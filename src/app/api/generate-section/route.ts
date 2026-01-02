@@ -136,7 +136,8 @@ export async function POST(request: NextRequest) {
         currentContent.bullets || [],
         instructions,
         jdAnalysis,
-        filteredHistory
+        filteredHistory,
+        unaddressedKeywords
       );
 
       // Detect which keywords were addressed in the refined content

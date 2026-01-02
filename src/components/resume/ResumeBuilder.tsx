@@ -529,17 +529,41 @@ async function handleHighlightsSelection(content: string, store: ReturnType<type
   if (data.results) {
     // Auto-select top 5
     const top5 = data.results.slice(0, 5);
-    const highlights = top5.map((r: { content: string }) => r.content);
     const ids = top5.map((r: { id: string }) => r.id);
 
-    store.setHighlights(highlights, ids);
+    // Tailor highlights with keywords
+    const tailorResponse = await fetch('/api/generate-section', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: store.sessionId,
+        sectionType: 'career_highlight',
+        contentIds: ids,
+      }),
+    });
+
+    const tailorData = await tailorResponse.json();
+
+    // Parse the tailored content (comes as bullet points separated by newlines)
+    const tailoredHighlights = tailorData.draft
+      ? tailorData.draft.split('\n').filter((h: string) => h.trim()).map((h: string) => h.replace(/^[•\-]\s*/, ''))
+      : top5.map((r: { content: string }) => r.content);
+
+    store.setHighlights(tailoredHighlights, ids);
+
+    // Update addressed keywords
+    if (tailorData.addressedKeywordIds && tailorData.addressedKeywordIds.length > 0) {
+      tailorData.addressedKeywordIds.forEach((id: string) => {
+        store.updateKeywordStatus(id, 'addressed', { sectionAddressed: 'highlights' });
+      });
+    }
 
     store.addMessage({
       id: uuidv4(),
       role: 'assistant',
-      content: `Here are the top 5 career highlights ranked by relevance to the JD:
+      content: `Here are the top 5 career highlights tailored for the JD:
 
-${highlights.map((h: string, i: number) => `${i + 1}. ${h}`).join('\n\n')}
+${tailoredHighlights.map((h: string, i: number) => `${i + 1}. ${h}`).join('\n\n')}
 
 These are automatically selected. Click **Approve** to continue, or tell me which ones to swap.`,
     });
@@ -614,7 +638,33 @@ Click **Approve** to continue, or suggest more changes.`,
   });
 
   const overviewData = await overviewResponse.json();
-  const overview = overviewData.results?.[0]?.content || '';
+  const overviewId = overviewData.results?.[0]?.id;
+
+  // Tailor the overview with keywords
+  let overview = overviewData.results?.[0]?.content || '';
+  if (overviewId) {
+    const tailorResponse = await fetch('/api/generate-section', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: store.sessionId,
+        sectionType: 'overview',
+        contentIds: [overviewId],
+      }),
+    });
+
+    const tailorData = await tailorResponse.json();
+    if (tailorData.draft) {
+      overview = tailorData.draft;
+    }
+
+    // Update addressed keywords
+    if (tailorData.addressedKeywordIds && tailorData.addressedKeywordIds.length > 0) {
+      tailorData.addressedKeywordIds.forEach((id: string) => {
+        store.updateKeywordStatus(id, 'addressed', { sectionAddressed: 'position_1' });
+      });
+    }
+  }
 
   // Get bullets if long format
   let bullets: string[] = [];
@@ -631,7 +681,34 @@ Click **Approve** to continue, or suggest more changes.`,
     });
 
     const bulletsData = await bulletsResponse.json();
-    bullets = bulletsData.results?.map((r: { content: string }) => r.content) || [];
+    const bulletIds = bulletsData.results?.map((r: { id: string }) => r.id) || [];
+
+    // Tailor bullets with keywords
+    if (bulletIds.length > 0) {
+      const tailorResponse = await fetch('/api/generate-section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: store.sessionId,
+          sectionType: 'bullet',
+          contentIds: bulletIds,
+        }),
+      });
+
+      const tailorData = await tailorResponse.json();
+      if (tailorData.draft) {
+        bullets = tailorData.draft.split('\n').filter((b: string) => b.trim()).map((b: string) => b.replace(/^[•\-]\s*/, ''));
+      } else {
+        bullets = bulletsData.results?.map((r: { content: string }) => r.content) || [];
+      }
+
+      // Update addressed keywords
+      if (tailorData.addressedKeywordIds && tailorData.addressedKeywordIds.length > 0) {
+        tailorData.addressedKeywordIds.forEach((id: string) => {
+          store.updateKeywordStatus(id, 'addressed', { sectionAddressed: 'position_1' });
+        });
+      }
+    }
   }
 
   store.setPosition({
@@ -727,7 +804,33 @@ Click **Approve** to continue, or suggest more changes.`,
   });
 
   const overviewData = await overviewResponse.json();
-  const overview = overviewData.results?.[0]?.content || '';
+  const overviewId = overviewData.results?.[0]?.id;
+
+  // Tailor the overview with keywords
+  let overview = overviewData.results?.[0]?.content || '';
+  if (overviewId) {
+    const tailorResponse = await fetch('/api/generate-section', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: store.sessionId,
+        sectionType: 'overview',
+        contentIds: [overviewId],
+      }),
+    });
+
+    const tailorData = await tailorResponse.json();
+    if (tailorData.draft) {
+      overview = tailorData.draft;
+    }
+
+    // Update addressed keywords
+    if (tailorData.addressedKeywordIds && tailorData.addressedKeywordIds.length > 0) {
+      tailorData.addressedKeywordIds.forEach((id: string) => {
+        store.updateKeywordStatus(id, 'addressed', { sectionAddressed: 'position_2' });
+      });
+    }
+  }
 
   // Get bullets if long format
   let bullets: string[] = [];
@@ -744,7 +847,34 @@ Click **Approve** to continue, or suggest more changes.`,
     });
 
     const bulletsData = await bulletsResponse.json();
-    bullets = bulletsData.results?.map((r: { content: string }) => r.content) || [];
+    const bulletIds = bulletsData.results?.map((r: { id: string }) => r.id) || [];
+
+    // Tailor bullets with keywords
+    if (bulletIds.length > 0) {
+      const tailorResponse = await fetch('/api/generate-section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: store.sessionId,
+          sectionType: 'bullet',
+          contentIds: bulletIds,
+        }),
+      });
+
+      const tailorData = await tailorResponse.json();
+      if (tailorData.draft) {
+        bullets = tailorData.draft.split('\n').filter((b: string) => b.trim()).map((b: string) => b.replace(/^[•\-]\s*/, ''));
+      } else {
+        bullets = bulletsData.results?.map((r: { content: string }) => r.content) || [];
+      }
+
+      // Update addressed keywords
+      if (tailorData.addressedKeywordIds && tailorData.addressedKeywordIds.length > 0) {
+        tailorData.addressedKeywordIds.forEach((id: string) => {
+          store.updateKeywordStatus(id, 'addressed', { sectionAddressed: 'position_2' });
+        });
+      }
+    }
   }
 
   store.setPosition({
@@ -789,7 +919,33 @@ async function handlePositions3to6(content: string, store: ReturnType<typeof use
     });
 
     const data = await response.json();
-    const overview = data.results?.[0]?.content || '';
+    const overviewId = data.results?.[0]?.id;
+    let overview = data.results?.[0]?.content || '';
+
+    // Tailor the overview with keywords
+    if (overviewId) {
+      const tailorResponse = await fetch('/api/generate-section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: store.sessionId,
+          sectionType: 'overview',
+          contentIds: [overviewId],
+        }),
+      });
+
+      const tailorData = await tailorResponse.json();
+      if (tailorData.draft) {
+        overview = tailorData.draft;
+      }
+
+      // Update addressed keywords
+      if (tailorData.addressedKeywordIds && tailorData.addressedKeywordIds.length > 0) {
+        tailorData.addressedKeywordIds.forEach((id: string) => {
+          store.updateKeywordStatus(id, 'addressed', { sectionAddressed: `position_${posConfig.number}` });
+        });
+      }
+    }
 
     store.setPosition({
       number: posConfig.number,

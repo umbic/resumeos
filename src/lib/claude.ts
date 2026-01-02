@@ -346,15 +346,34 @@ export async function refinePositionContent(
   bullets: string[],
   instructions: string,
   jdAnalysis: JDAnalysis,
-  conversationHistory?: ConversationMessage[]
+  conversationHistory?: ConversationMessage[],
+  unaddressedKeywords?: JDKeyword[]
 ): Promise<{ overview: string; bullets: string[] }> {
+  // Build keyword sections for the prompt
+  const keywordsByCategory = unaddressedKeywords
+    ? {
+        hard_skills: unaddressedKeywords.filter((k) => k.category === 'hard_skill').map((k) => k.keyword),
+        soft_skills: unaddressedKeywords.filter((k) => k.category === 'soft_skill').map((k) => k.keyword),
+        industry_terms: unaddressedKeywords.filter((k) => k.category === 'industry_term').map((k) => k.keyword),
+      }
+    : null;
+
+  const keywordSection = keywordsByCategory
+    ? `
+**ATS Keywords to Mirror** (where natural and authentic):
+${keywordsByCategory.hard_skills.length > 0 ? `- Hard Skills: ${keywordsByCategory.hard_skills.join(', ')}` : ''}
+${keywordsByCategory.soft_skills.length > 0 ? `- Soft Skills: ${keywordsByCategory.soft_skills.join(', ')}` : ''}
+${keywordsByCategory.industry_terms.length > 0 ? `- Industry Terms: ${keywordsByCategory.industry_terms.join(', ')}` : ''}
+`
+    : '';
+
   // Build the system context
   const systemContext = `You are helping refine position content on a resume based on user feedback.
 
 Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
 Industry: ${jdAnalysis.strategic.industry}
 Key Themes: ${jdAnalysis.strategic.positioningThemes.join(', ')}
-
+${keywordSection}
 Current Overview:
 ${overview}
 
@@ -369,8 +388,10 @@ CRITICAL RULES - VIOLATIONS ARE UNACCEPTABLE:
 5. If asked to add something not in the original content, politely explain you cannot invent facts
 
 Apply the user's requested changes while maintaining all factual accuracy.
+Also try to naturally incorporate ATS keywords where they genuinely apply.
 
 Wrap customized words/phrases in <mark> tags. Preserve existing <mark> tags if that text remains customized.
+When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
 
 Return a JSON object with:
 {
