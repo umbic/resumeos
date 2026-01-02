@@ -1,7 +1,7 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-02
-> **Last Session**: Implemented ATS Keywords extraction and gap reconciliation feature
+> **Last Session**: Fixed keywords and customizations to work across ALL resume sections
 
 ---
 
@@ -45,11 +45,12 @@
 - Gap reconciliation prompts for unaddressed keywords
 - Claude-based semantic detection of addressed keywords
 - Database migration applied (jd_analysis JSONB column)
+- **Keywords now incorporated in ALL sections** (summary, highlights, positions 1-6)
+- **Customization highlighting works across ALL sections** (mark tags rendered)
 - Pushed to Vercel
 
 **What's left**:
-- End-to-end testing of the full flow
-- Verify keyword detection accuracy in production
+- End-to-end testing of the full flow in production
 
 ---
 
