@@ -16,7 +16,7 @@ export interface JDAnalysis {
 
 export async function analyzeJobDescription(jobDescription: string): Promise<JDAnalysis> {
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-opus-4-5-20251101',
     max_tokens: 1024,
     messages: [
       {
@@ -64,7 +64,7 @@ export async function generateTailoredContent(
   instructions?: string
 ): Promise<string> {
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-opus-4-5-20251101',
     max_tokens: 1024,
     messages: [
       {
@@ -129,7 +129,7 @@ export async function generateSummary(
   format: 'long' | 'short'
 ): Promise<string> {
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-opus-4-5-20251101',
     max_tokens: 1024,
     messages: [
       {
@@ -185,7 +185,7 @@ export async function refinePositionContent(
   jdAnalysis: JDAnalysis
 ): Promise<{ overview: string; bullets: string[] }> {
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-opus-4-5-20251101',
     max_tokens: 2048,
     messages: [
       {
