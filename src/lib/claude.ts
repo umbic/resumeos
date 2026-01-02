@@ -94,7 +94,23 @@ You may NOT:
 - Fabricate clients or experiences
 - Inflate scope or scale
 
-Return ONLY the tailored content, no explanation or preamble.`,
+IMPORTANT: When tailoring content, wrap any words or phrases you customize in <mark> tags.
+
+"Customize" means:
+- Keywords or terminology mirrored from the job description
+- Reframed language to better align with the target role
+- Emphasis shifts to highlight relevant aspects
+
+Example:
+Original: "Led brand strategy initiatives across multiple sectors"
+Tailored: "Led <mark>enterprise brand transformation</mark> initiatives across <mark>financial services and wealth management</mark>"
+
+Do NOT mark:
+- Content that remains unchanged from the original
+- Minor grammatical adjustments (a/the, punctuation)
+- The entire sentence — only the specific changed words/phrases
+
+Return ONLY the tailored content with <mark> tags inline, no explanation or preamble.`,
       },
     ],
   });
@@ -135,7 +151,21 @@ Create a summary that:
 3. Uses industry-appropriate language
 4. Maintains all factual claims from the source options
 
-Return ONLY the summary text, no explanation.`,
+IMPORTANT: Wrap any words or phrases you customize for this specific role in <mark> tags.
+
+"Customize" means:
+- Keywords or terminology mirrored from the job description
+- Reframed language to better align with the target role
+- Industry-specific terms added to match the JD
+
+Example: "A <mark>strategic brand leader</mark> with expertise in <mark>enterprise transformation</mark>..."
+
+Do NOT mark:
+- Content that remains unchanged from the source options
+- Minor grammatical adjustments
+- The entire sentence — only the specific customized words/phrases
+
+Return ONLY the summary text with <mark> tags inline, no explanation.`,
       },
     ],
   });
@@ -179,14 +209,21 @@ Apply the user's requested changes while maintaining:
 - Professional tone
 - Relevance to the target role
 
+IMPORTANT: Wrap any words or phrases you customize in <mark> tags. This includes:
+- Keywords mirrored from the job description
+- Reframed language to better align with the target role
+- Any NEW customizations you make based on the user's request
+
+Preserve existing <mark> tags from the current content if that text remains customized.
+
 Return a JSON object with:
 {
-  "overview": "the updated overview text",
-  "bullets": ["bullet 1", "bullet 2", ...]
+  "overview": "the updated overview text with <mark> tags",
+  "bullets": ["bullet 1 with <mark>tags</mark>", "bullet 2", ...]
 }
 
-If the user's request only affects bullets, keep the overview the same.
-If the user's request only affects the overview, keep the bullets the same.
+If the user's request only affects bullets, keep the overview the same (with its marks).
+If the user's request only affects the overview, keep the bullets the same (with their marks).
 
 Return ONLY the JSON object, no other text.`,
       },

@@ -1,12 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useResumeStore } from '@/lib/store';
 import { STATIC_CONTENT, POSITIONS } from '@/lib/rules';
+import { renderContent } from '@/lib/render-highlights';
 
 export function PreviewPanel() {
+  const [showHighlights, setShowHighlights] = useState(false);
+
   const {
     format,
     header,
@@ -28,9 +34,21 @@ export function PreviewPanel() {
     <div className="h-full bg-white">
       <div className="sticky top-0 bg-zinc-100 border-b border-zinc-300 px-4 py-2 flex items-center justify-between">
         <h2 className="font-semibold text-zinc-700">Resume Preview</h2>
-        <Badge variant="outline" className="text-zinc-600">
-          {format === 'long' ? 'Long Format' : 'Short Format'}
-        </Badge>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="show-highlights"
+              checked={showHighlights}
+              onCheckedChange={setShowHighlights}
+            />
+            <Label htmlFor="show-highlights" className="text-sm text-zinc-600 cursor-pointer">
+              Show Customizations
+            </Label>
+          </div>
+          <Badge variant="outline" className="text-zinc-600">
+            {format === 'long' ? 'Long Format' : 'Short Format'}
+          </Badge>
+        </div>
       </div>
 
       <ScrollArea className="h-[calc(100%-48px)]">
@@ -53,7 +71,7 @@ export function PreviewPanel() {
             {summary && (
               <>
                 <p className="text-sm text-zinc-700 leading-relaxed mb-4">
-                  {summary}
+                  {renderContent({ content: summary, showHighlights })}
                 </p>
               </>
             )}
@@ -65,7 +83,7 @@ export function PreviewPanel() {
                 <ul className="list-disc list-outside ml-4 space-y-1">
                   {highlights.map((highlight, idx) => (
                     <li key={idx} className="text-sm text-zinc-700">
-                      <HighlightText text={highlight} />
+                      <HighlightText text={highlight} showHighlights={showHighlights} />
                     </li>
                   ))}
                 </ul>
@@ -99,7 +117,7 @@ export function PreviewPanel() {
 
                     {posData?.overview && (
                       <p className="text-sm text-zinc-700 mt-2 leading-relaxed">
-                        {posData.overview}
+                        {renderContent({ content: posData.overview, showHighlights })}
                       </p>
                     )}
 
@@ -107,7 +125,7 @@ export function PreviewPanel() {
                       <ul className="list-disc list-outside ml-4 mt-2 space-y-1">
                         {posData.bullets.map((bullet, idx) => (
                           <li key={idx} className="text-sm text-zinc-700">
-                            {bullet}
+                            {renderContent({ content: bullet, showHighlights })}
                           </li>
                         ))}
                       </ul>
@@ -152,21 +170,24 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
-function HighlightText({ text }: { text: string }) {
+function HighlightText({ text, showHighlights }: { text: string; showHighlights: boolean }) {
+  // First, handle mark tags for highlight display
+  const processedText = showHighlights ? text : text.replace(/<\/?mark>/g, '');
+
   // Parse for bold hook phrase (text before the colon)
-  const colonIndex = text.indexOf(':');
+  const colonIndex = processedText.indexOf(':');
 
   if (colonIndex > 0 && colonIndex < 60) {
-    const hook = text.substring(0, colonIndex + 1);
-    const rest = text.substring(colonIndex + 1);
+    const hook = processedText.substring(0, colonIndex + 1);
+    const rest = processedText.substring(colonIndex + 1);
 
     return (
       <>
-        <span className="font-semibold">{hook}</span>
-        {rest}
+        <span className="font-semibold">{renderContent({ content: hook, showHighlights })}</span>
+        {renderContent({ content: rest, showHighlights })}
       </>
     );
   }
 
-  return <>{text}</>;
+  return <>{renderContent({ content: processedText, showHighlights })}</>;
 }

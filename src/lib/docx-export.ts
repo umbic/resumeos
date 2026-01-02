@@ -9,6 +9,7 @@ import {
   TabStopType,
   BorderStyle,
 } from 'docx';
+import { stripMarks } from './render-highlights';
 
 interface HeaderData {
   name: string;
@@ -128,7 +129,7 @@ function createSummaryParagraph(summary: string): Paragraph {
   return new Paragraph({
     children: [
       new TextRun({
-        text: summary,
+        text: stripMarks(summary),
         font: { name: FONT_MINOR },
         size: STYLES.body.size,
       }),
@@ -141,14 +142,17 @@ function createSummaryParagraph(summary: string): Paragraph {
 }
 
 function createHighlightParagraph(highlight: string): Paragraph {
+  // Strip mark tags before processing
+  const cleanHighlight = stripMarks(highlight);
+
   // Parse for bold hook phrase (text before the colon)
-  const colonIndex = highlight.indexOf(':');
+  const colonIndex = cleanHighlight.indexOf(':');
   const children: TextRun[] = [];
 
   if (colonIndex > 0 && colonIndex < 60) {
     // Has a hook phrase
-    const hook = highlight.substring(0, colonIndex + 1);
-    const rest = highlight.substring(colonIndex + 1);
+    const hook = cleanHighlight.substring(0, colonIndex + 1);
+    const rest = cleanHighlight.substring(colonIndex + 1);
 
     children.push(
       new TextRun({
@@ -166,7 +170,7 @@ function createHighlightParagraph(highlight: string): Paragraph {
   } else {
     children.push(
       new TextRun({
-        text: highlight,
+        text: cleanHighlight,
         font: { name: FONT_MINOR },
         size: STYLES.highlight.size,
       })
@@ -229,7 +233,7 @@ function createOverviewParagraph(overview: string): Paragraph {
   return new Paragraph({
     children: [
       new TextRun({
-        text: overview,
+        text: stripMarks(overview),
         font: { name: FONT_MINOR },
         size: STYLES.body.size,
       }),
@@ -245,7 +249,7 @@ function createBulletParagraph(bullet: string): Paragraph {
   return new Paragraph({
     children: [
       new TextRun({
-        text: bullet,
+        text: stripMarks(bullet),
         font: { name: FONT_MINOR },
         size: STYLES.bullet.size,
       }),
