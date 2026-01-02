@@ -1,5 +1,6 @@
 import { pgTable, text, integer, timestamp, jsonb, uuid, serial } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
+import type { JDAnalysis } from '../types';
 
 // Custom vector type for pgvector
 // Note: Vercel Postgres supports pgvector - we'll handle vectors as text and cast in queries
@@ -45,6 +46,9 @@ export const sessions = pgTable('sessions', {
   keywords: jsonb('keywords').$type<string[]>().default([]),
   themes: jsonb('themes').$type<string[]>().default([]),
   jdEmbedding: text('jd_embedding'),
+
+  // Enhanced JD Analysis with ATS keywords
+  jdAnalysis: jsonb('jd_analysis').$type<JDAnalysis | null>(),
 
   // Content tracking
   usedContentIds: jsonb('used_content_ids').$type<string[]>().default([]),

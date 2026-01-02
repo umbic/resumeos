@@ -1,3 +1,5 @@
+import type { JDKeyword } from '../types';
+
 // Conflict Map - when an item is used, its conflicts get blocked
 export const CONFLICT_MAP: Record<string, string[]> = {
   'CH-01': ['P1-B02'], // Deloitte practice - same $40M metric
@@ -44,6 +46,63 @@ export const COMPETITOR_MAP: Record<string, string[]> = {
 
 // Always use generic version for these brands
 export const ALWAYS_GENERIC = ['SAP'];
+
+// Junior skills to filter out from ATS keyword extraction
+// These are too tactical/junior for executive-level resumes
+export const JUNIOR_SKILLS_IGNORE_LIST = [
+  // Office tools
+  'excel',
+  'powerpoint',
+  'word',
+  'google sheets',
+  'google slides',
+  'google docs',
+  'microsoft office',
+  'ms office',
+  'outlook',
+
+  // Technical/tactical
+  'sql',
+  'html',
+  'css',
+  'javascript',
+  'python',
+  'r programming',
+  'google analytics',
+  'adobe analytics',
+  'mixpanel',
+  'mailchimp',
+  'constant contact',
+  'hubspot certifications',
+
+  // Junior marketing
+  'social media posting',
+  'content calendar',
+  'email scheduling',
+  'canva',
+  'basic photoshop',
+  'wordpress admin',
+
+  // Generic/filler
+  'attention to detail',
+  'team player',
+  'self-starter',
+  'fast-paced environment',
+  'multitasking',
+  'detail-oriented',
+  'results-driven',
+  'proactive',
+];
+
+// Filter keywords to remove junior/tactical skills
+export function filterExecutiveKeywords(keywords: JDKeyword[]): JDKeyword[] {
+  return keywords.filter(
+    (k) =>
+      !JUNIOR_SKILLS_IGNORE_LIST.some((junior) =>
+        k.keyword.toLowerCase().includes(junior.toLowerCase())
+      )
+  );
+}
 
 // Format rules
 export const FORMAT_RULES = {

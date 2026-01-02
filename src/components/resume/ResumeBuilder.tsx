@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ProgressBar } from './ProgressBar';
 import { ChatPanel } from './ChatPanel';
@@ -8,9 +8,14 @@ import { PreviewPanel } from './PreviewPanel';
 import { useResumeStore } from '@/lib/store';
 import { STATIC_CONTENT, POSITIONS } from '@/lib/rules';
 import { Button } from '@/components/ui/button';
+import type { JDKeyword } from '@/types';
 
 export function ResumeBuilder() {
   const store = useResumeStore();
+  const [currentMissingKeyword, setCurrentMissingKeyword] = useState<JDKeyword | null>(null);
+  const [missingKeywordsQueue, setMissingKeywordsQueue] = useState<JDKeyword[]>([]);
+  const [isKeywordLoading, setIsKeywordLoading] = useState(false);
+  const [pendingContent, setPendingContent] = useState<string | null>(null);
 
   const handleSendMessage = useCallback(
     async (content: string) => {
@@ -142,6 +147,124 @@ export function ResumeBuilder() {
     }
   }, [store]);
 
+  // Keyword action handlers
+  const handleKeywordAdd = useCallback(
+    async (keywordId: string, userContext: string) => {
+      if (!pendingContent) return;
+
+      setIsKeywordLoading(true);
+
+      try {
+        const response = await fetch('/api/keyword-action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: store.sessionId,
+            keywordId,
+            action: 'add',
+            userContext,
+            currentContent: pendingContent,
+            sectionType: getSectionType(store.currentStep),
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Update store keyword status
+          store.updateKeywordStatus(keywordId, 'addressed', {
+            sectionAddressed: getSectionType(store.currentStep),
+            userContext,
+          });
+
+          // Update content with regenerated version
+          if (data.regeneratedContent) {
+            if (store.currentStep === 3) {
+              store.setSummary(data.regeneratedContent);
+              setPendingContent(data.regeneratedContent);
+            }
+          }
+
+          // Move to next keyword or allow approval
+          const remainingQueue = missingKeywordsQueue.filter((k) => k.id !== keywordId);
+          setMissingKeywordsQueue(remainingQueue);
+          setCurrentMissingKeyword(remainingQueue[0] || null);
+
+          if (remainingQueue.length === 0) {
+            store.addMessage({
+              id: uuidv4(),
+              role: 'assistant',
+              content: 'All JD keywords have been addressed. Click **Approve** to continue.',
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error adding keyword:', error);
+      } finally {
+        setIsKeywordLoading(false);
+      }
+    },
+    [store, pendingContent, missingKeywordsQueue]
+  );
+
+  const handleKeywordSkip = useCallback(
+    (keywordId: string) => {
+      store.updateKeywordStatus(keywordId, 'skipped');
+
+      const remainingQueue = missingKeywordsQueue.filter((k) => k.id !== keywordId);
+      setMissingKeywordsQueue(remainingQueue);
+      setCurrentMissingKeyword(remainingQueue[0] || null);
+
+      if (remainingQueue.length === 0) {
+        store.addMessage({
+          id: uuidv4(),
+          role: 'assistant',
+          content: 'Skipped keywords will be revisited in later sections. Click **Approve** to continue.',
+        });
+      }
+    },
+    [store, missingKeywordsQueue]
+  );
+
+  const handleKeywordDismiss = useCallback(
+    async (keywordId: string) => {
+      setIsKeywordLoading(true);
+
+      try {
+        await fetch('/api/keyword-action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: store.sessionId,
+            keywordId,
+            action: 'dismiss',
+          }),
+        });
+
+        store.updateKeywordStatus(keywordId, 'dismissed', {
+          dismissReason: "User indicated they don't have this skill",
+        });
+
+        const remainingQueue = missingKeywordsQueue.filter((k) => k.id !== keywordId);
+        setMissingKeywordsQueue(remainingQueue);
+        setCurrentMissingKeyword(remainingQueue[0] || null);
+
+        if (remainingQueue.length === 0) {
+          store.addMessage({
+            id: uuidv4(),
+            role: 'assistant',
+            content: 'All remaining keywords handled. Click **Approve** to continue.',
+          });
+        }
+      } catch (error) {
+        console.error('Error dismissing keyword:', error);
+      } finally {
+        setIsKeywordLoading(false);
+      }
+    },
+    [store, missingKeywordsQueue]
+  );
+
   // Initialize with welcome message
   if (store.messages.length === 0) {
     store.addMessage({
@@ -169,6 +292,11 @@ Type "long" or "short" to begin.`,
           <ChatPanel
             onSendMessage={handleSendMessage}
             onApprove={store.currentStep > 0 && store.currentStep < 8 ? handleApprove : undefined}
+            currentMissingKeyword={currentMissingKeyword}
+            onKeywordAdd={handleKeywordAdd}
+            onKeywordSkip={handleKeywordSkip}
+            onKeywordDismiss={handleKeywordDismiss}
+            isKeywordLoading={isKeywordLoading}
           />
         </div>
 
@@ -234,18 +362,37 @@ async function handleJDAnalysis(content: string, store: ReturnType<typeof useRes
     store.setJDAnalysis(data.analysis);
     store.setBrandingMode(data.analysis.recommendedBrandingMode);
 
+    // Format keywords by category for display
+    const keywordsByCategory = data.analysis.keywords?.reduce(
+      (acc: Record<string, string[]>, k: JDKeyword) => {
+        const cat = k.category === 'hard_skill' ? 'Hard Skills' :
+                   k.category === 'soft_skill' ? 'Soft Skills' :
+                   k.category === 'industry_term' ? 'Industry Terms' : 'Seniority';
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(k.keyword);
+        return acc;
+      },
+      {}
+    ) || {};
+
+    const keywordsDisplay = Object.entries(keywordsByCategory)
+      .map(([cat, kws]) => `• **${cat}:** ${(kws as string[]).slice(0, 5).join(', ')}`)
+      .join('\n');
+
     store.addMessage({
       id: uuidv4(),
       role: 'assistant',
       content: `Analysis complete!
 
-**Target Role:** ${data.analysis.targetTitle}
-**Company:** ${data.analysis.targetCompany}
-**Industry:** ${data.analysis.industry}
+**Target Role:** ${data.analysis.targetTitle || data.analysis.strategic?.targetTitle}
+**Company:** ${data.analysis.targetCompany || data.analysis.strategic?.targetCompany}
+**Industry:** ${data.analysis.industry || data.analysis.strategic?.industry}
 
-**Key Themes:** ${data.analysis.themes.join(', ')}
+**Positioning Themes:**
+${(data.analysis.themes || data.analysis.strategic?.positioningThemes || []).map((t: string) => `• ${t}`).join('\n')}
 
-**Keywords:** ${data.analysis.keywords.slice(0, 8).join(', ')}
+**ATS Keywords (${data.analysis.keywords?.length || 0} extracted):**
+${keywordsDisplay}
 
 ${data.analysis.recommendedBrandingMode === 'generic' ? '⚠️ Using generic branding (competitor detected)' : ''}
 
@@ -280,7 +427,12 @@ Now generating your tailored summary...`,
   await generateSummary(store);
 }
 
-async function generateSummary(store: ReturnType<typeof useResumeStore.getState>) {
+async function generateSummary(
+  store: ReturnType<typeof useResumeStore.getState>,
+  setMissingKeywordsQueue?: (keywords: JDKeyword[]) => void,
+  setCurrentMissingKeyword?: (keyword: JDKeyword | null) => void,
+  setPendingContent?: (content: string) => void
+) {
   const response = await fetch('/api/generate-section', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -295,15 +447,39 @@ async function generateSummary(store: ReturnType<typeof useResumeStore.getState>
   if (data.draft) {
     store.setSummary(data.draft);
 
-    store.addMessage({
-      id: uuidv4(),
-      role: 'assistant',
-      content: `Here's your tailored summary:
+    // Update addressed keywords in store
+    if (data.addressedKeywordIds && data.addressedKeywordIds.length > 0) {
+      data.addressedKeywordIds.forEach((id: string) => {
+        store.updateKeywordStatus(id, 'addressed', { sectionAddressed: 'summary' });
+      });
+    }
+
+    // Handle missing keywords for gap reconciliation
+    if (data.missingKeywords && data.missingKeywords.length > 0 && setMissingKeywordsQueue && setCurrentMissingKeyword && setPendingContent) {
+      setMissingKeywordsQueue(data.missingKeywords);
+      setCurrentMissingKeyword(data.missingKeywords[0]);
+      setPendingContent(data.draft);
+
+      store.addMessage({
+        id: uuidv4(),
+        role: 'assistant',
+        content: `Here's your tailored summary:
+
+"${data.draft}"
+
+${data.missingKeywords.length} JD keywords weren't naturally included. Let's see if any can be added.`,
+      });
+    } else {
+      store.addMessage({
+        id: uuidv4(),
+        role: 'assistant',
+        content: `Here's your tailored summary:
 
 "${data.draft}"
 
 Click **Approve** to continue, or suggest changes.`,
-    });
+      });
+    }
   }
 }
 

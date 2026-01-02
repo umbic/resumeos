@@ -1,10 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
+import type { JDAnalysis, JDKeyword, JDStrategic } from '../types';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-export interface JDAnalysis {
+// Legacy JDAnalysis interface for backward compatibility during migration
+export interface LegacyJDAnalysis {
   targetTitle: string;
   targetCompany: string;
   industry: string;
@@ -14,26 +16,126 @@ export interface JDAnalysis {
   reasoning: string;
 }
 
-export async function analyzeJobDescription(jobDescription: string): Promise<JDAnalysis> {
+// Raw response from Claude before processing
+interface RawJDAnalysisResponse {
+  strategic: JDStrategic;
+  keywords: Array<{
+    keyword: string;
+    category: 'hard_skill' | 'soft_skill' | 'industry_term' | 'seniority_signal';
+    priority: 'high' | 'medium' | 'low';
+    placement: string;
+  }>;
+  recommendedBrandingMode: 'branded' | 'generic';
+  reasoning: string;
+}
+
+export type { JDAnalysis, JDKeyword };
+
+export async function analyzeJobDescription(jobDescription: string): Promise<{
+  analysis: JDAnalysis;
+  recommendedBrandingMode: 'branded' | 'generic';
+  reasoning: string;
+}> {
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-5-20251101',
-    max_tokens: 1024,
+    max_tokens: 2048,
     messages: [
       {
         role: 'user',
-        content: `Analyze this job description and extract key information for resume customization.
+        content: `Analyze this job description and extract TWO types of information:
+
+---
+
+## PART 1: STRATEGIC POSITIONING
+
+1. **Target Job Title**: The exact title as it should appear on the resume header
+2. **Target Company**: Company name
+3. **Industry/Sector**: Primary industry (e.g., "Financial Services", "Healthcare", "Technology")
+4. **Positioning Themes**: 3-5 strategic angles to emphasize throughout the resume. These are the "story" the resume should tell — not keywords, but narrative directions.
+
+Example positioning themes:
+- "Transformation leader who modernizes legacy brands"
+- "Data-informed strategist who connects brand to revenue"
+- "Cross-functional executive who aligns marketing with business goals"
+
+---
+
+## PART 2: ATS KEYWORD EXTRACTION
+
+Extract keywords an ATS would scan for, filtered for **executive-level relevance**.
+
+IMPORTANT FILTERING RULES:
+- SKIP junior/tactical skills (Excel, PowerPoint, SQL, HTML, CSS, Google Analytics, etc.)
+- SKIP tool-level proficiencies unless strategic (e.g., keep "Salesforce ecosystem strategy", skip "Salesforce admin")
+- FOCUS on strategic, leadership, and domain expertise keywords
+- This is for a senior executive resume — keywords should reflect VP/SVP/C-suite level work
+
+### Categories to Extract:
+
+**1. Hard Skills** (strategic/leadership abilities)
+Examples: brand strategy, go-to-market planning, P&L management, executive communications, portfolio architecture, campaign strategy, customer segmentation, market positioning
+
+**2. Soft Skills** (executive-level interpersonal skills)
+Examples: executive presence, stakeholder management, cross-functional leadership, board communication, change management, team building
+
+**3. Industry Terms** (sector-specific vocabulary)
+Examples: wealth management, B2B, omnichannel, DTC, AUM, customer lifetime value, brand equity, retail banking
+
+**4. Seniority Signals** (level indicators)
+Examples: years of experience mentioned, level words like "senior", "director", "VP", "head of", team size expectations, budget/P&L responsibility
+
+For each keyword, provide:
+- **keyword**: Exact phrase from JD
+- **category**: hard_skill | soft_skill | industry_term | seniority_signal
+- **priority**: high | medium | low (based on frequency and placement in JD)
+- **placement**: Where it appeared (title, requirements, responsibilities, nice-to-have)
+
+---
+
+## BRANDING RECOMMENDATION
+
+Also determine if "generic" branding should be used (hide competitor names like Deloitte, Omnicom) if the target company is:
+McKinsey, BCG, Bain, Accenture, EY, KPMG, PwC, WPP, Publicis, IPG, or Dentsu
+
+---
+
+## OUTPUT FORMAT
+
+Return as JSON:
+
+{
+  "strategic": {
+    "targetTitle": "Head of Brand Strategy",
+    "targetCompany": "Morgan Stanley",
+    "industry": "Financial Services - Wealth Management",
+    "positioningThemes": [
+      "Enterprise brand transformation leader",
+      "Wealth/financial services domain expertise",
+      "Cross-functional executive who partners with business leaders"
+    ]
+  },
+  "keywords": [
+    {
+      "keyword": "brand strategy",
+      "category": "hard_skill",
+      "priority": "high",
+      "placement": "title, requirements"
+    },
+    {
+      "keyword": "wealth management",
+      "category": "industry_term",
+      "priority": "high",
+      "placement": "throughout"
+    }
+  ],
+  "recommendedBrandingMode": "branded",
+  "reasoning": "Morgan Stanley is not a direct competitor to Deloitte or Omnicom agencies"
+}
+
+---
 
 Job Description:
 ${jobDescription}
-
-Return a JSON object with:
-1. targetTitle: The exact job title (as it should appear on a resume header)
-2. targetCompany: The company name
-3. industry: The industry/sector (e.g., "Financial Services", "Healthcare", "Technology")
-4. keywords: Array of 8-12 key skills/keywords for ATS optimization
-5. themes: Array of 3-5 strategic positioning themes to emphasize
-6. recommendedBrandingMode: "branded" or "generic" - use "generic" if the company is McKinsey, BCG, Bain, Accenture, EY, KPMG, PwC, WPP, Publicis, IPG, or Dentsu
-7. reasoning: Brief explanation of branding recommendation
 
 Return ONLY the JSON object, no other text.`,
       },
@@ -46,12 +148,36 @@ Return ONLY the JSON object, no other text.`,
   }
 
   try {
-    return JSON.parse(content.text) as JDAnalysis;
+    const parsed = JSON.parse(content.text) as RawJDAnalysisResponse;
+    return {
+      analysis: {
+        strategic: parsed.strategic,
+        keywords: parsed.keywords.map((k, i) => ({
+          ...k,
+          id: `kw_${String(i + 1).padStart(3, '0')}`,
+          status: 'unaddressed' as const,
+        })),
+      },
+      recommendedBrandingMode: parsed.recommendedBrandingMode,
+      reasoning: parsed.reasoning,
+    };
   } catch {
     // Try to extract JSON from the response
     const jsonMatch = content.text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]) as JDAnalysis;
+      const parsed = JSON.parse(jsonMatch[0]) as RawJDAnalysisResponse;
+      return {
+        analysis: {
+          strategic: parsed.strategic,
+          keywords: parsed.keywords.map((k, i) => ({
+            ...k,
+            id: `kw_${String(i + 1).padStart(3, '0')}`,
+            status: 'unaddressed' as const,
+          })),
+        },
+        recommendedBrandingMode: parsed.recommendedBrandingMode,
+        reasoning: parsed.reasoning,
+      };
     }
     throw new Error('Failed to parse JD analysis response');
   }
@@ -61,8 +187,27 @@ export async function generateTailoredContent(
   originalContent: string,
   jdAnalysis: JDAnalysis,
   sectionType: string,
-  instructions?: string
+  instructions?: string,
+  unaddressedKeywords?: JDKeyword[]
 ): Promise<string> {
+  // Build keyword sections for the prompt
+  const keywordsByCategory = unaddressedKeywords
+    ? {
+        hard_skills: unaddressedKeywords.filter((k) => k.category === 'hard_skill').map((k) => k.keyword),
+        soft_skills: unaddressedKeywords.filter((k) => k.category === 'soft_skill').map((k) => k.keyword),
+        industry_terms: unaddressedKeywords.filter((k) => k.category === 'industry_term').map((k) => k.keyword),
+      }
+    : null;
+
+  const keywordSection = keywordsByCategory
+    ? `
+**ATS Keywords to Mirror** (where natural and authentic):
+${keywordsByCategory.hard_skills.length > 0 ? `- Hard Skills: ${keywordsByCategory.hard_skills.join(', ')}` : ''}
+${keywordsByCategory.soft_skills.length > 0 ? `- Soft Skills: ${keywordsByCategory.soft_skills.join(', ')}` : ''}
+${keywordsByCategory.industry_terms.length > 0 ? `- Industry Terms: ${keywordsByCategory.industry_terms.join(', ')}` : ''}
+`
+    : '';
+
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-5-20251101',
     max_tokens: 1024,
@@ -71,11 +216,12 @@ export async function generateTailoredContent(
         role: 'user',
         content: `Tailor this resume content for a specific job application. You must preserve all facts from the original.
 
-Target Role: ${jdAnalysis.targetTitle} at ${jdAnalysis.targetCompany}
-Industry: ${jdAnalysis.industry}
-Key Themes: ${jdAnalysis.themes.join(', ')}
-Keywords: ${jdAnalysis.keywords.join(', ')}
+Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+Industry: ${jdAnalysis.strategic.industry}
 
+**Positioning Themes** (story to tell):
+${jdAnalysis.strategic.positioningThemes.map((t) => `- ${t}`).join('\n')}
+${keywordSection}
 ORIGINAL CONTENT (${sectionType}):
 ${originalContent}
 
@@ -93,8 +239,10 @@ ALLOWED CUSTOMIZATIONS:
 - Use synonyms that don't change meaning (e.g., "led" → "spearheaded")
 - Mirror JD terminology ONLY where it authentically maps to existing content
 - Slight rephrasing that preserves all original claims
+- Naturally incorporate ATS keywords where they genuinely apply
 
-Wrap customized words/phrases in <mark> tags. Only mark actual changes.
+When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
+Wrap other customized words/phrases in <mark> tags too. Only mark actual changes.
 
 Example:
 Original: "Led brand strategy initiatives across multiple sectors"
@@ -117,8 +265,27 @@ Return ONLY the tailored content with <mark> tags inline.`,
 export async function generateSummary(
   summaryOptions: string[],
   jdAnalysis: JDAnalysis,
-  format: 'long' | 'short'
+  format: 'long' | 'short',
+  unaddressedKeywords?: JDKeyword[]
 ): Promise<string> {
+  // Build keyword sections for the prompt
+  const keywordsByCategory = unaddressedKeywords
+    ? {
+        hard_skills: unaddressedKeywords.filter((k) => k.category === 'hard_skill').map((k) => k.keyword),
+        soft_skills: unaddressedKeywords.filter((k) => k.category === 'soft_skill').map((k) => k.keyword),
+        industry_terms: unaddressedKeywords.filter((k) => k.category === 'industry_term').map((k) => k.keyword),
+      }
+    : null;
+
+  const keywordSection = keywordsByCategory
+    ? `
+**ATS Keywords to Mirror** (where natural and authentic):
+${keywordsByCategory.hard_skills.length > 0 ? `- Hard Skills: ${keywordsByCategory.hard_skills.join(', ')}` : ''}
+${keywordsByCategory.soft_skills.length > 0 ? `- Soft Skills: ${keywordsByCategory.soft_skills.join(', ')}` : ''}
+${keywordsByCategory.industry_terms.length > 0 ? `- Industry Terms: ${keywordsByCategory.industry_terms.join(', ')}` : ''}
+`
+    : '';
+
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-5-20251101',
     max_tokens: 1024,
@@ -127,9 +294,12 @@ export async function generateSummary(
         role: 'user',
         content: `Combine and tailor a professional summary for a resume using ONLY the source content provided.
 
-Target Role: ${jdAnalysis.targetTitle} at ${jdAnalysis.targetCompany}
-Industry: ${jdAnalysis.industry}
-Key Themes: ${jdAnalysis.themes.join(', ')}
+Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+Industry: ${jdAnalysis.strategic.industry}
+
+**Positioning Themes** (story to tell):
+${jdAnalysis.strategic.positioningThemes.map((t) => `- ${t}`).join('\n')}
+${keywordSection}
 Format: ${format} (${format === 'long' ? '4-5 sentences' : '3-4 sentences'})
 
 SOURCE CONTENT (use ONLY phrases, claims, and facts from these):
@@ -148,8 +318,10 @@ ALLOWED CUSTOMIZATIONS:
 - Combine phrases from different source options
 - Use synonyms (e.g., "organizations" → "enterprises")
 - Mirror terminology from the JD that maps to existing source content
+- Naturally incorporate ATS keywords where they genuinely apply to the source content
 
-Wrap customized words/phrases in <mark> tags. Only mark actual changes, not unchanged source content.
+When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
+Wrap other customized words/phrases in <mark> tags too. Only mark actual changes.
 
 Return ONLY the summary text with <mark> tags inline.`,
       },
@@ -179,9 +351,9 @@ export async function refinePositionContent(
   // Build the system context
   const systemContext = `You are helping refine position content on a resume based on user feedback.
 
-Target Role: ${jdAnalysis.targetTitle} at ${jdAnalysis.targetCompany}
-Industry: ${jdAnalysis.industry}
-Key Themes: ${jdAnalysis.themes.join(', ')}
+Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+Industry: ${jdAnalysis.strategic.industry}
+Key Themes: ${jdAnalysis.strategic.positioningThemes.join(', ')}
 
 Current Overview:
 ${overview}
@@ -250,6 +422,111 @@ Return ONLY the JSON object, no other text.`;
     // Return original content if parsing fails
     return { overview, bullets };
   }
+}
+
+// Detect which keywords were addressed in generated content using Claude analysis
+export async function detectAddressedKeywords(
+  content: string,
+  keywords: JDKeyword[]
+): Promise<string[]> {
+  if (keywords.length === 0) {
+    return [];
+  }
+
+  const response = await anthropic.messages.create({
+    model: 'claude-opus-4-5-20251101',
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: `Analyze the following resume content and determine which of the provided keywords have been incorporated (either exactly or semantically).
+
+RESUME CONTENT:
+${content}
+
+KEYWORDS TO CHECK:
+${keywords.map((k) => `- ${k.id}: "${k.keyword}"`).join('\n')}
+
+For each keyword, determine if it has been addressed in the content. A keyword is "addressed" if:
+1. The exact phrase appears in the content, OR
+2. A clear semantic equivalent appears (e.g., "P&L management" addressed by "managed a $40M P&L")
+
+Return a JSON array of the keyword IDs that have been addressed:
+["kw_001", "kw_003", ...]
+
+If no keywords were addressed, return an empty array: []
+
+Return ONLY the JSON array, no other text.`,
+      },
+    ],
+  });
+
+  const responseContent = response.content[0];
+  if (responseContent.type !== 'text') {
+    return [];
+  }
+
+  try {
+    return JSON.parse(responseContent.text) as string[];
+  } catch {
+    const jsonMatch = responseContent.text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]) as string[];
+    }
+    return [];
+  }
+}
+
+// Regenerate content with a specific keyword incorporated
+export async function regenerateWithKeyword(
+  currentContent: string,
+  keyword: JDKeyword,
+  userContext: string,
+  jdAnalysis: JDAnalysis,
+  sectionType: string
+): Promise<string> {
+  const response = await anthropic.messages.create({
+    model: 'claude-opus-4-5-20251101',
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: `The user wants to include a specific JD keyword in their resume content.
+
+Keyword: "${keyword.keyword}"
+User context: "${userContext}"
+
+Current content:
+${currentContent}
+
+Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+Industry: ${jdAnalysis.strategic.industry}
+Section: ${sectionType}
+
+Reframe the content to naturally incorporate this keyword/concept, using the user's context.
+
+CRITICAL RULES:
+1. Integrate naturally — don't force it or keyword stuff
+2. Maintain all existing metrics and facts
+3. Mirror the JD terminology where authentic
+4. NEVER change any numbers, percentages, or quantified outcomes
+5. NEVER add industries or experiences not in the original content
+6. Only add the keyword if the user's context provides a legitimate basis for it
+
+Wrap the newly incorporated keyword in <mark> tags to highlight it.
+Preserve any existing <mark> tags on other customizations.
+
+Return ONLY the updated content with <mark> tags inline.`,
+      },
+    ],
+  });
+
+  const responseContent = response.content[0];
+  if (responseContent.type !== 'text') {
+    throw new Error('Unexpected response type');
+  }
+
+  return responseContent.text.trim();
 }
 
 export default anthropic;

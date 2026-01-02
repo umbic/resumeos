@@ -8,14 +8,31 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useResumeStore, Message, ContentOption } from '@/lib/store';
+import { GapPrompt } from './GapPrompt';
+import type { JDKeyword } from '@/types';
 
 interface ChatPanelProps {
   onSendMessage: (message: string) => void;
   onSelectOption?: (optionId: string) => void;
   onApprove?: () => void;
+  // Gap reconciliation props
+  currentMissingKeyword?: JDKeyword | null;
+  onKeywordAdd?: (keywordId: string, userContext: string) => void;
+  onKeywordSkip?: (keywordId: string) => void;
+  onKeywordDismiss?: (keywordId: string) => void;
+  isKeywordLoading?: boolean;
 }
 
-export function ChatPanel({ onSendMessage, onSelectOption, onApprove }: ChatPanelProps) {
+export function ChatPanel({
+  onSendMessage,
+  onSelectOption,
+  onApprove,
+  currentMissingKeyword,
+  onKeywordAdd,
+  onKeywordSkip,
+  onKeywordDismiss,
+  isKeywordLoading,
+}: ChatPanelProps) {
   const { messages, isLoading, currentStep } = useResumeStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -47,7 +64,7 @@ export function ChatPanel({ onSendMessage, onSelectOption, onApprove }: ChatPane
       {/* Messages */}
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         <div className="space-y-4">
-          {messages.map((message) => (
+          {messages.map((message: Message) => (
             <MessageBubble
               key={message.id}
               message={message}
@@ -66,27 +83,38 @@ export function ChatPanel({ onSendMessage, onSelectOption, onApprove }: ChatPane
 
       {/* Input area */}
       <div className="border-t border-zinc-800 p-4">
+        {/* Gap Prompt for missing keywords */}
+        {currentMissingKeyword && onKeywordAdd && onKeywordSkip && onKeywordDismiss && (
+          <GapPrompt
+            keyword={currentMissingKeyword}
+            onAdd={(userContext) => onKeywordAdd(currentMissingKeyword.id, userContext)}
+            onSkip={() => onKeywordSkip(currentMissingKeyword.id)}
+            onDismiss={() => onKeywordDismiss(currentMissingKeyword.id)}
+            isLoading={isKeywordLoading}
+          />
+        )}
+
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Textarea
             ref={inputRef}
             placeholder={getPlaceholder(currentStep)}
             className="flex-1 min-h-[60px] max-h-[200px] bg-zinc-900 border-zinc-700 text-white resize-none"
             onKeyDown={handleKeyDown}
-            disabled={isLoading}
+            disabled={isLoading || isKeywordLoading}
           />
           <div className="flex flex-col gap-2">
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isKeywordLoading}
               className="bg-blue-600 hover:bg-blue-700"
             >
               Send
             </Button>
-            {onApprove && currentStep > 0 && (
+            {onApprove && currentStep > 0 && !currentMissingKeyword && (
               <Button
                 type="button"
                 onClick={onApprove}
-                disabled={isLoading}
+                disabled={isLoading || isKeywordLoading}
                 className="bg-green-600 hover:bg-green-700"
               >
                 Approve

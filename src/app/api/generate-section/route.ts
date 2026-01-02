@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { generateTailoredContent, generateSummary, refinePositionContent, JDAnalysis, ConversationMessage } from '@/lib/claude';
+import {
+  generateTailoredContent,
+  generateSummary,
+  refinePositionContent,
+  detectAddressedKeywords,
+  ConversationMessage,
+} from '@/lib/claude';
 import { shouldUseGeneric, getContentVersion } from '@/lib/rules';
+import type { JDAnalysis, JDKeyword } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +21,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get session data
+    // Get session data including jd_analysis
     const sessionResult = await sql`
       SELECT
         target_title,
@@ -23,7 +30,8 @@ export async function POST(request: NextRequest) {
         keywords,
         themes,
         branding_mode,
-        format
+        format,
+        jd_analysis
       FROM sessions
       WHERE id = ${sessionId}
     `;
@@ -36,15 +44,28 @@ export async function POST(request: NextRequest) {
     }
 
     const session = sessionResult.rows[0];
-    const jdAnalysis: JDAnalysis = {
-      targetTitle: session.target_title || '',
-      targetCompany: session.target_company || '',
-      industry: session.industry || '',
-      keywords: Array.isArray(session.keywords) ? session.keywords : [],
-      themes: Array.isArray(session.themes) ? session.themes : [],
-      recommendedBrandingMode: session.branding_mode as 'branded' | 'generic',
-      reasoning: '',
-    };
+
+    // Use enhanced jd_analysis if available, otherwise build from legacy fields
+    let jdAnalysis: JDAnalysis;
+    let unaddressedKeywords: JDKeyword[] = [];
+
+    if (session.jd_analysis) {
+      jdAnalysis = session.jd_analysis as JDAnalysis;
+      unaddressedKeywords = jdAnalysis.keywords.filter(
+        (k) => k.status === 'unaddressed' || k.status === 'skipped'
+      );
+    } else {
+      // Legacy fallback - build JDAnalysis from flat fields
+      jdAnalysis = {
+        strategic: {
+          targetTitle: session.target_title || '',
+          targetCompany: session.target_company || '',
+          industry: session.industry || '',
+          positioningThemes: Array.isArray(session.themes) ? session.themes : [],
+        },
+        keywords: [],
+      };
+    }
 
     const brandingMode = session.branding_mode || 'branded';
     const format = session.format || 'long';
@@ -67,15 +88,34 @@ export async function POST(request: NextRequest) {
 
       const summaryOptions = summaryResult.rows.map((row) => {
         const brandTags = Array.isArray(row.brand_tags) ? row.brand_tags : [];
-        const useGeneric = brandingMode === 'generic' || shouldUseGeneric(brandTags, jdAnalysis.targetCompany);
+        const useGeneric = brandingMode === 'generic' || shouldUseGeneric(brandTags, jdAnalysis.strategic.targetCompany);
         return useGeneric && row.content_generic ? row.content_generic : row.content_long;
       });
 
-      const draft = await generateSummary(summaryOptions, jdAnalysis, format as 'long' | 'short');
+      const draft = await generateSummary(
+        summaryOptions,
+        jdAnalysis,
+        format as 'long' | 'short',
+        unaddressedKeywords
+      );
+
+      // Detect which keywords were addressed in the generated content
+      let missingKeywords: JDKeyword[] = [];
+      let addressedKeywordIds: string[] = [];
+
+      if (unaddressedKeywords.length > 0) {
+        addressedKeywordIds = await detectAddressedKeywords(draft, unaddressedKeywords);
+        missingKeywords = unaddressedKeywords.filter(
+          (k) => !addressedKeywordIds.includes(k.id)
+        );
+      }
 
       return NextResponse.json({
         draft,
-        contentUsed: summaryResult.rows.map(r => r.id),
+        contentUsed: summaryResult.rows.map((r) => r.id),
+        missingKeywords,
+        addressedKeywordIds,
+        canApprove: missingKeywords.length === 0,
       });
     }
 
@@ -99,8 +139,23 @@ export async function POST(request: NextRequest) {
         filteredHistory
       );
 
+      // Detect which keywords were addressed in the refined content
+      const combinedContent = `${refined.overview}\n${refined.bullets.join('\n')}`;
+      let missingKeywords: JDKeyword[] = [];
+      let addressedKeywordIds: string[] = [];
+
+      if (unaddressedKeywords.length > 0) {
+        addressedKeywordIds = await detectAddressedKeywords(combinedContent, unaddressedKeywords);
+        missingKeywords = unaddressedKeywords.filter(
+          (k) => !addressedKeywordIds.includes(k.id)
+        );
+      }
+
       return NextResponse.json({
         draft: refined,
+        missingKeywords,
+        addressedKeywordIds,
+        canApprove: missingKeywords.length === 0,
       });
     }
 
@@ -144,7 +199,7 @@ export async function POST(request: NextRequest) {
 
     for (const row of contentResult.rows) {
       const brandTags = Array.isArray(row.brand_tags) ? row.brand_tags : [];
-      const useGeneric = brandingMode === 'generic' || shouldUseGeneric(brandTags, jdAnalysis.targetCompany);
+      const useGeneric = brandingMode === 'generic' || shouldUseGeneric(brandTags, jdAnalysis.strategic.targetCompany);
 
       const originalContent = getContentVersion(
         {
@@ -162,7 +217,8 @@ export async function POST(request: NextRequest) {
         originalContent,
         jdAnalysis,
         sectionType,
-        instructions
+        instructions,
+        unaddressedKeywords
       );
 
       tailoredItems.push(tailored);
@@ -178,9 +234,23 @@ export async function POST(request: NextRequest) {
       draft = tailoredItems.join('\n\n');
     }
 
+    // Detect which keywords were addressed in the generated content
+    let missingKeywords: JDKeyword[] = [];
+    let addressedKeywordIds: string[] = [];
+
+    if (unaddressedKeywords.length > 0) {
+      addressedKeywordIds = await detectAddressedKeywords(draft, unaddressedKeywords);
+      missingKeywords = unaddressedKeywords.filter(
+        (k) => !addressedKeywordIds.includes(k.id)
+      );
+    }
+
     return NextResponse.json({
       draft,
       contentUsed: contentIds,
+      missingKeywords,
+      addressedKeywordIds,
+      canApprove: missingKeywords.length === 0,
     });
   } catch (error) {
     console.error('Error generating section:', error);

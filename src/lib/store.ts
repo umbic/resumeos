@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { JDAnalysis, JDKeyword, KeywordStatus } from '../types';
 
 export interface Message {
   id: string;
@@ -39,8 +40,10 @@ interface ResumeState {
   format: 'long' | 'short';
   brandingMode: 'branded' | 'generic';
 
-  // JD Analysis
+  // JD Analysis (enhanced with keywords)
   jobDescription: string;
+  jdAnalysis: JDAnalysis | null;
+  // Legacy flat fields for backward compatibility
   targetTitle: string;
   targetCompany: string;
   industry: string;
@@ -67,12 +70,24 @@ interface ResumeState {
   setBrandingMode: (mode: 'branded' | 'generic') => void;
   setJobDescription: (jd: string) => void;
   setJDAnalysis: (analysis: {
-    targetTitle: string;
-    targetCompany: string;
-    industry: string;
-    keywords: string[];
-    themes: string[];
+    strategic?: {
+      targetTitle: string;
+      targetCompany: string;
+      industry: string;
+      positioningThemes: string[];
+    };
+    keywords?: JDKeyword[];
+    // Legacy flat fields
+    targetTitle?: string;
+    targetCompany?: string;
+    industry?: string;
+    themes?: string[];
   }) => void;
+  updateKeywordStatus: (
+    keywordId: string,
+    status: KeywordStatus,
+    metadata?: { sectionAddressed?: string; userContext?: string; dismissReason?: string }
+  ) => void;
   setCurrentStep: (step: number) => void;
   setHeader: (header: HeaderData) => void;
   setSummary: (summary: string) => void;
@@ -89,18 +104,19 @@ const initialState = {
   format: 'long' as const,
   brandingMode: 'branded' as const,
   jobDescription: '',
+  jdAnalysis: null as JDAnalysis | null,
   targetTitle: '',
   targetCompany: '',
   industry: '',
-  keywords: [],
-  themes: [],
+  keywords: [] as string[],
+  themes: [] as string[],
   currentStep: 0,
-  header: null,
+  header: null as HeaderData | null,
   summary: '',
-  highlights: [],
-  highlightIds: [],
-  positions: {},
-  messages: [],
+  highlights: [] as string[],
+  highlightIds: [] as string[],
+  positions: {} as { [key: number]: PositionData },
+  messages: [] as Message[],
   isLoading: false,
 };
 
@@ -115,13 +131,56 @@ export const useResumeStore = create<ResumeState>((set) => ({
 
   setJobDescription: (jd) => set({ jobDescription: jd }),
 
-  setJDAnalysis: (analysis) =>
-    set({
-      targetTitle: analysis.targetTitle,
-      targetCompany: analysis.targetCompany,
-      industry: analysis.industry,
-      keywords: analysis.keywords,
-      themes: analysis.themes,
+  setJDAnalysis: (analysis) => {
+    // Handle both new structured format and legacy flat format
+    if (analysis.strategic && analysis.keywords) {
+      // New format with strategic + keywords
+      set({
+        jdAnalysis: {
+          strategic: analysis.strategic,
+          keywords: analysis.keywords,
+        },
+        // Also set legacy fields for backward compatibility
+        targetTitle: analysis.strategic.targetTitle,
+        targetCompany: analysis.strategic.targetCompany,
+        industry: analysis.strategic.industry,
+        keywords: analysis.keywords.map((k) => k.keyword),
+        themes: analysis.strategic.positioningThemes,
+      });
+    } else {
+      // Legacy flat format
+      set({
+        targetTitle: analysis.targetTitle || '',
+        targetCompany: analysis.targetCompany || '',
+        industry: analysis.industry || '',
+        keywords: analysis.themes || [], // themes used to be keywords in legacy
+        themes: analysis.themes || [],
+      });
+    }
+  },
+
+  updateKeywordStatus: (keywordId, status, metadata) =>
+    set((state) => {
+      if (!state.jdAnalysis) return state;
+
+      const updatedKeywords = state.jdAnalysis.keywords.map((k) =>
+        k.id === keywordId
+          ? {
+              ...k,
+              status,
+              ...(metadata?.sectionAddressed && { sectionAddressed: metadata.sectionAddressed }),
+              ...(metadata?.userContext && { userContext: metadata.userContext }),
+              ...(metadata?.dismissReason && { dismissReason: metadata.dismissReason }),
+            }
+          : k
+      );
+
+      return {
+        jdAnalysis: {
+          ...state.jdAnalysis,
+          keywords: updatedKeywords,
+        },
+      };
     }),
 
   setCurrentStep: (step) => set({ currentStep: step }),

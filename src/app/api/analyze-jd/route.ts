@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { analyzeJobDescription } from '@/lib/claude';
 import { generateEmbedding } from '@/lib/openai';
-import { COMPETITOR_MAP } from '@/lib/rules';
+import { COMPETITOR_MAP, filterExecutiveKeywords } from '@/lib/rules';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,21 +15,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Analyze JD with Claude
-    const analysis = await analyzeJobDescription(jobDescription);
+    // Analyze JD with Claude (enhanced two-layer analysis)
+    const { analysis, recommendedBrandingMode: claudeBrandingMode, reasoning } =
+      await analyzeJobDescription(jobDescription);
+
+    // Filter out junior/tactical keywords
+    const filteredKeywords = filterExecutiveKeywords(analysis.keywords);
+
+    // Update analysis with filtered keywords
+    const filteredAnalysis = {
+      ...analysis,
+      keywords: filteredKeywords,
+    };
 
     // Generate embedding for the JD
     const jdEmbedding = await generateEmbedding(jobDescription);
     const embeddingStr = `[${jdEmbedding.join(',')}]`;
 
     // Determine branding mode based on target company
-    let recommendedBrandingMode = analysis.recommendedBrandingMode || 'branded';
-    const competitorBrands = COMPETITOR_MAP[analysis.targetCompany] || [];
+    let finalBrandingMode = claudeBrandingMode || 'branded';
+    const competitorBrands = COMPETITOR_MAP[analysis.strategic.targetCompany] || [];
     if (competitorBrands.length > 0) {
-      recommendedBrandingMode = 'generic';
+      finalBrandingMode = 'generic';
     }
 
-    // Create new session
+    // Extract simple keyword strings for backward compatibility
+    const simpleKeywords = filteredKeywords.map((k) => k.keyword);
+
+    // Create new session with enhanced jd_analysis
     const result = await sql`
       INSERT INTO sessions (
         job_description,
@@ -39,16 +52,18 @@ export async function POST(request: NextRequest) {
         keywords,
         themes,
         jd_embedding,
-        branding_mode
+        branding_mode,
+        jd_analysis
       ) VALUES (
         ${jobDescription},
-        ${analysis.targetTitle},
-        ${analysis.targetCompany},
-        ${analysis.industry},
-        ${JSON.stringify(analysis.keywords)},
-        ${JSON.stringify(analysis.themes)},
+        ${analysis.strategic.targetTitle},
+        ${analysis.strategic.targetCompany},
+        ${analysis.strategic.industry},
+        ${JSON.stringify(simpleKeywords)},
+        ${JSON.stringify(analysis.strategic.positioningThemes)},
         ${embeddingStr}::vector,
-        ${recommendedBrandingMode}
+        ${finalBrandingMode},
+        ${JSON.stringify(filteredAnalysis)}
       )
       RETURNING id
     `;
@@ -58,13 +73,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       sessionId,
       analysis: {
-        targetTitle: analysis.targetTitle,
-        targetCompany: analysis.targetCompany,
-        industry: analysis.industry,
-        keywords: analysis.keywords,
-        themes: analysis.themes,
-        recommendedBrandingMode,
-        reasoning: analysis.reasoning,
+        // New structured format
+        strategic: analysis.strategic,
+        keywords: filteredKeywords,
+        // Backward compatible flat format
+        targetTitle: analysis.strategic.targetTitle,
+        targetCompany: analysis.strategic.targetCompany,
+        industry: analysis.strategic.industry,
+        themes: analysis.strategic.positioningThemes,
+        recommendedBrandingMode: finalBrandingMode,
+        reasoning,
       },
     });
   } catch (error) {

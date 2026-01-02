@@ -1,17 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+import { ListFilter } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { useResumeStore } from '@/lib/store';
 import { STATIC_CONTENT, POSITIONS } from '@/lib/rules';
 import { renderContent } from '@/lib/render-highlights';
+import { KeywordsPanel } from './KeywordsPanel';
 
 export function PreviewPanel() {
   const [showHighlights, setShowHighlights] = useState(false);
+  const [showKeywords, setShowKeywords] = useState(false);
 
   const {
     format,
@@ -20,7 +24,16 @@ export function PreviewPanel() {
     highlights,
     positions,
     targetTitle,
+    jdAnalysis,
   } = useResumeStore();
+
+  // Calculate keyword stats
+  const keywordStats = jdAnalysis
+    ? {
+        total: jdAnalysis.keywords.filter((k: { status: string }) => k.status !== 'dismissed').length,
+        addressed: jdAnalysis.keywords.filter((k: { status: string }) => k.status === 'addressed').length,
+      }
+    : null;
 
   const displayHeader = header || {
     name: STATIC_CONTENT.header.name,
@@ -31,10 +44,26 @@ export function PreviewPanel() {
   };
 
   return (
-    <div className="h-full bg-white">
-      <div className="sticky top-0 bg-zinc-100 border-b border-zinc-300 px-4 py-2 flex items-center justify-between">
+    <div className="h-full bg-white relative">
+      <div className="sticky top-0 bg-zinc-100 border-b border-zinc-300 px-4 py-2 flex items-center justify-between z-20">
         <h2 className="font-semibold text-zinc-700">Resume Preview</h2>
         <div className="flex items-center gap-4">
+          {/* Keywords toggle button */}
+          {jdAnalysis && keywordStats && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowKeywords(!showKeywords)}
+              className={`flex items-center gap-2 ${
+                showKeywords ? 'bg-zinc-200 border-zinc-400' : ''
+              }`}
+            >
+              <ListFilter className="h-4 w-4" />
+              <span className="text-xs">
+                Keywords {keywordStats.addressed}/{keywordStats.total}
+              </span>
+            </Button>
+          )}
           <div className="flex items-center gap-2">
             <Switch
               id="show-highlights"
@@ -50,6 +79,9 @@ export function PreviewPanel() {
           </Badge>
         </div>
       </div>
+
+      {/* Keywords Panel (slides from right) */}
+      <KeywordsPanel isOpen={showKeywords} onClose={() => setShowKeywords(false)} />
 
       <ScrollArea className="h-[calc(100%-48px)]">
         <div className="p-8 max-w-[700px] mx-auto">
@@ -81,7 +113,7 @@ export function PreviewPanel() {
               <div className="mb-4">
                 <SectionHeader>Career Highlights</SectionHeader>
                 <ul className="list-disc list-outside ml-4 space-y-1">
-                  {highlights.map((highlight, idx) => (
+                  {highlights.map((highlight: string, idx: number) => (
                     <li key={idx} className="text-sm text-zinc-700">
                       <HighlightText text={highlight} showHighlights={showHighlights} />
                     </li>
@@ -123,7 +155,7 @@ export function PreviewPanel() {
 
                     {showBullets && posData?.bullets && posData.bullets.length > 0 && (
                       <ul className="list-disc list-outside ml-4 mt-2 space-y-1">
-                        {posData.bullets.map((bullet, idx) => (
+                        {posData.bullets.map((bullet: string, idx: number) => (
                           <li key={idx} className="text-sm text-zinc-700">
                             {renderContent({ content: bullet, showHighlights })}
                           </li>
