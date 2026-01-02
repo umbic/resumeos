@@ -69,48 +69,39 @@ export async function generateTailoredContent(
     messages: [
       {
         role: 'user',
-        content: `You are helping tailor resume content for a specific job application.
+        content: `Tailor this resume content for a specific job application. You must preserve all facts from the original.
 
 Target Role: ${jdAnalysis.targetTitle} at ${jdAnalysis.targetCompany}
 Industry: ${jdAnalysis.industry}
 Key Themes: ${jdAnalysis.themes.join(', ')}
 Keywords: ${jdAnalysis.keywords.join(', ')}
 
-Original Content (${sectionType}):
+ORIGINAL CONTENT (${sectionType}):
 ${originalContent}
 
 ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
-Reframe this content to emphasize aspects most relevant to the target role.
+CRITICAL RULES - VIOLATIONS ARE UNACCEPTABLE:
+1. NEVER change any metrics, numbers, or percentages
+2. NEVER add industries, sectors, or client types not in the original
+3. NEVER fabricate capabilities, experiences, or outcomes
+4. NEVER inflate scope, scale, or impact beyond what's stated
+5. If the target industry isn't mentioned in the original, do NOT add it
 
-You MAY:
-- Reorder emphasis
-- Use industry-specific language that matches the JD
-- Mirror JD terminology where authentic
+ALLOWED CUSTOMIZATIONS:
+- Reorder emphasis within the sentence
+- Use synonyms that don't change meaning (e.g., "led" → "spearheaded")
+- Mirror JD terminology ONLY where it authentically maps to existing content
+- Slight rephrasing that preserves all original claims
 
-You may NOT:
-- Change any metrics or numbers
-- Add capabilities not present in the original
-- Fabricate clients or experiences
-- Inflate scope or scale
-
-IMPORTANT: When tailoring content, wrap any words or phrases you customize in <mark> tags.
-
-"Customize" means:
-- Keywords or terminology mirrored from the job description
-- Reframed language to better align with the target role
-- Emphasis shifts to highlight relevant aspects
+Wrap customized words/phrases in <mark> tags. Only mark actual changes.
 
 Example:
 Original: "Led brand strategy initiatives across multiple sectors"
-Tailored: "Led <mark>enterprise brand transformation</mark> initiatives across <mark>financial services and wealth management</mark>"
+CORRECT: "Led <mark>brand transformation</mark> initiatives across multiple sectors"
+WRONG: "Led brand strategy initiatives across <mark>financial services and payments</mark>" (invents industries)
 
-Do NOT mark:
-- Content that remains unchanged from the original
-- Minor grammatical adjustments (a/the, punctuation)
-- The entire sentence — only the specific changed words/phrases
-
-Return ONLY the tailored content with <mark> tags inline, no explanation or preamble.`,
+Return ONLY the tailored content with <mark> tags inline.`,
       },
     ],
   });
@@ -134,38 +125,33 @@ export async function generateSummary(
     messages: [
       {
         role: 'user',
-        content: `Generate a tailored professional summary for a resume.
+        content: `Combine and tailor a professional summary for a resume using ONLY the source content provided.
 
 Target Role: ${jdAnalysis.targetTitle} at ${jdAnalysis.targetCompany}
 Industry: ${jdAnalysis.industry}
 Key Themes: ${jdAnalysis.themes.join(', ')}
 Format: ${format} (${format === 'long' ? '4-5 sentences' : '3-4 sentences'})
 
-Here are pre-approved summary options to draw from - you MUST use only content from these:
+SOURCE CONTENT (use ONLY phrases, claims, and facts from these):
 
 ${summaryOptions.map((s, i) => `Option ${i + 1}:\n${s}`).join('\n\n')}
 
-Create a summary that:
-1. Leads with the capability most relevant to this JD
-2. Emphasizes outcomes the JD cares about
-3. Uses industry-appropriate language
-4. Maintains all factual claims from the source options
+CRITICAL RULES - VIOLATIONS ARE UNACCEPTABLE:
+1. NEVER invent industries, sectors, or domains not explicitly mentioned in the source content
+2. NEVER add client types, company types, or verticals not in the source (e.g., don't add "payments technology" if not in source)
+3. NEVER fabricate capabilities, experiences, or outcomes not stated in the source
+4. You may ONLY reorder, combine, and slightly rephrase content from the source options
+5. If the target industry isn't represented in the source content, use general business language instead of inventing specifics
 
-IMPORTANT: Wrap any words or phrases you customize for this specific role in <mark> tags.
+ALLOWED CUSTOMIZATIONS:
+- Reorder sentences to lead with most relevant capability
+- Combine phrases from different source options
+- Use synonyms (e.g., "organizations" → "enterprises")
+- Mirror terminology from the JD that maps to existing source content
 
-"Customize" means:
-- Keywords or terminology mirrored from the job description
-- Reframed language to better align with the target role
-- Industry-specific terms added to match the JD
+Wrap customized words/phrases in <mark> tags. Only mark actual changes, not unchanged source content.
 
-Example: "A <mark>strategic brand leader</mark> with expertise in <mark>enterprise transformation</mark>..."
-
-Do NOT mark:
-- Content that remains unchanged from the source options
-- Minor grammatical adjustments
-- The entire sentence — only the specific customized words/phrases
-
-Return ONLY the summary text with <mark> tags inline, no explanation.`,
+Return ONLY the summary text with <mark> tags inline.`,
       },
     ],
   });
@@ -203,17 +189,16 @@ ${overview}
 Current Bullets:
 ${bullets.map((b, i) => `${i + 1}. ${b}`).join('\n')}
 
-Apply the user's requested changes while maintaining:
-- All factual accuracy (no changing metrics/numbers)
-- Professional tone
-- Relevance to the target role
+CRITICAL RULES - VIOLATIONS ARE UNACCEPTABLE:
+1. NEVER change any metrics, numbers, or percentages
+2. NEVER add industries, sectors, or client types not already in the content
+3. NEVER fabricate capabilities, experiences, or outcomes
+4. NEVER inflate scope, scale, or impact beyond what's stated
+5. If asked to add something not in the original content, politely explain you cannot invent facts
 
-IMPORTANT: Wrap any words or phrases you customize in <mark> tags. This includes:
-- Keywords mirrored from the job description
-- Reframed language to better align with the target role
-- Any NEW customizations you make based on the user's request
+Apply the user's requested changes while maintaining all factual accuracy.
 
-Preserve existing <mark> tags from the current content if that text remains customized.
+Wrap customized words/phrases in <mark> tags. Preserve existing <mark> tags if that text remains customized.
 
 Return a JSON object with:
 {
@@ -221,8 +206,8 @@ Return a JSON object with:
   "bullets": ["bullet 1 with <mark>tags</mark>", "bullet 2", ...]
 }
 
-If the user's request only affects bullets, keep the overview the same (with its marks).
-If the user's request only affects the overview, keep the bullets the same (with their marks).
+If the user's request only affects bullets, keep the overview the same.
+If the user's request only affects the overview, keep the bullets the same.
 
 Return ONLY the JSON object, no other text.`;
 
