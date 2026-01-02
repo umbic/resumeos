@@ -1,0 +1,167 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
+import { generateTailoredContent, generateSummary, JDAnalysis } from '@/lib/claude';
+import { shouldUseGeneric, getContentVersion } from '@/lib/rules';
+
+export async function POST(request: NextRequest) {
+  try {
+    const { sessionId, sectionType, contentIds, instructions } = await request.json();
+
+    if (!sessionId || !sectionType) {
+      return NextResponse.json(
+        { error: 'Session ID and section type are required' },
+        { status: 400 }
+      );
+    }
+
+    // Get session data
+    const sessionResult = await sql`
+      SELECT
+        target_title,
+        target_company,
+        industry,
+        keywords,
+        themes,
+        branding_mode,
+        format
+      FROM sessions
+      WHERE id = ${sessionId}
+    `;
+
+    if (sessionResult.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Session not found' },
+        { status: 404 }
+      );
+    }
+
+    const session = sessionResult.rows[0];
+    const jdAnalysis: JDAnalysis = {
+      targetTitle: session.target_title || '',
+      targetCompany: session.target_company || '',
+      industry: session.industry || '',
+      keywords: Array.isArray(session.keywords) ? session.keywords : [],
+      themes: Array.isArray(session.themes) ? session.themes : [],
+      recommendedBrandingMode: session.branding_mode as 'branded' | 'generic',
+      reasoning: '',
+    };
+
+    const brandingMode = session.branding_mode || 'branded';
+    const format = session.format || 'long';
+
+    // For summary generation, we don't need specific content IDs
+    if (sectionType === 'summary') {
+      // Get top matching summaries
+      const summaryResult = await sql`
+        SELECT
+          id,
+          content_long,
+          content_generic,
+          brand_tags
+        FROM content_items
+        WHERE type = 'summary'
+          AND embedding IS NOT NULL
+        ORDER BY embedding <=> (SELECT jd_embedding FROM sessions WHERE id = ${sessionId})
+        LIMIT 5
+      `;
+
+      const summaryOptions = summaryResult.rows.map((row) => {
+        const brandTags = Array.isArray(row.brand_tags) ? row.brand_tags : [];
+        const useGeneric = brandingMode === 'generic' || shouldUseGeneric(brandTags, jdAnalysis.targetCompany);
+        return useGeneric && row.content_generic ? row.content_generic : row.content_long;
+      });
+
+      const draft = await generateSummary(summaryOptions, jdAnalysis, format as 'long' | 'short');
+
+      return NextResponse.json({
+        draft,
+        contentUsed: summaryResult.rows.map(r => r.id),
+      });
+    }
+
+    // For other sections, get the specific content items
+    if (!contentIds || contentIds.length === 0) {
+      return NextResponse.json(
+        { error: 'Content IDs are required for this section type' },
+        { status: 400 }
+      );
+    }
+
+    const contentIdList = contentIds.map((id: string) => `'${id}'`).join(',');
+    const contentResult = await sql.query(`
+      SELECT
+        id,
+        type,
+        content_short,
+        content_medium,
+        content_long,
+        content_generic,
+        brand_tags
+      FROM content_items
+      WHERE id IN (${contentIdList})
+    `);
+
+    if (contentResult.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'No content found for provided IDs' },
+        { status: 404 }
+      );
+    }
+
+    // Determine version based on section type and format
+    let version: 'short' | 'medium' | 'long' = 'long';
+    if (sectionType === 'career_highlight') {
+      version = format === 'long' ? 'medium' : 'short';
+    }
+
+    // Generate tailored content for each item
+    const tailoredItems: string[] = [];
+
+    for (const row of contentResult.rows) {
+      const brandTags = Array.isArray(row.brand_tags) ? row.brand_tags : [];
+      const useGeneric = brandingMode === 'generic' || shouldUseGeneric(brandTags, jdAnalysis.targetCompany);
+
+      const originalContent = getContentVersion(
+        {
+          contentShort: row.content_short,
+          contentMedium: row.content_medium,
+          contentLong: row.content_long,
+          contentGeneric: row.content_generic,
+          brandTags,
+        },
+        version,
+        useGeneric
+      );
+
+      const tailored = await generateTailoredContent(
+        originalContent,
+        jdAnalysis,
+        sectionType,
+        instructions
+      );
+
+      tailoredItems.push(tailored);
+    }
+
+    // Format the draft based on section type
+    let draft: string;
+    if (sectionType === 'career_highlight') {
+      draft = tailoredItems.map((item) => `• ${item}`).join('\n');
+    } else if (sectionType === 'bullet') {
+      draft = tailoredItems.map((item) => `• ${item}`).join('\n');
+    } else {
+      draft = tailoredItems.join('\n\n');
+    }
+
+    return NextResponse.json({
+      draft,
+      contentUsed: contentIds,
+    });
+  } catch (error) {
+    console.error('Error generating section:', error);
+    return NextResponse.json(
+      { error: 'Failed to generate section' },
+      { status: 500 }
+    );
+  }
+}
