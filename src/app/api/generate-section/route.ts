@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { generateTailoredContent, generateSummary, JDAnalysis } from '@/lib/claude';
+import { generateTailoredContent, generateSummary, refinePositionContent, JDAnalysis } from '@/lib/claude';
 import { shouldUseGeneric, getContentVersion } from '@/lib/rules';
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, sectionType, contentIds, instructions } = await request.json();
+    const { sessionId, sectionType, contentIds, instructions, currentContent } = await request.json();
 
     if (!sessionId || !sectionType) {
       return NextResponse.json(
@@ -76,6 +76,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         draft,
         contentUsed: summaryResult.rows.map(r => r.id),
+      });
+    }
+
+    // For position refinement
+    if (sectionType === 'position' && currentContent && instructions) {
+      const refined = await refinePositionContent(
+        currentContent.overview,
+        currentContent.bullets || [],
+        instructions,
+        jdAnalysis
+      );
+
+      return NextResponse.json({
+        draft: refined,
       });
     }
 

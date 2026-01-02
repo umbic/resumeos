@@ -148,4 +148,67 @@ Return ONLY the summary text, no explanation.`,
   return content.text.trim();
 }
 
+export async function refinePositionContent(
+  overview: string,
+  bullets: string[],
+  instructions: string,
+  jdAnalysis: JDAnalysis
+): Promise<{ overview: string; bullets: string[] }> {
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 2048,
+    messages: [
+      {
+        role: 'user',
+        content: `You are helping refine position content on a resume based on user feedback.
+
+Target Role: ${jdAnalysis.targetTitle} at ${jdAnalysis.targetCompany}
+Industry: ${jdAnalysis.industry}
+Key Themes: ${jdAnalysis.themes.join(', ')}
+
+Current Overview:
+${overview}
+
+Current Bullets:
+${bullets.map((b, i) => `${i + 1}. ${b}`).join('\n')}
+
+User Request: "${instructions}"
+
+Apply the user's requested changes while maintaining:
+- All factual accuracy (no changing metrics/numbers)
+- Professional tone
+- Relevance to the target role
+
+Return a JSON object with:
+{
+  "overview": "the updated overview text",
+  "bullets": ["bullet 1", "bullet 2", ...]
+}
+
+If the user's request only affects bullets, keep the overview the same.
+If the user's request only affects the overview, keep the bullets the same.
+
+Return ONLY the JSON object, no other text.`,
+      },
+    ],
+  });
+
+  const content = response.content[0];
+  if (content.type !== 'text') {
+    throw new Error('Unexpected response type');
+  }
+
+  try {
+    return JSON.parse(content.text) as { overview: string; bullets: string[] };
+  } catch {
+    // Try to extract JSON from the response
+    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]) as { overview: string; bullets: string[] };
+    }
+    // Return original content if parsing fails
+    return { overview, bullets };
+  }
+}
+
 export default anthropic;

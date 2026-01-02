@@ -372,7 +372,58 @@ These are automatically selected. Click **Approve** to continue, or tell me whic
 
 async function handlePosition1(content: string, store: ReturnType<typeof useResumeStore.getState>) {
   const posConfig = POSITIONS[0];
+  const currentPosition = store.positions[1];
 
+  // If user is providing refinement feedback and we have existing content
+  if (content && currentPosition?.overview) {
+    const response = await fetch('/api/generate-section', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: store.sessionId,
+        sectionType: 'position',
+        position: 1,
+        instructions: content,
+        currentContent: {
+          overview: currentPosition.overview,
+          bullets: currentPosition.bullets,
+        },
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.draft) {
+      const updatedOverview = data.draft.overview || currentPosition.overview;
+      const updatedBullets = data.draft.bullets || currentPosition.bullets;
+
+      store.setPosition({
+        number: 1,
+        title: posConfig.titleDefault,
+        company: posConfig.company,
+        location: posConfig.location,
+        dates: posConfig.dates,
+        overview: updatedOverview,
+        bullets: updatedBullets,
+      });
+
+      store.addMessage({
+        id: uuidv4(),
+        role: 'assistant',
+        content: `Updated Position 1:
+
+**Overview:**
+${updatedOverview}
+
+${updatedBullets.length > 0 ? `**Bullets:**\n${updatedBullets.map((b: string, i: number) => `${i + 1}. ${b}`).join('\n')}` : ''}
+
+Click **Approve** to continue, or suggest more changes.`,
+      });
+      return;
+    }
+  }
+
+  // Initial load - fetch content
   // Get overview
   const overviewResponse = await fetch('/api/search-content', {
     method: 'POST',
@@ -433,7 +484,58 @@ Click **Approve** to continue, or suggest changes.`,
 
 async function handlePosition2(content: string, store: ReturnType<typeof useResumeStore.getState>) {
   const posConfig = POSITIONS[1];
+  const currentPosition = store.positions[2];
 
+  // If user is providing refinement feedback and we have existing content
+  if (content && currentPosition?.overview) {
+    const response = await fetch('/api/generate-section', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: store.sessionId,
+        sectionType: 'position',
+        position: 2,
+        instructions: content,
+        currentContent: {
+          overview: currentPosition.overview,
+          bullets: currentPosition.bullets,
+        },
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.draft) {
+      const updatedOverview = data.draft.overview || currentPosition.overview;
+      const updatedBullets = data.draft.bullets || currentPosition.bullets;
+
+      store.setPosition({
+        number: 2,
+        title: posConfig.titleDefault,
+        company: posConfig.company,
+        location: posConfig.location,
+        dates: posConfig.dates,
+        overview: updatedOverview,
+        bullets: updatedBullets,
+      });
+
+      store.addMessage({
+        id: uuidv4(),
+        role: 'assistant',
+        content: `Updated Position 2:
+
+**Overview:**
+${updatedOverview}
+
+${updatedBullets.length > 0 ? `**Bullets:**\n${updatedBullets.map((b: string, i: number) => `${i + 1}. ${b}`).join('\n')}` : ''}
+
+Click **Approve** to continue, or suggest more changes.`,
+      });
+      return;
+    }
+  }
+
+  // Initial load - fetch content
   // Get overview
   const overviewResponse = await fetch('/api/search-content', {
     method: 'POST',
