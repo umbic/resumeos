@@ -388,6 +388,7 @@ async function handlePosition1(content: string, store: ReturnType<typeof useResu
           overview: currentPosition.overview,
           bullets: currentPosition.bullets,
         },
+        conversationHistory: store.messages,
       }),
     });
 
@@ -500,6 +501,7 @@ async function handlePosition2(content: string, store: ReturnType<typeof useResu
           overview: currentPosition.overview,
           bullets: currentPosition.bullets,
         },
+        conversationHistory: store.messages,
       }),
     });
 

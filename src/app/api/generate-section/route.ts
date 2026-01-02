@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { generateTailoredContent, generateSummary, refinePositionContent, JDAnalysis } from '@/lib/claude';
+import { generateTailoredContent, generateSummary, refinePositionContent, JDAnalysis, ConversationMessage } from '@/lib/claude';
 import { shouldUseGeneric, getContentVersion } from '@/lib/rules';
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, sectionType, contentIds, instructions, currentContent } = await request.json();
+    const { sessionId, sectionType, contentIds, instructions, currentContent, conversationHistory } = await request.json();
 
     if (!sessionId || !sectionType) {
       return NextResponse.json(
@@ -81,11 +81,22 @@ export async function POST(request: NextRequest) {
 
     // For position refinement
     if (sectionType === 'position' && currentContent && instructions) {
+      // Filter conversation history to only include relevant messages (text only, no options)
+      const filteredHistory: ConversationMessage[] = conversationHistory
+        ? conversationHistory
+            .filter((msg: { content: string; options?: unknown[] }) => msg.content && !msg.options)
+            .map((msg: { role: string; content: string }) => ({
+              role: msg.role as 'user' | 'assistant',
+              content: msg.content,
+            }))
+        : [];
+
       const refined = await refinePositionContent(
         currentContent.overview,
         currentContent.bullets || [],
         instructions,
-        jdAnalysis
+        jdAnalysis,
+        filteredHistory
       );
 
       return NextResponse.json({

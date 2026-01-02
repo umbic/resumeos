@@ -178,19 +178,20 @@ Return ONLY the summary text with <mark> tags inline, no explanation.`,
   return content.text.trim();
 }
 
+export interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export async function refinePositionContent(
   overview: string,
   bullets: string[],
   instructions: string,
-  jdAnalysis: JDAnalysis
+  jdAnalysis: JDAnalysis,
+  conversationHistory?: ConversationMessage[]
 ): Promise<{ overview: string; bullets: string[] }> {
-  const response = await anthropic.messages.create({
-    model: 'claude-opus-4-5-20251101',
-    max_tokens: 2048,
-    messages: [
-      {
-        role: 'user',
-        content: `You are helping refine position content on a resume based on user feedback.
+  // Build the system context
+  const systemContext = `You are helping refine position content on a resume based on user feedback.
 
 Target Role: ${jdAnalysis.targetTitle} at ${jdAnalysis.targetCompany}
 Industry: ${jdAnalysis.industry}
@@ -201,8 +202,6 @@ ${overview}
 
 Current Bullets:
 ${bullets.map((b, i) => `${i + 1}. ${b}`).join('\n')}
-
-User Request: "${instructions}"
 
 Apply the user's requested changes while maintaining:
 - All factual accuracy (no changing metrics/numbers)
@@ -225,9 +224,29 @@ Return a JSON object with:
 If the user's request only affects bullets, keep the overview the same (with its marks).
 If the user's request only affects the overview, keep the bullets the same (with their marks).
 
-Return ONLY the JSON object, no other text.`,
-      },
-    ],
+Return ONLY the JSON object, no other text.`;
+
+  // Build messages array with conversation history
+  const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+    { role: 'user', content: systemContext },
+    { role: 'assistant', content: 'I understand. I will help you refine this position content. What changes would you like me to make?' },
+  ];
+
+  // Add conversation history if provided (last 10 exchanges max)
+  if (conversationHistory && conversationHistory.length > 0) {
+    const recentHistory = conversationHistory.slice(-20); // Last 20 messages (10 exchanges)
+    for (const msg of recentHistory) {
+      messages.push({ role: msg.role, content: msg.content });
+    }
+  }
+
+  // Add the current instruction
+  messages.push({ role: 'user', content: instructions });
+
+  const response = await anthropic.messages.create({
+    model: 'claude-opus-4-5-20251101',
+    max_tokens: 2048,
+    messages,
   });
 
   const content = response.content[0];
