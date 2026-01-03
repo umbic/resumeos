@@ -1,6 +1,6 @@
 import { pgTable, text, integer, timestamp, jsonb, uuid, serial } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import type { JDAnalysis } from '../types';
+import type { JDAnalysis, VerbTracker } from '../types';
 
 // Custom vector type for pgvector
 // Note: Vercel Postgres supports pgvector - we'll handle vectors as text and cast in queries
@@ -49,6 +49,19 @@ export const sessions = pgTable('sessions', {
 
   // Enhanced JD Analysis with ATS keywords
   jdAnalysis: jsonb('jd_analysis').$type<JDAnalysis | null>(),
+
+  // Verb tracking for action verb variety
+  verbTracker: jsonb('verb_tracker').$type<VerbTracker>().default({
+    usedVerbs: {},
+    availableVerbs: [
+      'Built', 'Developed', 'Created', 'Established', 'Launched', 'Designed',
+      'Led', 'Directed', 'Oversaw', 'Managed', 'Headed', 'Guided',
+      'Grew', 'Scaled', 'Expanded', 'Increased', 'Accelerated', 'Drove',
+      'Transformed', 'Repositioned', 'Modernized', 'Revitalized', 'Redesigned',
+      'Architected', 'Defined', 'Shaped', 'Crafted', 'Pioneered', 'Championed',
+      'Delivered', 'Executed', 'Implemented', 'Activated', 'Orchestrated'
+    ]
+  }),
 
   // Content tracking
   usedContentIds: jsonb('used_content_ids').$type<string[]>().default([]),

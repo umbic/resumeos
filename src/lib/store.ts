@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { JDAnalysis, JDKeyword, KeywordStatus } from '../types';
+import type { JDAnalysis, JDKeyword, KeywordStatus, VerbTracker } from '../types';
 
 export interface Message {
   id: string;
@@ -34,11 +34,25 @@ export interface PositionData {
   bullets: string[];
 }
 
+// Default verb tracker with initial available verbs
+const DEFAULT_VERB_TRACKER: VerbTracker = {
+  usedVerbs: {},
+  availableVerbs: [
+    'Built', 'Developed', 'Created', 'Established', 'Launched', 'Designed',
+    'Led', 'Directed', 'Oversaw', 'Managed', 'Headed', 'Guided',
+    'Grew', 'Scaled', 'Expanded', 'Increased', 'Accelerated', 'Drove',
+    'Transformed', 'Repositioned', 'Modernized', 'Revitalized', 'Redesigned',
+    'Architected', 'Defined', 'Shaped', 'Crafted', 'Pioneered', 'Championed',
+    'Delivered', 'Executed', 'Implemented', 'Activated', 'Orchestrated'
+  ]
+};
+
 interface ResumeState {
   // Session
   sessionId: string | null;
   format: 'long' | 'short';
   brandingMode: 'branded' | 'generic';
+  verbTracker: VerbTracker;
 
   // JD Analysis (enhanced with keywords)
   jobDescription: string;
@@ -96,6 +110,8 @@ interface ResumeState {
   addMessage: (message: Message) => void;
   updateMessage: (id: string, updates: Partial<Message>) => void;
   setIsLoading: (loading: boolean) => void;
+  setVerbTracker: (tracker: VerbTracker) => void;
+  updateUsedVerbs: (verb: string, section: string) => void;
   reset: () => void;
 }
 
@@ -103,6 +119,7 @@ const initialState = {
   sessionId: null,
   format: 'long' as const,
   brandingMode: 'branded' as const,
+  verbTracker: DEFAULT_VERB_TRACKER,
   jobDescription: '',
   jdAnalysis: null as JDAnalysis | null,
   targetTitle: '',
@@ -213,6 +230,24 @@ export const useResumeStore = create<ResumeState>((set) => ({
     })),
 
   setIsLoading: (loading) => set({ isLoading: loading }),
+
+  setVerbTracker: (tracker) => set({ verbTracker: tracker }),
+
+  updateUsedVerbs: (verb, section) =>
+    set((state) => {
+      const currentSections = state.verbTracker.usedVerbs[verb] || [];
+      if (currentSections.includes(section)) return state; // Already tracked
+
+      return {
+        verbTracker: {
+          ...state.verbTracker,
+          usedVerbs: {
+            ...state.verbTracker.usedVerbs,
+            [verb]: [...currentSections, section],
+          },
+        },
+      };
+    }),
 
   reset: () => set(initialState),
 }));

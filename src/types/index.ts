@@ -38,5 +38,11 @@ export interface JDAnalysis {
   keywords: JDKeyword[];
 }
 
+// Verb Tracking for action verb variety
+export interface VerbTracker {
+  usedVerbs: Record<string, string[]>; // verb → array of sections where used
+  availableVerbs: string[];
+}
+
 // Note: Message, ContentOption, HeaderData, PositionData types are defined in lib/store.ts
 // Import them directly from there to avoid circular dependencies
