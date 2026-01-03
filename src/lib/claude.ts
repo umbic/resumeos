@@ -217,23 +217,10 @@ export async function generateTailoredContent(
   unaddressedKeywords?: JDKeyword[],
   usedVerbs: string[] = []
 ): Promise<string> {
-  // Build keyword sections for the prompt
-  const keywordsByCategory = unaddressedKeywords
-    ? {
-        hard_skills: unaddressedKeywords.filter((k) => k.category === 'hard_skill').map((k) => k.keyword),
-        soft_skills: unaddressedKeywords.filter((k) => k.category === 'soft_skill').map((k) => k.keyword),
-        industry_terms: unaddressedKeywords.filter((k) => k.category === 'industry_term').map((k) => k.keyword),
-      }
-    : null;
-
-  const keywordSection = keywordsByCategory
-    ? `
-**ATS Keywords to Mirror** (where natural and authentic):
-${keywordsByCategory.hard_skills.length > 0 ? `- Hard Skills: ${keywordsByCategory.hard_skills.join(', ')}` : ''}
-${keywordsByCategory.soft_skills.length > 0 ? `- Soft Skills: ${keywordsByCategory.soft_skills.join(', ')}` : ''}
-${keywordsByCategory.industry_terms.length > 0 ? `- Industry Terms: ${keywordsByCategory.industry_terms.join(', ')}` : ''}
-`
-    : '';
+  // Build keyword list for the prompt (top 5 unaddressed)
+  const keywordsToIncorporate = unaddressedKeywords
+    ? unaddressedKeywords.slice(0, 5).map((k) => `- ${k.keyword} (${k.priority})`).join('\n')
+    : 'None specified';
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-5-20251101',
@@ -241,53 +228,58 @@ ${keywordsByCategory.industry_terms.length > 0 ? `- Industry Terms: ${keywordsBy
     messages: [
       {
         role: 'user',
-        content: `Tailor this resume content for a specific job application. You must preserve all facts from the original.
+        content: `You are an executive resume writer creating content for a senior brand strategist.
 
-Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
-Industry: ${jdAnalysis.strategic.industry}
+TARGET ROLE: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+INDUSTRY: ${jdAnalysis.strategic.industry}
 
-**Positioning Themes** (story to tell):
+POSITIONING THEMES (the story to tell):
 ${jdAnalysis.strategic.positioningThemes.map((t) => `- ${t}`).join('\n')}
-${keywordSection}
-ORIGINAL CONTENT (${sectionType}):
+
+KEYWORDS TO INCORPORATE (where natural):
+${keywordsToIncorporate}
+
+---
+
+ORIGINAL CONTENT:
 ${originalContent}
 
-${instructions ? `Additional Instructions: ${instructions}` : ''}
+---
 
-CRITICAL RULES - VIOLATIONS ARE UNACCEPTABLE:
+CRITICAL INTEGRITY RULES (violations are unacceptable):
 1. NEVER change any metrics, numbers, or percentages
 2. NEVER add industries, sectors, or client types not in the original
 3. NEVER fabricate capabilities, experiences, or outcomes
 4. NEVER inflate scope, scale, or impact beyond what's stated
-5. If the target industry isn't mentioned in the original, do NOT add it
-
-ALLOWED CUSTOMIZATIONS:
-- Reorder emphasis within the sentence
-- Use synonyms that don't change meaning (e.g., "led" → "spearheaded")
-- Mirror JD terminology ONLY where it authentically maps to existing content
-- Slight rephrasing that preserves all original claims
-- Naturally incorporate ATS keywords where they genuinely apply
 
 VERB CONSTRAINTS:
-The following verbs have already been used in this resume and MUST NOT be used again:
-${usedVerbs.length > 0 ? usedVerbs.join(', ') : 'None yet'}
+Already used (DO NOT USE): ${usedVerbs.join(', ') || 'None'}
+Choose from: Built, Developed, Created, Launched, Led, Directed, Grew, Scaled, Transformed, Architected, Delivered, Executed, Pioneered
 
-Choose action verbs from this list that haven't been used:
-Built, Developed, Created, Launched, Led, Directed, Grew, Scaled,
-Transformed, Architected, Delivered, Executed, Pioneered, Championed,
-Designed, Oversaw, Managed, Expanded, Shaped, Crafted, Orchestrated
+BULLET STRUCTURE (CAR Method):
+Each bullet must follow: [Action Verb] + [What/Challenge] + [How/Method] + [Result/Metrics]
 
-CRITICAL: Do not start any bullet or sentence with a verb from the "already used" list.
+Example of GOOD bullet:
+"Built creator commerce platform's first global brand strategy post-$300M investment, launching multi-channel campaign that drove 8% customer acquisition"
 
-When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
-Wrap other customized words/phrases in <mark> tags too. Only mark actual changes.
+Example of BAD bullet:
+"Spearheaded go-to-market leveraging data-driven strategies and cross-functional stakeholder management" (vague, keyword-stuffed)
 
-Example:
-Original: "Led brand strategy initiatives across multiple sectors"
-CORRECT: "Led <mark>brand transformation</mark> initiatives across multiple sectors"
-WRONG: "Led brand strategy initiatives across <mark>financial services and payments</mark>" (invents industries)
+KEYWORD INTEGRATION:
+- Density limit: 1-2 keywords per bullet, 3-5 per overview
+- TRANSLATE user's language to JD terminology, don't just insert keywords
+- Example: User says "shifted CRM focus" → Integrate as "customer-centric transformation"
+- If keyword doesn't authentically apply, SKIP IT
 
-Return ONLY the tailored content with <mark> tags inline.`,
+CUSTOMIZATION MARKING:
+- Wrap ONLY actual changes in <mark> tags
+- Do NOT mark entire sentences
+- Do NOT mark original text that happens to match JD
+- Aim for 2-4 marks per bullet maximum
+
+${instructions ? `ADDITIONAL INSTRUCTIONS: ${instructions}` : ''}
+
+Return ONLY the tailored content with <mark> tags.`,
       },
     ],
   });
@@ -307,23 +299,10 @@ export async function generateSummary(
   unaddressedKeywords?: JDKeyword[],
   usedVerbs: string[] = []
 ): Promise<string> {
-  // Build keyword sections for the prompt
-  const keywordsByCategory = unaddressedKeywords
-    ? {
-        hard_skills: unaddressedKeywords.filter((k) => k.category === 'hard_skill').map((k) => k.keyword),
-        soft_skills: unaddressedKeywords.filter((k) => k.category === 'soft_skill').map((k) => k.keyword),
-        industry_terms: unaddressedKeywords.filter((k) => k.category === 'industry_term').map((k) => k.keyword),
-      }
-    : null;
-
-  const keywordSection = keywordsByCategory
-    ? `
-**ATS Keywords to Mirror** (where natural and authentic):
-${keywordsByCategory.hard_skills.length > 0 ? `- Hard Skills: ${keywordsByCategory.hard_skills.join(', ')}` : ''}
-${keywordsByCategory.soft_skills.length > 0 ? `- Soft Skills: ${keywordsByCategory.soft_skills.join(', ')}` : ''}
-${keywordsByCategory.industry_terms.length > 0 ? `- Industry Terms: ${keywordsByCategory.industry_terms.join(', ')}` : ''}
-`
-    : '';
+  // Build keyword list for ATS optimization
+  const keywordsList = unaddressedKeywords
+    ? unaddressedKeywords.map((k) => `- ${k.keyword}`).join('\n')
+    : 'None specified';
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-5-20251101',
@@ -331,49 +310,45 @@ ${keywordsByCategory.industry_terms.length > 0 ? `- Industry Terms: ${keywordsBy
     messages: [
       {
         role: 'user',
-        content: `Combine and tailor a professional summary for a resume using ONLY the source content provided.
+        content: `Create an executive summary for a senior brand strategist resume.
 
-Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
-Industry: ${jdAnalysis.strategic.industry}
+TARGET: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+INDUSTRY: ${jdAnalysis.strategic.industry}
+FORMAT: ${format} (${format === 'long' ? '4-5 sentences' : '3-4 sentences'})
 
-**Positioning Themes** (story to tell):
+POSITIONING THEMES:
 ${jdAnalysis.strategic.positioningThemes.map((t) => `- ${t}`).join('\n')}
-${keywordSection}
-Format: ${format} (${format === 'long' ? '4-5 sentences' : '3-4 sentences'})
 
-SOURCE CONTENT (use ONLY phrases, claims, and facts from these):
+ATS KEYWORDS (this is your power zone - aim for 8-12 naturally integrated):
+${keywordsList}
+
+---
+
+SOURCE CONTENT (combine and reframe from these ONLY):
 
 ${summaryOptions.map((s, i) => `Option ${i + 1}:\n${s}`).join('\n\n')}
 
-CRITICAL RULES - VIOLATIONS ARE UNACCEPTABLE:
-1. NEVER invent industries, sectors, or domains not explicitly mentioned in the source content
-2. NEVER add client types, company types, or verticals not in the source (e.g., don't add "payments technology" if not in source)
-3. NEVER fabricate capabilities, experiences, or outcomes not stated in the source
-4. You may ONLY reorder, combine, and slightly rephrase content from the source options
-5. If the target industry isn't represented in the source content, use general business language instead of inventing specifics
+---
 
-ALLOWED CUSTOMIZATIONS:
-- Reorder sentences to lead with most relevant capability
-- Combine phrases from different source options
-- Use synonyms (e.g., "organizations" → "enterprises")
-- Mirror terminology from the JD that maps to existing source content
-- Naturally incorporate ATS keywords where they genuinely apply to the source content
+RULES:
+1. Use ONLY facts, claims, and phrases from the source content
+2. Never invent industries, capabilities, or experiences
+3. Lead with the most relevant capability for this role
+4. The summary is your ATS power zone - keywords should feel invisible, not forced
+
+STRUCTURE:
+1. Identity statement (who you are + years + expertise)
+2. Value proposition (what you do for organizations)
+3. Proof points (types of companies served)
+4. Method (how you approach work)
+5. Outcome focus (results you deliver)
 
 VERB CONSTRAINTS:
-The following verbs have already been used in this resume and MUST NOT be used again:
-${usedVerbs.length > 0 ? usedVerbs.join(', ') : 'None yet'}
+Already used: ${usedVerbs.join(', ') || 'None'}
 
-Choose action verbs from this list that haven't been used:
-Built, Developed, Created, Launched, Led, Directed, Grew, Scaled,
-Transformed, Architected, Delivered, Executed, Pioneered, Championed,
-Designed, Oversaw, Managed, Expanded, Shaped, Crafted, Orchestrated
+Mark customizations with <mark> tags. Only mark actual changes.
 
-CRITICAL: Do not start any sentence with a verb from the "already used" list.
-
-When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
-Wrap other customized words/phrases in <mark> tags too. Only mark actual changes.
-
-Return ONLY the summary text with <mark> tags inline.`,
+Return ONLY the summary text.`,
       },
     ],
   });
@@ -400,60 +375,57 @@ export async function refinePositionContent(
   unaddressedKeywords?: JDKeyword[],
   usedVerbs: string[] = []
 ): Promise<{ overview: string; bullets: string[] }> {
-  // Build keyword sections for the prompt
-  const keywordsByCategory = unaddressedKeywords
-    ? {
-        hard_skills: unaddressedKeywords.filter((k) => k.category === 'hard_skill').map((k) => k.keyword),
-        soft_skills: unaddressedKeywords.filter((k) => k.category === 'soft_skill').map((k) => k.keyword),
-        industry_terms: unaddressedKeywords.filter((k) => k.category === 'industry_term').map((k) => k.keyword),
-      }
-    : null;
+  // Extract verbs already used in this position's current content
+  const positionContent = overview + ' ' + bullets.join(' ');
+  const positionVerbs = extractVerbsFromContent(positionContent);
 
-  const keywordSection = keywordsByCategory
-    ? `
-**ATS Keywords to Mirror** (where natural and authentic):
-${keywordsByCategory.hard_skills.length > 0 ? `- Hard Skills: ${keywordsByCategory.hard_skills.join(', ')}` : ''}
-${keywordsByCategory.soft_skills.length > 0 ? `- Soft Skills: ${keywordsByCategory.soft_skills.join(', ')}` : ''}
-${keywordsByCategory.industry_terms.length > 0 ? `- Industry Terms: ${keywordsByCategory.industry_terms.join(', ')}` : ''}
-`
-    : '';
+  // Build keyword list for prompt
+  const keywordsList = unaddressedKeywords
+    ? unaddressedKeywords.slice(0, 5).map((k) => `- ${k.keyword}`).join('\n')
+    : 'None specified';
 
   // Build the system context
   const systemContext = `You are helping refine position content on a resume based on user feedback.
 
-Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
-Industry: ${jdAnalysis.strategic.industry}
-Key Themes: ${jdAnalysis.strategic.positioningThemes.join(', ')}
-${keywordSection}
+TARGET ROLE: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+INDUSTRY: ${jdAnalysis.strategic.industry}
+KEY THEMES: ${jdAnalysis.strategic.positioningThemes.join(', ')}
+
+KEYWORDS TO INCORPORATE (where natural):
+${keywordsList}
+
 Current Overview:
 ${overview}
 
 Current Bullets:
 ${bullets.map((b, i) => `${i + 1}. ${b}`).join('\n')}
 
-CRITICAL RULES - VIOLATIONS ARE UNACCEPTABLE:
+QUALITY STANDARDS:
+- Every bullet must have a quantified result
+- No verb can repeat within this position
+- Keyword density: 1-2 per bullet maximum
+- If user asks for something not in original content, explain you cannot invent facts
+
+CRITICAL INTEGRITY RULES (violations are unacceptable):
 1. NEVER change any metrics, numbers, or percentages
 2. NEVER add industries, sectors, or client types not already in the content
 3. NEVER fabricate capabilities, experiences, or outcomes
 4. NEVER inflate scope, scale, or impact beyond what's stated
-5. If asked to add something not in the original content, politely explain you cannot invent facts
 
 Apply the user's requested changes while maintaining all factual accuracy.
-Also try to naturally incorporate ATS keywords where they genuinely apply.
 
 VERB CONSTRAINTS:
-The following verbs have already been used in this resume and MUST NOT be used again:
-${usedVerbs.length > 0 ? usedVerbs.join(', ') : 'None yet'}
+Already used in resume: ${usedVerbs.join(', ') || 'None'}
+Already used in THIS position: ${positionVerbs.join(', ') || 'None'}
+Choose from: Built, Developed, Created, Launched, Led, Directed, Grew, Scaled, Transformed, Architected, Delivered, Executed, Pioneered
 
-Choose action verbs from this list that haven't been used:
-Built, Developed, Created, Launched, Led, Directed, Grew, Scaled,
-Transformed, Architected, Delivered, Executed, Pioneered, Championed,
-Designed, Oversaw, Managed, Expanded, Shaped, Crafted, Orchestrated
+BULLET STRUCTURE (CAR Method):
+Each bullet must follow: [Action Verb] + [What/Challenge] + [How/Method] + [Result/Metrics]
 
-CRITICAL: Do not start any bullet with a verb from the "already used" list.
-
-Wrap customized words/phrases in <mark> tags. Preserve existing <mark> tags if that text remains customized.
-When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
+CUSTOMIZATION MARKING:
+- Wrap ONLY actual changes in <mark> tags
+- Preserve existing <mark> tags if that text remains customized
+- Aim for 2-4 marks per bullet maximum
 
 Return a JSON object with:
 {
@@ -560,7 +532,7 @@ Return ONLY the JSON array, no other text.`,
   }
 }
 
-// Regenerate content with a specific keyword incorporated
+// Regenerate content with a specific keyword incorporated through translation
 export async function regenerateWithKeyword(
   currentContent: string,
   keyword: JDKeyword,
@@ -574,32 +546,33 @@ export async function regenerateWithKeyword(
     messages: [
       {
         role: 'user',
-        content: `The user wants to include a specific JD keyword in their resume content.
+        content: `Incorporate a specific keyword into resume content through TRANSLATION, not insertion.
 
-Keyword: "${keyword.keyword}"
-User context: "${userContext}"
+KEYWORD TO ADD: "${keyword.keyword}"
+USER CONTEXT: "${userContext}"
 
-Current content:
+CURRENT CONTENT:
 ${currentContent}
 
-Target Role: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
-Industry: ${jdAnalysis.strategic.industry}
-Section: ${sectionType}
+TARGET: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
 
-Reframe the content to naturally incorporate this keyword/concept, using the user's context.
+APPROACH:
+1. Find where user's existing language can be TRANSLATED to include this keyword
+2. The keyword should feel like it was always there, not inserted
+3. If the user context doesn't provide a legitimate basis, explain why you can't add it
 
-CRITICAL RULES:
-1. Integrate naturally — don't force it or keyword stuff
-2. Maintain all existing metrics and facts
-3. Mirror the JD terminology where authentic
-4. NEVER change any numbers, percentages, or quantified outcomes
-5. NEVER add industries or experiences not in the original content
-6. Only add the keyword if the user's context provides a legitimate basis for it
+RULES:
+- Maintain all existing metrics and facts
+- One keyword addition only - don't stack multiple keywords
+- Preserve existing <mark> tags
+- Wrap the newly added keyword phrase in <mark> tags
 
-Wrap the newly incorporated keyword in <mark> tags to highlight it.
-Preserve any existing <mark> tags on other customizations.
+Example:
+- Original: "shifted CRM approach to focus on retention"
+- Keyword: "customer-centric"
+- Result: "Led <mark>customer-centric</mark> transformation of CRM, shifting focus to retention"
 
-Return ONLY the updated content with <mark> tags inline.`,
+Return ONLY the updated content.`,
       },
     ],
   });
