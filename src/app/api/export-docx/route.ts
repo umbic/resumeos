@@ -43,7 +43,17 @@ export async function POST(request: NextRequest) {
     const targetCompany = session.target_company || '';
 
     // Get approved highlights content
-    const highlightIds = (session.approved_highlights || []) as string[];
+    // Handle JSONB that may come back as string from @vercel/postgres
+    let highlightIds: string[] = [];
+    if (typeof session.approved_highlights === 'string') {
+      try {
+        highlightIds = JSON.parse(session.approved_highlights);
+      } catch {
+        highlightIds = [];
+      }
+    } else if (Array.isArray(session.approved_highlights)) {
+      highlightIds = session.approved_highlights;
+    }
     let highlights: string[] = [];
 
     if (highlightIds.length > 0) {
@@ -86,7 +96,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Build positions data
-    const approvedPositions = (session.approved_positions || {}) as {
+    // Handle JSONB that may come back as string from @vercel/postgres
+    let approvedPositions: {
       [key: number]: {
         title: string;
         company: string;
@@ -95,7 +106,16 @@ export async function POST(request: NextRequest) {
         overview: string;
         bullets: string[];
       };
-    };
+    } = {};
+    if (typeof session.approved_positions === 'string') {
+      try {
+        approvedPositions = JSON.parse(session.approved_positions);
+      } catch {
+        approvedPositions = {};
+      }
+    } else if (session.approved_positions && typeof session.approved_positions === 'object') {
+      approvedPositions = session.approved_positions;
+    }
 
     // Merge with default position data
     const positions: { [key: number]: {
@@ -120,13 +140,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Build header
-    const approvedHeader = session.approved_header as {
+    // Handle JSONB that may come back as string from @vercel/postgres
+    let approvedHeader: {
       name?: string;
       title?: string;
       location?: string;
       phone?: string;
       email?: string;
-    } | null;
+    } | null = null;
+    if (typeof session.approved_header === 'string') {
+      try {
+        approvedHeader = JSON.parse(session.approved_header);
+      } catch {
+        approvedHeader = null;
+      }
+    } else if (session.approved_header && typeof session.approved_header === 'object') {
+      approvedHeader = session.approved_header;
+    }
 
     const header = {
       name: approvedHeader?.name || STATIC_CONTENT.header.name,
