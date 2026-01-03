@@ -1,7 +1,42 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: Session 3 - Wire Verb Tracking to API Routes (V1 Upgrade)
+> **Last Session**: Session 4 - Rewrite Prompts for Executive Quality (V1 Upgrade)
+
+---
+
+## Session 4 Completed: Rewrite Prompts for Executive Quality
+
+### What Was Done
+- Rewrote `generateTailoredContent()` prompt with:
+  - CAR bullet structure (Challenge → Action → Result)
+  - Good/bad bullet examples to prevent keyword stuffing
+  - Keyword density limits (1-2 per bullet, 3-5 per overview)
+  - Translation-first approach for keyword integration
+- Rewrote `generateSummary()` prompt with:
+  - 5-part structure (identity, value prop, proof, method, outcomes)
+  - Target of 8-12 keywords naturally integrated
+  - "ATS power zone" concept
+- Updated `refinePositionContent()` prompt with:
+  - Position-level verb tracking (verbs used in current position)
+  - Quality standards section
+  - CAR method reference
+- Updated `regenerateWithKeyword()` prompt with:
+  - Translation-first approach
+  - Example of proper keyword integration
+  - Single keyword addition limit
+
+### Key Prompt Improvements
+- Quality over keyword density philosophy embedded in prompts
+- Examples of good vs bad bullets prevent keyword stuffing
+- Verb tracking now happens at both resume and position level
+- Mark tag discipline: 2-4 marks per bullet maximum
+- Keywords simplified to top 5 with priority indicators
+
+### Next Session
+**Session 5: Conversation Context** — Add conversation history to improve multi-turn refinements.
+
+See `docs/V1_UPGRADE_SESSIONS.md` for full session details.
 
 ---
 
