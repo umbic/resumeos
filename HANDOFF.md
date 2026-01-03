@@ -1,7 +1,37 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: Session 4 - Rewrite Prompts for Executive Quality (V1 Upgrade)
+> **Last Session**: Session 5 - Conversation History for All Sections (V1 Upgrade)
+
+---
+
+## Session 5 Completed: Conversation History for All Sections
+
+### What Was Done
+- Added `conversationHistory` state to Zustand store (`Record<string, ConversationMessage[]>`)
+- Added `addConversationMessage()` and `clearSectionHistory()` actions
+- Added `refineSummary()` function to claude.ts for multi-turn summary refinement
+- Added `refineHighlights()` function to claude.ts for multi-turn highlights refinement
+- Updated `/api/generate-section/route.ts` to:
+  - Handle summary refinement when `currentContent` + `instructions` provided
+  - Handle highlights refinement when `currentContent` + `instructions` provided
+  - Import and use new `refineSummary` and `refineHighlights` functions
+- Updated `ResumeBuilder.tsx`:
+  - `handleSummaryGeneration()` now passes `currentContent` and `conversationHistory`
+  - `handleHighlightsSelection()` now detects refinement vs initial load and handles accordingly
+
+### How It Works
+- Summary and Highlights now follow same pattern as Position refinement
+- When user provides feedback, the API receives:
+  - `currentContent`: The existing content to refine
+  - `instructions`: What the user wants changed
+  - `conversationHistory`: Previous messages for context
+- Claude uses the conversation history to understand multi-turn refinements
+
+### Next Session
+All V1 upgrade sessions are complete. Test the full flow in production.
+
+See `docs/V1_UPGRADE_SESSIONS.md` for full session details.
 
 ---
 
