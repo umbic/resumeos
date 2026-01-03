@@ -47,6 +47,12 @@ const DEFAULT_VERB_TRACKER: VerbTracker = {
   ]
 };
 
+// Conversation message for section refinements (simplified version of Message)
+export interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface ResumeState {
   // Session
   sessionId: string | null;
@@ -77,6 +83,9 @@ interface ResumeState {
   // Chat
   messages: Message[];
   isLoading: boolean;
+
+  // Conversation history per section (for multi-turn refinements)
+  conversationHistory: Record<string, ConversationMessage[]>;
 
   // Actions
   setSessionId: (id: string) => void;
@@ -112,6 +121,8 @@ interface ResumeState {
   setIsLoading: (loading: boolean) => void;
   setVerbTracker: (tracker: VerbTracker) => void;
   updateUsedVerbs: (verb: string, section: string) => void;
+  addConversationMessage: (section: string, message: ConversationMessage) => void;
+  clearSectionHistory: (section: string) => void;
   reset: () => void;
 }
 
@@ -135,6 +146,7 @@ const initialState = {
   positions: {} as { [key: number]: PositionData },
   messages: [] as Message[],
   isLoading: false,
+  conversationHistory: {} as Record<string, ConversationMessage[]>,
 };
 
 export const useResumeStore = create<ResumeState>((set) => ({
@@ -248,6 +260,22 @@ export const useResumeStore = create<ResumeState>((set) => ({
         },
       };
     }),
+
+  addConversationMessage: (section, message) =>
+    set((state) => ({
+      conversationHistory: {
+        ...state.conversationHistory,
+        [section]: [...(state.conversationHistory[section] || []), message],
+      },
+    })),
+
+  clearSectionHistory: (section) =>
+    set((state) => ({
+      conversationHistory: {
+        ...state.conversationHistory,
+        [section]: [],
+      },
+    })),
 
   reset: () => set(initialState),
 }));

@@ -484,7 +484,7 @@ Click **Approve** to continue, or suggest changes.`,
 }
 
 async function handleSummaryGeneration(content: string, store: ReturnType<typeof useResumeStore.getState>) {
-  // User is providing feedback - regenerate
+  // User is providing feedback - refine with conversation history
   const response = await fetch('/api/generate-section', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -492,6 +492,13 @@ async function handleSummaryGeneration(content: string, store: ReturnType<typeof
       sessionId: store.sessionId,
       sectionType: 'summary',
       instructions: content,
+      currentContent: store.summary,
+      conversationHistory: store.messages.filter(
+        (msg) => msg.content && !msg.options
+      ).map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
     }),
   });
 
@@ -513,7 +520,51 @@ Click **Approve** to continue, or suggest more changes.`,
 }
 
 async function handleHighlightsSelection(content: string, store: ReturnType<typeof useResumeStore.getState>) {
-  // Search for career highlights
+  // If we have existing highlights and user is providing feedback, this is a refinement
+  if (content && store.highlights.length > 0) {
+    const response = await fetch('/api/generate-section', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: store.sessionId,
+        sectionType: 'highlights',
+        instructions: content,
+        currentContent: store.highlights,
+        conversationHistory: store.messages.filter(
+          (msg) => msg.content && !msg.options
+        ).map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.draft && Array.isArray(data.draft)) {
+      store.setHighlights(data.draft, store.highlightIds);
+
+      // Update addressed keywords
+      if (data.addressedKeywordIds && data.addressedKeywordIds.length > 0) {
+        data.addressedKeywordIds.forEach((id: string) => {
+          store.updateKeywordStatus(id, 'addressed', { sectionAddressed: 'highlights' });
+        });
+      }
+
+      store.addMessage({
+        id: uuidv4(),
+        role: 'assistant',
+        content: `Updated career highlights:
+
+${data.draft.map((h: string, i: number) => `${i + 1}. ${h}`).join('\n\n')}
+
+Click **Approve** to continue, or suggest more changes.`,
+      });
+    }
+    return;
+  }
+
+  // Initial load - search for career highlights
   const response = await fetch('/api/search-content', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

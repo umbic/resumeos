@@ -361,6 +361,123 @@ Return ONLY the summary text.`,
   return responseContent.text.trim();
 }
 
+export async function refineSummary(
+  currentSummary: string,
+  jdAnalysis: JDAnalysis,
+  conversationHistory: ConversationMessage[],
+  instructions: string,
+  usedVerbs: string[] = []
+): Promise<{ content: string; detectedVerbs: string[] }> {
+  const systemContext = `You are helping refine a professional summary based on user feedback.
+
+TARGET: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+INDUSTRY: ${jdAnalysis.strategic.industry}
+
+CURRENT SUMMARY:
+${currentSummary}
+
+RULES:
+1. Never change metrics or facts
+2. Never add industries not in original
+3. Maintain executive tone
+4. Used verbs (avoid): ${usedVerbs.join(', ') || 'None'}
+
+Apply the user's requested changes while maintaining quality.
+Wrap changes in <mark> tags.
+
+Return ONLY the updated summary.`;
+
+  const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+    { role: 'user', content: systemContext },
+    { role: 'assistant', content: "I understand. I'll help refine this summary while preserving all facts and metrics." },
+    ...conversationHistory,
+    { role: 'user', content: instructions },
+  ];
+
+  const response = await anthropic.messages.create({
+    model: 'claude-opus-4-5-20251101',
+    max_tokens: 1024,
+    messages,
+  });
+
+  const responseContent = response.content[0];
+  const content = responseContent.type === 'text' ? responseContent.text.trim() : '';
+
+  return {
+    content,
+    detectedVerbs: extractVerbsFromContent(content),
+  };
+}
+
+export async function refineHighlights(
+  currentHighlights: string[],
+  jdAnalysis: JDAnalysis,
+  conversationHistory: ConversationMessage[],
+  instructions: string,
+  usedVerbs: string[] = []
+): Promise<{ content: string[]; detectedVerbs: string[] }> {
+  const systemContext = `You are helping refine career highlights based on user feedback.
+
+TARGET: ${jdAnalysis.strategic.targetTitle} at ${jdAnalysis.strategic.targetCompany}
+INDUSTRY: ${jdAnalysis.strategic.industry}
+
+CURRENT HIGHLIGHTS:
+${currentHighlights.map((h, i) => `${i + 1}. ${h}`).join('\n')}
+
+RULES:
+1. Never change metrics, numbers, or facts
+2. Never add industries not in original
+3. Keep the bold hook phrase + supporting text format
+4. Used verbs (avoid): ${usedVerbs.join(', ') || 'None'}
+
+Apply the user's requested changes while maintaining quality.
+Wrap changes in <mark> tags.
+
+Return a JSON array of the updated highlights:
+["highlight 1 with <mark>changes</mark>", "highlight 2", ...]
+
+Return ONLY the JSON array, no other text.`;
+
+  const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+    { role: 'user', content: systemContext },
+    { role: 'assistant', content: "I understand. I'll help refine these career highlights while preserving all facts and metrics." },
+    ...conversationHistory,
+    { role: 'user', content: instructions },
+  ];
+
+  const response = await anthropic.messages.create({
+    model: 'claude-opus-4-5-20251101',
+    max_tokens: 2048,
+    messages,
+  });
+
+  const responseContent = response.content[0];
+  if (responseContent.type !== 'text') {
+    return { content: currentHighlights, detectedVerbs: [] };
+  }
+
+  try {
+    const highlights = JSON.parse(responseContent.text) as string[];
+    const allContent = highlights.join(' ');
+    return {
+      content: highlights,
+      detectedVerbs: extractVerbsFromContent(allContent),
+    };
+  } catch {
+    // Try to extract JSON from the response
+    const jsonMatch = responseContent.text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const highlights = JSON.parse(jsonMatch[0]) as string[];
+      const allContent = highlights.join(' ');
+      return {
+        content: highlights,
+        detectedVerbs: extractVerbsFromContent(allContent),
+      };
+    }
+    return { content: currentHighlights, detectedVerbs: [] };
+  }
+}
+
 export interface ConversationMessage {
   role: 'user' | 'assistant';
   content: string;

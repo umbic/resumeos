@@ -3,6 +3,8 @@ import { sql } from '@vercel/postgres';
 import {
   generateTailoredContent,
   generateSummary,
+  refineSummary,
+  refineHighlights,
   refinePositionContent,
   detectAddressedKeywords,
   extractVerbsFromContent,
@@ -76,9 +78,48 @@ export async function POST(request: NextRequest) {
     const brandingMode = session.branding_mode || 'branded';
     const format = session.format || 'long';
 
-    // For summary generation, we don't need specific content IDs
+    // For summary generation or refinement
     if (sectionType === 'summary') {
-      // Get top matching summaries
+      // If we have currentContent and instructions, this is a refinement
+      if (currentContent && instructions) {
+        const filteredHistory: ConversationMessage[] = conversationHistory
+          ? conversationHistory
+              .filter((msg: { content: string; options?: unknown[] }) => msg.content && !msg.options)
+              .map((msg: { role: string; content: string }) => ({
+                role: msg.role as 'user' | 'assistant',
+                content: msg.content,
+              }))
+          : [];
+
+        const result = await refineSummary(
+          currentContent,
+          jdAnalysis,
+          filteredHistory,
+          instructions,
+          allUsedVerbs
+        );
+
+        // Detect which keywords were addressed in the refined content
+        let missingKeywords: JDKeyword[] = [];
+        let addressedKeywordIds: string[] = [];
+
+        if (unaddressedKeywords.length > 0) {
+          addressedKeywordIds = await detectAddressedKeywords(result.content, unaddressedKeywords);
+          missingKeywords = unaddressedKeywords.filter(
+            (k) => !addressedKeywordIds.includes(k.id)
+          );
+        }
+
+        return NextResponse.json({
+          draft: result.content,
+          missingKeywords,
+          addressedKeywordIds,
+          canApprove: missingKeywords.length === 0,
+          detectedVerbs: result.detectedVerbs,
+        });
+      }
+
+      // First generation: Get top matching summaries
       const summaryResult = await sql`
         SELECT
           id,
@@ -127,6 +168,49 @@ export async function POST(request: NextRequest) {
         addressedKeywordIds,
         canApprove: missingKeywords.length === 0,
         detectedVerbs,
+      });
+    }
+
+    // For highlights refinement
+    if (sectionType === 'highlights' && currentContent && instructions) {
+      const filteredHistory: ConversationMessage[] = conversationHistory
+        ? conversationHistory
+            .filter((msg: { content: string; options?: unknown[] }) => msg.content && !msg.options)
+            .map((msg: { role: string; content: string }) => ({
+              role: msg.role as 'user' | 'assistant',
+              content: msg.content,
+            }))
+        : [];
+
+      // currentContent should be an array of highlight strings
+      const currentHighlights = Array.isArray(currentContent) ? currentContent : [currentContent];
+
+      const result = await refineHighlights(
+        currentHighlights,
+        jdAnalysis,
+        filteredHistory,
+        instructions,
+        allUsedVerbs
+      );
+
+      // Detect which keywords were addressed in the refined content
+      const combinedContent = result.content.join('\n');
+      let missingKeywords: JDKeyword[] = [];
+      let addressedKeywordIds: string[] = [];
+
+      if (unaddressedKeywords.length > 0) {
+        addressedKeywordIds = await detectAddressedKeywords(combinedContent, unaddressedKeywords);
+        missingKeywords = unaddressedKeywords.filter(
+          (k) => !addressedKeywordIds.includes(k.id)
+        );
+      }
+
+      return NextResponse.json({
+        draft: result.content,
+        missingKeywords,
+        addressedKeywordIds,
+        canApprove: missingKeywords.length === 0,
+        detectedVerbs: result.detectedVerbs,
       });
     }
 
