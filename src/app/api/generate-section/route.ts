@@ -5,10 +5,11 @@ import {
   generateSummary,
   refinePositionContent,
   detectAddressedKeywords,
+  extractVerbsFromContent,
   ConversationMessage,
 } from '@/lib/claude';
 import { shouldUseGeneric, getContentVersion } from '@/lib/rules';
-import type { JDAnalysis, JDKeyword } from '@/types';
+import type { JDAnalysis, JDKeyword, VerbTracker } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get session data including jd_analysis
+    // Get session data including jd_analysis and verb_tracker
     const sessionResult = await sql`
       SELECT
         target_title,
@@ -31,7 +32,8 @@ export async function POST(request: NextRequest) {
         themes,
         branding_mode,
         format,
-        jd_analysis
+        jd_analysis,
+        verb_tracker
       FROM sessions
       WHERE id = ${sessionId}
     `;
@@ -44,6 +46,10 @@ export async function POST(request: NextRequest) {
     }
 
     const session = sessionResult.rows[0];
+
+    // Extract verb tracker for action verb variety
+    const verbTracker = (session.verb_tracker || { usedVerbs: {}, availableVerbs: [] }) as VerbTracker;
+    const allUsedVerbs = Object.values(verbTracker.usedVerbs).flat();
 
     // Use enhanced jd_analysis if available, otherwise build from legacy fields
     let jdAnalysis: JDAnalysis;
@@ -96,7 +102,8 @@ export async function POST(request: NextRequest) {
         summaryOptions,
         jdAnalysis,
         format as 'long' | 'short',
-        unaddressedKeywords
+        unaddressedKeywords,
+        allUsedVerbs
       );
 
       // Detect which keywords were addressed in the generated content
@@ -110,12 +117,16 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Extract verbs used in the generated content
+      const detectedVerbs = extractVerbsFromContent(draft);
+
       return NextResponse.json({
         draft,
         contentUsed: summaryResult.rows.map((r) => r.id),
         missingKeywords,
         addressedKeywordIds,
         canApprove: missingKeywords.length === 0,
+        detectedVerbs,
       });
     }
 
@@ -137,7 +148,8 @@ export async function POST(request: NextRequest) {
         instructions,
         jdAnalysis,
         filteredHistory,
-        unaddressedKeywords
+        unaddressedKeywords,
+        allUsedVerbs
       );
 
       // Detect which keywords were addressed in the refined content
@@ -152,11 +164,15 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Extract verbs used in the refined content
+      const detectedVerbs = extractVerbsFromContent(combinedContent);
+
       return NextResponse.json({
         draft: refined,
         missingKeywords,
         addressedKeywordIds,
         canApprove: missingKeywords.length === 0,
+        detectedVerbs,
       });
     }
 
@@ -219,7 +235,8 @@ export async function POST(request: NextRequest) {
         jdAnalysis,
         sectionType,
         instructions,
-        unaddressedKeywords
+        unaddressedKeywords,
+        allUsedVerbs
       );
 
       tailoredItems.push(tailored);
@@ -246,12 +263,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract verbs used in the generated content
+    const detectedVerbs = extractVerbsFromContent(draft);
+
     return NextResponse.json({
       draft,
       contentUsed: contentIds,
       missingKeywords,
       addressedKeywordIds,
       canApprove: missingKeywords.length === 0,
+      detectedVerbs,
     });
   } catch (error) {
     console.error('Error generating section:', error);

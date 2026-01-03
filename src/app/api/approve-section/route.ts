@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getAllConflicts } from '@/lib/rules';
+import { extractVerbsFromContent } from '@/lib/claude';
+import type { VerbTracker } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +20,8 @@ export async function POST(request: NextRequest) {
       SELECT
         used_content_ids,
         blocked_content_ids,
-        current_step
+        current_step,
+        verb_tracker
       FROM sessions
       WHERE id = ${sessionId}
     `;
@@ -34,6 +37,38 @@ export async function POST(request: NextRequest) {
     const currentUsedIds = (session.used_content_ids || []) as string[];
     const currentBlockedIds = (session.blocked_content_ids || []) as string[];
     const currentStep = session.current_step || 0;
+
+    // Extract verbs from approved content and update verb tracker
+    const currentTracker = (session.verb_tracker || { usedVerbs: {}, availableVerbs: [] }) as VerbTracker;
+
+    // Determine content to extract verbs from
+    let contentToExtract = '';
+    if (typeof content === 'string') {
+      contentToExtract = content;
+    } else if (content && typeof content === 'object') {
+      // For position content with overview and bullets
+      if (content.overview) {
+        contentToExtract = content.overview;
+      }
+      if (content.bullets && Array.isArray(content.bullets)) {
+        contentToExtract += '\n' + content.bullets.join('\n');
+      }
+    }
+
+    // Extract verbs and update tracker (only for content sections)
+    if (contentToExtract && sectionType !== 'format' && sectionType !== 'header') {
+      const detectedVerbs = extractVerbsFromContent(contentToExtract);
+      const sectionKey = sectionType === 'position'
+        ? `position_${positionData?.number || positionData?.position}`
+        : sectionType;
+
+      currentTracker.usedVerbs[sectionKey] = detectedVerbs;
+
+      // Remove used verbs from available
+      currentTracker.availableVerbs = currentTracker.availableVerbs.filter(
+        (v: string) => !detectedVerbs.includes(v)
+      );
+    }
 
     // Calculate new conflicts if content IDs are provided
     let newBlockedIds: string[] = [];
@@ -73,6 +108,7 @@ export async function POST(request: NextRequest) {
           SET approved_summary = ${content},
               used_content_ids = ${JSON.stringify(updatedUsedIds)},
               blocked_content_ids = ${JSON.stringify(updatedBlockedIds)},
+              verb_tracker = ${JSON.stringify(currentTracker)},
               current_step = ${currentStep + 1},
               updated_at = NOW()
           WHERE id = ${sessionId}
@@ -86,6 +122,7 @@ export async function POST(request: NextRequest) {
           SET approved_highlights = ${JSON.stringify(contentIds || [])},
               used_content_ids = ${JSON.stringify(updatedUsedIds)},
               blocked_content_ids = ${JSON.stringify(updatedBlockedIds)},
+              verb_tracker = ${JSON.stringify(currentTracker)},
               current_step = ${currentStep + 1},
               updated_at = NOW()
           WHERE id = ${sessionId}
@@ -117,6 +154,7 @@ export async function POST(request: NextRequest) {
           SET approved_positions = ${JSON.stringify(updatedPositions)},
               used_content_ids = ${JSON.stringify(updatedUsedIds)},
               blocked_content_ids = ${JSON.stringify(updatedBlockedIds)},
+              verb_tracker = ${JSON.stringify(currentTracker)},
               current_step = ${currentStep + 1},
               updated_at = NOW()
           WHERE id = ${sessionId}

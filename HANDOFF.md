@@ -1,7 +1,35 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: Session 2 - Verb Tracking in Prompts (V1 Upgrade)
+> **Last Session**: Session 3 - Wire Verb Tracking to API Routes (V1 Upgrade)
+
+---
+
+## Session 3 Completed: Wire Verb Tracking to API Routes
+
+### What Was Done
+- Updated `/api/generate-section/route.ts`:
+  - Fetches `verb_tracker` from session
+  - Extracts `allUsedVerbs` from tracker for passing to generation functions
+  - Passes `allUsedVerbs` to `generateSummary()`, `refinePositionContent()`, and `generateTailoredContent()`
+  - Returns `detectedVerbs` in all response payloads
+- Updated `/api/approve-section/route.ts`:
+  - Imports `extractVerbsFromContent` from claude.ts
+  - Fetches `verb_tracker` from session
+  - Extracts verbs from approved content (handles strings and position objects)
+  - Updates `verb_tracker.usedVerbs[sectionKey]` with detected verbs
+  - Removes used verbs from `verb_tracker.availableVerbs`
+  - Saves updated `verb_tracker` to session in all relevant update queries
+
+### Key Implementation Details
+- Section keys for verb tracking: `summary`, `highlights`, `position_1`, `position_2`, etc.
+- Verb extraction only runs for content sections (skips `format` and `header`)
+- Position content extraction handles both `overview` and `bullets` array
+
+### Next Session
+**Session 4: Rewrite Generate Prompts (Optional)** — Further prompt improvements if needed.
+
+See `docs/V1_UPGRADE_SESSIONS.md` for full session details.
 
 ---
 
