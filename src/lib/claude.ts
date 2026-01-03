@@ -550,6 +550,7 @@ export async function regenerateWithKeyword(
 
 KEYWORD TO ADD: "${keyword.keyword}"
 USER CONTEXT: "${userContext}"
+SECTION: ${sectionType}
 
 CURRENT CONTENT:
 ${currentContent}
