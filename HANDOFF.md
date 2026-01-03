@@ -1,7 +1,41 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: Session 1 - Verb Tracking Infrastructure (V1 Upgrade)
+> **Last Session**: Session 2 - Verb Tracking in Prompts (V1 Upgrade)
+
+---
+
+## Session 2 Completed: Verb Tracking in Prompts
+
+### What Was Done
+- Added `VERB_PATTERNS` constant with 30+ action verbs
+- Added `extractVerbsFromContent()` helper function to detect verbs in generated content
+- Updated `generateTailoredContent()` with:
+  - `usedVerbs` parameter (optional, for backward compat)
+  - Verb constraint block in prompt
+- Updated `generateSummary()` with same pattern
+- Updated `refinePositionContent()` with same pattern
+- All prompts now instruct Claude to avoid reusing verbs
+- Committed: `84f661a` "feat: add verb constraints to generation prompts"
+
+### Prompt Verb Constraint Block
+```
+VERB CONSTRAINTS:
+The following verbs have already been used in this resume and MUST NOT be used again:
+${usedVerbs.length > 0 ? usedVerbs.join(', ') : 'None yet'}
+
+Choose action verbs from this list that haven't been used:
+Built, Developed, Created, Launched, Led, Directed, Grew, Scaled,
+Transformed, Architected, Delivered, Executed, Pioneered, Championed,
+Designed, Oversaw, Managed, Expanded, Shaped, Crafted, Orchestrated
+
+CRITICAL: Do not start any bullet with a verb from the "already used" list.
+```
+
+### Next Session
+**Session 3: Wire Verb Tracking to API Routes** — Connect verb tracking through the API layer.
+
+See `docs/V1_UPGRADE_SESSIONS.md` for full session details.
 
 ---
 
