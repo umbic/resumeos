@@ -1,7 +1,40 @@
 # ResumeOS - Session Handoff
 
-> **Last Updated**: 2026-01-02
-> **Last Session**: Fixed keywords and customizations to work across ALL resume sections
+> **Last Updated**: 2026-01-03
+> **Last Session**: Session 1 - Verb Tracking Infrastructure (V1 Upgrade)
+
+---
+
+## Session 1 Completed: Verb Tracking Infrastructure
+
+### What Was Done
+- Added `VerbTracker` interface to `src/types/index.ts`
+- Added `verb_tracker` JSONB column to sessions table in `src/drizzle/schema.ts`
+- Added `verbTracker` state, `setVerbTracker`, and `updateUsedVerbs` actions to Zustand store
+- Generated migration file `0001_even_lady_mastermind.sql`
+- Applied migration to production database
+- Committed: `8be3d78` "feat: add verb tracking infrastructure"
+
+### VerbTracker Structure
+```typescript
+interface VerbTracker {
+  usedVerbs: Record<string, string[]>;  // verb → sections where used
+  availableVerbs: string[];              // 30+ default action verbs
+}
+```
+
+### Default Verbs (6 categories)
+- **Building**: Built, Developed, Created, Established, Launched, Designed
+- **Leading**: Led, Directed, Oversaw, Managed, Headed, Guided
+- **Growing**: Grew, Scaled, Expanded, Increased, Accelerated, Drove
+- **Transforming**: Transformed, Repositioned, Modernized, Revitalized, Redesigned
+- **Strategy**: Architected, Defined, Shaped, Crafted, Pioneered, Championed
+- **Executing**: Delivered, Executed, Implemented, Activated, Orchestrated
+
+### Next Session
+**Session 2: Verb Tracking in Prompts** — Update Claude prompts to receive and respect verb constraints.
+
+See `docs/V1_UPGRADE_SESSIONS.md` for full session details.
 
 ---
 
