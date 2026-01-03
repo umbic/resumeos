@@ -5,6 +5,32 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Verb patterns for tracking action verb variety
+const VERB_PATTERNS = [
+  'Built', 'Developed', 'Created', 'Established', 'Launched', 'Designed',
+  'Led', 'Directed', 'Oversaw', 'Managed', 'Headed', 'Guided',
+  'Grew', 'Scaled', 'Expanded', 'Increased', 'Accelerated', 'Drove',
+  'Transformed', 'Repositioned', 'Modernized', 'Revitalized', 'Redesigned',
+  'Architected', 'Defined', 'Shaped', 'Crafted', 'Pioneered', 'Championed',
+  'Delivered', 'Executed', 'Implemented', 'Activated', 'Orchestrated'
+];
+
+/**
+ * Extract action verbs from resume content.
+ * Detects verbs at the start of sentences or bullet points.
+ */
+export function extractVerbsFromContent(content: string): string[] {
+  const found: string[] = [];
+  for (const verb of VERB_PATTERNS) {
+    // Match verb at start of sentence, after bullet, or after newline
+    const regex = new RegExp(`(?:^|[•\\-\\n]|\\. )\\s*${verb}\\b`, 'gi');
+    if (regex.test(content)) {
+      found.push(verb);
+    }
+  }
+  return Array.from(new Set(found)); // Dedupe
+}
+
 // Legacy JDAnalysis interface for backward compatibility during migration
 export interface LegacyJDAnalysis {
   targetTitle: string;
@@ -188,7 +214,8 @@ export async function generateTailoredContent(
   jdAnalysis: JDAnalysis,
   sectionType: string,
   instructions?: string,
-  unaddressedKeywords?: JDKeyword[]
+  unaddressedKeywords?: JDKeyword[],
+  usedVerbs: string[] = []
 ): Promise<string> {
   // Build keyword sections for the prompt
   const keywordsByCategory = unaddressedKeywords
@@ -241,6 +268,17 @@ ALLOWED CUSTOMIZATIONS:
 - Slight rephrasing that preserves all original claims
 - Naturally incorporate ATS keywords where they genuinely apply
 
+VERB CONSTRAINTS:
+The following verbs have already been used in this resume and MUST NOT be used again:
+${usedVerbs.length > 0 ? usedVerbs.join(', ') : 'None yet'}
+
+Choose action verbs from this list that haven't been used:
+Built, Developed, Created, Launched, Led, Directed, Grew, Scaled,
+Transformed, Architected, Delivered, Executed, Pioneered, Championed,
+Designed, Oversaw, Managed, Expanded, Shaped, Crafted, Orchestrated
+
+CRITICAL: Do not start any bullet or sentence with a verb from the "already used" list.
+
 When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
 Wrap other customized words/phrases in <mark> tags too. Only mark actual changes.
 
@@ -254,19 +292,20 @@ Return ONLY the tailored content with <mark> tags inline.`,
     ],
   });
 
-  const content = response.content[0];
-  if (content.type !== 'text') {
+  const responseContent = response.content[0];
+  if (responseContent.type !== 'text') {
     throw new Error('Unexpected response type');
   }
 
-  return content.text.trim();
+  return responseContent.text.trim();
 }
 
 export async function generateSummary(
   summaryOptions: string[],
   jdAnalysis: JDAnalysis,
   format: 'long' | 'short',
-  unaddressedKeywords?: JDKeyword[]
+  unaddressedKeywords?: JDKeyword[],
+  usedVerbs: string[] = []
 ): Promise<string> {
   // Build keyword sections for the prompt
   const keywordsByCategory = unaddressedKeywords
@@ -320,6 +359,17 @@ ALLOWED CUSTOMIZATIONS:
 - Mirror terminology from the JD that maps to existing source content
 - Naturally incorporate ATS keywords where they genuinely apply to the source content
 
+VERB CONSTRAINTS:
+The following verbs have already been used in this resume and MUST NOT be used again:
+${usedVerbs.length > 0 ? usedVerbs.join(', ') : 'None yet'}
+
+Choose action verbs from this list that haven't been used:
+Built, Developed, Created, Launched, Led, Directed, Grew, Scaled,
+Transformed, Architected, Delivered, Executed, Pioneered, Championed,
+Designed, Oversaw, Managed, Expanded, Shaped, Crafted, Orchestrated
+
+CRITICAL: Do not start any sentence with a verb from the "already used" list.
+
 When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
 Wrap other customized words/phrases in <mark> tags too. Only mark actual changes.
 
@@ -328,12 +378,12 @@ Return ONLY the summary text with <mark> tags inline.`,
     ],
   });
 
-  const content = response.content[0];
-  if (content.type !== 'text') {
+  const responseContent = response.content[0];
+  if (responseContent.type !== 'text') {
     throw new Error('Unexpected response type');
   }
 
-  return content.text.trim();
+  return responseContent.text.trim();
 }
 
 export interface ConversationMessage {
@@ -347,7 +397,8 @@ export async function refinePositionContent(
   instructions: string,
   jdAnalysis: JDAnalysis,
   conversationHistory?: ConversationMessage[],
-  unaddressedKeywords?: JDKeyword[]
+  unaddressedKeywords?: JDKeyword[],
+  usedVerbs: string[] = []
 ): Promise<{ overview: string; bullets: string[] }> {
   // Build keyword sections for the prompt
   const keywordsByCategory = unaddressedKeywords
@@ -390,6 +441,17 @@ CRITICAL RULES - VIOLATIONS ARE UNACCEPTABLE:
 Apply the user's requested changes while maintaining all factual accuracy.
 Also try to naturally incorporate ATS keywords where they genuinely apply.
 
+VERB CONSTRAINTS:
+The following verbs have already been used in this resume and MUST NOT be used again:
+${usedVerbs.length > 0 ? usedVerbs.join(', ') : 'None yet'}
+
+Choose action verbs from this list that haven't been used:
+Built, Developed, Created, Launched, Led, Directed, Grew, Scaled,
+Transformed, Architected, Delivered, Executed, Pioneered, Championed,
+Designed, Oversaw, Managed, Expanded, Shaped, Crafted, Orchestrated
+
+CRITICAL: Do not start any bullet with a verb from the "already used" list.
+
 Wrap customized words/phrases in <mark> tags. Preserve existing <mark> tags if that text remains customized.
 When you incorporate a JD keyword, wrap it in <mark> tags so we can highlight it.
 
@@ -427,16 +489,16 @@ Return ONLY the JSON object, no other text.`;
     messages,
   });
 
-  const content = response.content[0];
-  if (content.type !== 'text') {
+  const responseContent = response.content[0];
+  if (responseContent.type !== 'text') {
     throw new Error('Unexpected response type');
   }
 
   try {
-    return JSON.parse(content.text) as { overview: string; bullets: string[] };
+    return JSON.parse(responseContent.text) as { overview: string; bullets: string[] };
   } catch {
     // Try to extract JSON from the response
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+    const jsonMatch = responseContent.text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]) as { overview: string; bullets: string[] };
     }
