@@ -8,6 +8,7 @@ import { ResumePreview } from './ResumePreview';
 import { ChatRefinement } from './ChatRefinement';
 import { KeywordGaps } from './KeywordGaps';
 import { Download, RefreshCw, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
+import { SectionEditor } from '@/components/editor/SectionEditor';
 
 interface OneShotReviewProps {
   sessionId: string;
@@ -46,8 +47,44 @@ export function OneShotReview({
 }: OneShotReviewProps) {
   const [showQualityDetails, setShowQualityDetails] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [editingSection, setEditingSection] = useState<{
+    key: string;
+    content: string;
+  } | null>(null);
 
   const openGaps = gaps.filter(g => g.status === 'open');
+
+  const handleSectionClick = (sectionKey: string, content: string) => {
+    setActiveSection(sectionKey);
+    setEditingSection({ key: sectionKey, content });
+  };
+
+  const handleSectionSave = async (newContent: string) => {
+    if (!editingSection) return;
+
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/section`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sectionKey: editingSection.key,
+          content: newContent,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.resume) {
+        onResumeUpdate(data.resume);
+      }
+
+      setEditingSection(null);
+      setActiveSection(null);
+    } catch (error) {
+      console.error('Failed to save section:', error);
+      alert('Failed to save changes. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,7 +141,7 @@ export function OneShotReview({
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <ResumePreview
                 resume={resume}
-                onSectionClick={setActiveSection}
+                onSectionClick={handleSectionClick}
                 activeSection={activeSection}
               />
             </div>
@@ -182,6 +219,20 @@ export function OneShotReview({
           </div>
         </div>
       </div>
+
+      {/* Section Editor Modal */}
+      {editingSection && (
+        <SectionEditor
+          sessionId={sessionId}
+          sectionKey={editingSection.key}
+          currentContent={editingSection.content}
+          onClose={() => {
+            setEditingSection(null);
+            setActiveSection(null);
+          }}
+          onSave={handleSectionSave}
+        />
+      )}
     </div>
   );
 }

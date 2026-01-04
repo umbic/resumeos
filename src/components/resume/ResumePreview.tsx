@@ -4,7 +4,7 @@ import type { GeneratedResume } from '@/types';
 
 interface ResumePreviewProps {
   resume: GeneratedResume;
-  onSectionClick?: (section: string) => void;
+  onSectionClick?: (sectionKey: string, content: string) => void;
   activeSection?: string | null;
 }
 
@@ -35,7 +35,7 @@ export function ResumePreview({
       {/* Summary */}
       <div
         className={sectionClass('summary')}
-        onClick={() => onSectionClick?.('summary')}
+        onClick={() => onSectionClick?.('summary', resume.summary)}
       >
         <p className="text-gray-800 leading-relaxed">
           {resume.summary}
@@ -52,7 +52,7 @@ export function ResumePreview({
             <li
               key={index}
               className={sectionClass(`highlight_${index + 1}`)}
-              onClick={() => onSectionClick?.(`highlight_${index + 1}`)}
+              onClick={() => onSectionClick?.(`highlight_${index + 1}`, highlight)}
             >
               {highlight}
             </li>
@@ -80,7 +80,7 @@ export function ResumePreview({
             {/* Overview */}
             <div
               className={sectionClass(`position_${position.number}_overview`)}
-              onClick={() => onSectionClick?.(`position_${position.number}_overview`)}
+              onClick={() => onSectionClick?.(`position_${position.number}_overview`, position.overview)}
             >
               <p className="text-gray-700">
                 {position.overview}
@@ -94,7 +94,7 @@ export function ResumePreview({
                   <li
                     key={bulletIndex}
                     className={sectionClass(`position_${position.number}_bullet_${bulletIndex + 1}`)}
-                    onClick={() => onSectionClick?.(`position_${position.number}_bullet_${bulletIndex + 1}`)}
+                    onClick={() => onSectionClick?.(`position_${position.number}_bullet_${bulletIndex + 1}`, bullet)}
                   >
                     {bullet}
                   </li>

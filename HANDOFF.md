@@ -1,7 +1,85 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: Session 4a - Named Sessions + Dashboard
+> **Last Session**: Session 4b - Section Editor with Edit Mode
+
+---
+
+## Session 4b Completed: Section Editor with Edit Mode
+
+### What Was Done
+Added a section editor that allows users to click any resume section and edit it directly with a modal editor.
+
+### Changes Made
+
+**New Component**: `src/components/editor/SectionEditor.tsx`
+- Modal-based editor with Edit/Refine/Bank tabs (Edit is functional, others are placeholders)
+- Textarea for direct content editing
+- Word count display with target ranges for different section types
+- Save Changes / Cancel buttons
+- Unsaved changes indicator
+
+**Updated ResumePreview** (`src/components/resume/ResumePreview.tsx`):
+- Changed `onSectionClick` signature to pass both `sectionKey` and `content`
+- All clickable sections now pass their content when clicked
+
+**New API Endpoint**:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| PATCH | `/api/sessions/[id]/section` | Update a specific section in generated_resume |
+
+Request:
+```json
+{
+  "sectionKey": "highlight_1",
+  "content": "New content..."
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "updated_at": "2026-01-04T...",
+  "resume": { /* updated GeneratedResume */ }
+}
+```
+
+**Updated OneShotReview** (`src/components/resume/OneShotReview.tsx`):
+- Added `editingSection` state to track which section is being edited
+- Added `handleSectionClick` handler that opens editor with content
+- Added `handleSectionSave` that saves via API and updates parent state
+- Renders `SectionEditor` modal when a section is selected
+
+### Editable Sections (19 total)
+| Section | Key | Word Target |
+|---------|-----|-------------|
+| Summary | `summary` | 50-75 |
+| Career Highlights 1-5 | `highlight_1` to `highlight_5` | 40-55 |
+| P1 Overview | `position_1_overview` | 35-50 |
+| P1 Bullets 1-4 | `position_1_bullet_1` to `_4` | 30-40 |
+| P2 Overview | `position_2_overview` | 35-50 |
+| P2 Bullets 1-3 | `position_2_bullet_1` to `_3` | 30-40 |
+| P3-P6 Overviews | `position_3_overview` to `_6` | 35-50 |
+
+### Files Created
+| File | Description |
+|------|-------------|
+| `src/components/editor/SectionEditor.tsx` | Modal editor component |
+| `src/app/api/sessions/[id]/section/route.ts` | Section save API |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/components/resume/ResumePreview.tsx` | Pass content with section clicks |
+| `src/components/resume/OneShotReview.tsx` | Integrate section editor |
+
+---
+
+### Next Session Focus: 4c - Content Bank
+1. Add Bank tab functionality to SectionEditor
+2. Show available content items from database
+3. Allow swapping section content with bank items
 
 ---
 
