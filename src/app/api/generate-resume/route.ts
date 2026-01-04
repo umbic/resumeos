@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { generateFullResume } from '@/lib/claude';
 import { detectGaps } from '@/lib/gap-detection';
+import { runQualityCheck } from '@/lib/quality-check';
+import { autoFixIssues } from '@/lib/quality-fix';
 import type { EnhancedJDAnalysis, JDAnalysis } from '@/types';
 
 /**
@@ -102,19 +104,44 @@ export async function POST(request: NextRequest) {
       targetCompany: session.target_company || '',
     });
 
-    // Detect gaps between JD themes and generated resume
-    const gaps = await detectGaps(jdAnalysis, generatedResume);
+    // Run quality check
+    let qualityScore = runQualityCheck(generatedResume);
 
-    // Store the generated resume and gaps
+    // Auto-fix critical issues
+    let finalResume = generatedResume;
+    if (qualityScore.issues.some(i => i.severity === 'error')) {
+      const { resume: fixedResume, fixedIssues } = await autoFixIssues(
+        generatedResume,
+        qualityScore.issues
+      );
+      finalResume = fixedResume;
+
+      // Re-run quality check after fixes
+      qualityScore = runQualityCheck(finalResume);
+
+      // Mark fixed issues
+      qualityScore.issues = qualityScore.issues.map(issue => {
+        const wasFixed = fixedIssues.some(
+          f => f.location === issue.location && f.type === issue.type
+        );
+        return wasFixed ? { ...issue, autoFixed: true } : issue;
+      });
+    }
+
+    // Detect gaps between JD themes and generated resume
+    const gaps = await detectGaps(jdAnalysis, finalResume);
+
+    // Store the generated resume, gaps, and quality score
     // Format verbs as PostgreSQL array literal: {"verb1","verb2"}
-    const verbsArray = generatedResume.verbs_used || [];
+    const verbsArray = finalResume.verbs_used || [];
     const verbsLiteral = `{${verbsArray.map(v => `"${v.replace(/"/g, '\\"')}"`).join(',')}}`;
 
     await sql`
       UPDATE sessions
       SET
-        generated_resume = ${JSON.stringify(generatedResume)}::jsonb,
+        generated_resume = ${JSON.stringify(finalResume)}::jsonb,
         gaps = ${JSON.stringify(gaps)}::jsonb,
+        quality_score = ${JSON.stringify(qualityScore)}::jsonb,
         used_verbs = ${verbsLiteral}::text[],
         generation_version = 'v1.5',
         updated_at = NOW()
@@ -123,10 +150,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      resume: generatedResume,
+      resume: finalResume,
       gaps,
-      themes_addressed: generatedResume.themes_addressed,
-      themes_not_addressed: generatedResume.themes_not_addressed,
+      quality_score: qualityScore,
+      themes_addressed: finalResume.themes_addressed,
+      themes_not_addressed: finalResume.themes_not_addressed,
     });
 
   } catch (error) {

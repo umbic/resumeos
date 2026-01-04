@@ -1,7 +1,43 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: V1.5 Session 4 - Gap Detection + Recommendations
+> **Last Session**: V1.5 Session 5 - Quality Gate System
+
+---
+
+## V1.5 Session 5 Completed: Quality Gate System
+
+### What Was Done
+- Created `src/lib/quality-check.ts`:
+  - `runQualityCheck()` - Validates generated resume against quality rules
+  - Checks bullet length (error >40 words, warning >35)
+  - Checks verb repetition (error within position, warning >2x resume)
+  - Checks phrase repetition (warning >2x resume)
+  - Checks jargon patterns (warning on compound noun soup)
+  - Calculates A-F grade based on errors/warnings
+- Created `src/lib/quality-fix.ts`:
+  - `autoFixIssues()` - Automatically fixes critical errors
+  - Uses Claude to shorten overlong bullets while preserving metrics
+- Integrated quality check into `/api/generate-resume`:
+  - Runs quality check after generation
+  - Auto-fixes critical issues if found
+  - Re-runs check after fixes
+  - Stores quality score in session
+- Created `QualityIndicator` component for UI
+
+### Quality Grade Calculation
+| Grade | Criteria |
+|-------|----------|
+| A | 0 errors, ≤2 warnings |
+| B | ≤1 error, ≤4 warnings |
+| C | ≤2 errors, ≤6 warnings |
+| D | ≤4 errors |
+| F | >4 errors |
+
+### Next Session
+**V1.5 Session 6: UI Overhaul** — Replace wizard with single-page flow.
+
+See `docs/SESSION_6_UI_OVERHAUL.md` for full session details.
 
 ---
 

@@ -1,0 +1,309 @@
+import type { GeneratedResume, QualityScore, QualityIssue } from '@/types';
+
+// Common action verbs to track
+const ACTION_VERBS = [
+  'led', 'built', 'drove', 'developed', 'created', 'designed', 'launched',
+  'transformed', 'architected', 'pioneered', 'established', 'delivered',
+  'scaled', 'accelerated', 'managed', 'directed', 'orchestrated', 'spearheaded',
+  'implemented', 'executed', 'negotiated', 'cultivated', 'optimized'
+];
+
+// Jargon patterns to flag
+const JARGON_PATTERNS = [
+  /B2B\s+\w+\s+partner/i,
+  /enterprise\s+\w+\s+platform\s+\w+/i,
+  /\w+\s+technology\s+\w+\s+brand/i,
+  /strategic\s+\w+\s+\w+\s+initiative/i,
+];
+
+/**
+ * Run quality checks on a generated resume.
+ * Returns a QualityScore with grade, coverage metrics, and issues.
+ */
+export function runQualityCheck(resume: GeneratedResume): QualityScore {
+  const issues: QualityIssue[] = [];
+
+  // Check summary
+  issues.push(...checkSummary(resume.summary));
+
+  // Check career highlights
+  resume.career_highlights.forEach((highlight, index) => {
+    issues.push(...checkHighlight(highlight, index + 1));
+  });
+
+  // Check positions
+  resume.positions.forEach(position => {
+    issues.push(...checkOverview(position.overview, position.number));
+
+    position.bullets?.forEach((bullet, index) => {
+      issues.push(...checkBullet(bullet, position.number, index + 1));
+    });
+  });
+
+  // Check verb repetition across resume
+  issues.push(...checkVerbRepetition(resume));
+
+  // Check phrase repetition across resume
+  issues.push(...checkPhraseRepetition(resume));
+
+  // Calculate scores
+  const errorCount = issues.filter(i => i.severity === 'error').length;
+  const warningCount = issues.filter(i => i.severity === 'warning').length;
+
+  const overall = calculateGrade(errorCount, warningCount);
+  const keywordCoverage = calculateKeywordCoverage(resume);
+  const themeAlignment = calculateThemeAlignment(resume);
+
+  return {
+    overall,
+    keyword_coverage: keywordCoverage,
+    theme_alignment: themeAlignment,
+    issues,
+  };
+}
+
+function checkSummary(summary: string): QualityIssue[] {
+  const issues: QualityIssue[] = [];
+
+  // Check sentence count (should be 3-4)
+  const sentences = summary.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  if (sentences.length > 5) {
+    issues.push({
+      type: 'bullet_length',
+      severity: 'warning',
+      location: 'summary',
+      message: `Summary has ${sentences.length} sentences (target: 3-4)`,
+    });
+  }
+
+  // Check for jargon
+  issues.push(...checkJargon(summary, 'summary'));
+
+  return issues;
+}
+
+function checkHighlight(highlight: string, index: number): QualityIssue[] {
+  const issues: QualityIssue[] = [];
+  const location = `highlight_${index}`;
+
+  // Check word count
+  const wordCount = highlight.split(/\s+/).length;
+  if (wordCount > 50) {
+    issues.push({
+      type: 'bullet_length',
+      severity: 'warning',
+      location,
+      message: `Highlight ${index} has ${wordCount} words (consider trimming)`,
+    });
+  }
+
+  // Check for jargon
+  issues.push(...checkJargon(highlight, location));
+
+  return issues;
+}
+
+function checkOverview(overview: string, positionNumber: number): QualityIssue[] {
+  const issues: QualityIssue[] = [];
+  const location = `position_${positionNumber}_overview`;
+
+  // Check for jargon
+  issues.push(...checkJargon(overview, location));
+
+  return issues;
+}
+
+function checkBullet(
+  bullet: string,
+  positionNumber: number,
+  bulletNumber: number
+): QualityIssue[] {
+  const issues: QualityIssue[] = [];
+  const location = `position_${positionNumber}_bullet_${bulletNumber}`;
+
+  // Check word count (HARD LIMIT: 40)
+  const wordCount = bullet.split(/\s+/).length;
+  if (wordCount > 40) {
+    issues.push({
+      type: 'bullet_length',
+      severity: 'error',
+      location,
+      message: `Bullet has ${wordCount} words (limit: 40)`,
+    });
+  } else if (wordCount > 35) {
+    issues.push({
+      type: 'bullet_length',
+      severity: 'warning',
+      location,
+      message: `Bullet has ${wordCount} words (approaching limit)`,
+    });
+  }
+
+  // Check for jargon
+  issues.push(...checkJargon(bullet, location));
+
+  return issues;
+}
+
+function checkJargon(text: string, location: string): QualityIssue[] {
+  const issues: QualityIssue[] = [];
+
+  for (const pattern of JARGON_PATTERNS) {
+    const match = text.match(pattern);
+    if (match) {
+      issues.push({
+        type: 'jargon',
+        severity: 'warning',
+        location,
+        message: `Jargon detected: "${match[0]}"`,
+      });
+    }
+  }
+
+  return issues;
+}
+
+function checkVerbRepetition(resume: GeneratedResume): QualityIssue[] {
+  const issues: QualityIssue[] = [];
+  const verbUsage: Record<string, string[]> = {};
+
+  // Extract all text sections
+  const sections = [
+    { text: resume.summary, location: 'summary' },
+    ...resume.career_highlights.map((h, i) => ({
+      text: h,
+      location: `highlight_${i + 1}`
+    })),
+    ...resume.positions.flatMap(p => [
+      { text: p.overview, location: `position_${p.number}_overview` },
+      ...(p.bullets || []).map((b, i) => ({
+        text: b,
+        location: `position_${p.number}_bullet_${i + 1}`
+      })),
+    ]),
+  ];
+
+  // Track verb usage
+  for (const { text, location } of sections) {
+    const words = text.toLowerCase().split(/\s+/);
+    const firstWord = words[0]?.replace(/[^a-z]/g, '');
+
+    for (const verb of ACTION_VERBS) {
+      if (firstWord === verb || text.toLowerCase().includes(` ${verb} `)) {
+        if (!verbUsage[verb]) {
+          verbUsage[verb] = [];
+        }
+        verbUsage[verb].push(location);
+      }
+    }
+  }
+
+  // Check for violations
+  for (const [verb, locations] of Object.entries(verbUsage)) {
+    // Check within-position repetition
+    const positionGroups: Record<string, string[]> = {};
+    for (const loc of locations) {
+      const posMatch = loc.match(/position_(\d+)/);
+      if (posMatch) {
+        const posKey = `position_${posMatch[1]}`;
+        if (!positionGroups[posKey]) {
+          positionGroups[posKey] = [];
+        }
+        positionGroups[posKey].push(loc);
+      }
+    }
+
+    for (const [position, locs] of Object.entries(positionGroups)) {
+      if (locs.length > 1) {
+        issues.push({
+          type: 'verb_repetition',
+          severity: 'error',
+          location: position,
+          message: `"${verb}" used ${locs.length}x within same position: ${locs.join(', ')}`,
+        });
+      }
+    }
+
+    // Check resume-wide repetition (>2x)
+    if (locations.length > 2) {
+      issues.push({
+        type: 'verb_repetition',
+        severity: 'warning',
+        location: 'resume',
+        message: `"${verb}" used ${locations.length}x total (max: 2): ${locations.join(', ')}`,
+      });
+    }
+  }
+
+  return issues;
+}
+
+function checkPhraseRepetition(resume: GeneratedResume): QualityIssue[] {
+  const issues: QualityIssue[] = [];
+
+  // Common phrases to track
+  const phrasesToTrack = [
+    'strategic storytelling',
+    'executive narratives',
+    'gtm alignment',
+    'go-to-market',
+    'cross-functional',
+    'brand transformation',
+    'enterprise buyer',
+    'measurable impact',
+    'business value',
+  ];
+
+  // Combine all text
+  const allText = [
+    resume.summary,
+    ...resume.career_highlights,
+    ...resume.positions.flatMap(p => [
+      p.overview,
+      ...(p.bullets || []),
+    ]),
+  ].join(' ').toLowerCase();
+
+  for (const phrase of phrasesToTrack) {
+    const regex = new RegExp(phrase, 'gi');
+    const matches = allText.match(regex);
+
+    if (matches && matches.length > 2) {
+      issues.push({
+        type: 'phrase_repetition',
+        severity: 'warning',
+        location: 'resume',
+        message: `"${phrase}" used ${matches.length}x (max: 2)`,
+      });
+    }
+  }
+
+  return issues;
+}
+
+function calculateGrade(errors: number, warnings: number): QualityScore['overall'] {
+  if (errors === 0 && warnings === 0) return 'A';
+  if (errors === 0 && warnings <= 2) return 'A';
+  if (errors === 0 && warnings <= 4) return 'B';
+  if (errors <= 1 && warnings <= 4) return 'B';
+  if (errors <= 2 && warnings <= 6) return 'C';
+  if (errors <= 4) return 'D';
+  return 'F';
+}
+
+function calculateKeywordCoverage(resume: GeneratedResume): number {
+  const addressed = resume.themes_addressed?.length || 0;
+  const total = addressed + (resume.themes_not_addressed?.length || 0);
+
+  if (total === 0) return 100;
+  return Math.round((addressed / total) * 100);
+}
+
+function calculateThemeAlignment(resume: GeneratedResume): number {
+  const addressed = resume.themes_addressed?.length || 0;
+  const notAddressed = resume.themes_not_addressed?.length || 0;
+  const total = addressed + notAddressed;
+
+  if (total === 0) return 100;
+  return Math.round((addressed / total) * 100);
+}
