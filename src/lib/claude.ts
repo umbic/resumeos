@@ -1,5 +1,16 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { JDAnalysis, JDKeyword, JDStrategic } from '../types';
+import type { JDAnalysis, JDKeyword, JDStrategic, EnhancedJDAnalysis, GeneratedResume } from '../types';
+import { db } from './db';
+import { contentItems } from '@/drizzle/schema';
+import { eq } from 'drizzle-orm';
+import { POSITIONS } from './rules';
+import {
+  buildMasterGenerationPrompt,
+  parseGenerationResponse,
+  mapContentItemToPrompt,
+  type PositionContent,
+  type PromptContentItem,
+} from './prompts/master-generation';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -702,5 +713,122 @@ Return ONLY the updated content.`,
 
   return responseContent.text.trim();
 }
+
+// ============================================
+// V1.5 One-Shot Generation Functions
+// ============================================
+
+/**
+ * Fetch all summary content items from the database
+ */
+async function fetchAllSummaries(): Promise<PromptContentItem[]> {
+  const results = await db
+    .select()
+    .from(contentItems)
+    .where(eq(contentItems.type, 'summary'));
+
+  return results.map(mapContentItemToPrompt);
+}
+
+/**
+ * Fetch all career highlight content items from the database
+ */
+async function fetchAllCareerHighlights(): Promise<PromptContentItem[]> {
+  const results = await db
+    .select()
+    .from(contentItems)
+    .where(eq(contentItems.type, 'career_highlight'));
+
+  return results.map(mapContentItemToPrompt);
+}
+
+/**
+ * Fetch all position content (overviews and bullets) from the database
+ */
+async function fetchAllPositionContent(): Promise<PositionContent[]> {
+  // Fetch overviews
+  const overviews = await db
+    .select()
+    .from(contentItems)
+    .where(eq(contentItems.type, 'overview'));
+
+  // Fetch bullets
+  const bullets = await db
+    .select()
+    .from(contentItems)
+    .where(eq(contentItems.type, 'bullet'));
+
+  // Map overviews and bullets by position
+  const overviewsByPosition: Record<number, PromptContentItem> = {};
+  for (const ov of overviews) {
+    if (ov.position !== null) {
+      overviewsByPosition[ov.position] = mapContentItemToPrompt(ov);
+    }
+  }
+
+  const bulletsByPosition: Record<number, PromptContentItem[]> = {};
+  for (const b of bullets) {
+    if (b.position !== null) {
+      if (!bulletsByPosition[b.position]) {
+        bulletsByPosition[b.position] = [];
+      }
+      bulletsByPosition[b.position].push(mapContentItemToPrompt(b));
+    }
+  }
+
+  // Combine with position metadata
+  return POSITIONS.map((pos) => ({
+    position: pos.number,
+    title: pos.titleDefault,
+    company: pos.company,
+    dates: pos.dates,
+    location: pos.location,
+    overview: overviewsByPosition[pos.number] || null,
+    bullets: bulletsByPosition[pos.number] || [],
+  }));
+}
+
+/**
+ * Generate a complete resume in one shot using the master generation prompt.
+ * This is the core V1.5 generation function.
+ */
+export async function generateFullResume(input: {
+  jdAnalysis: EnhancedJDAnalysis;
+  format: 'long' | 'short';
+  brandingMode: 'branded' | 'generic';
+  targetCompany: string;
+}): Promise<GeneratedResume> {
+  // Fetch all content from database
+  const summaries = await fetchAllSummaries();
+  const careerHighlights = await fetchAllCareerHighlights();
+  const positionContent = await fetchAllPositionContent();
+
+  const prompt = buildMasterGenerationPrompt({
+    ...input,
+    summaries,
+    careerHighlights,
+    positionContent,
+  });
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 8000,
+    messages: [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === 'text'
+    ? response.content[0].text
+    : '';
+
+  return parseGenerationResponse(text);
+}
+
+// Re-export for convenience
+export { buildMasterGenerationPrompt, parseGenerationResponse };
 
 export default anthropic;

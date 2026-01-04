@@ -1,7 +1,44 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: V1.5 Session 1 - Database + Types for One-Shot Generation
+> **Last Session**: V1.5 Session 2 - Master Generation Prompt
+
+---
+
+## V1.5 Session 2 Completed: Master Generation Prompt
+
+### What Was Done
+- Created `src/lib/prompts/master-generation.ts`:
+  - `buildMasterGenerationPrompt()` - Builds the one-shot prompt with all quality rules inline
+  - `parseGenerationResponse()` - Parses Claude's JSON response into GeneratedResume
+  - `mapContentItemToPrompt()` - Maps DB content items to prompt format
+  - `PromptContentItem` and `PositionContent` interfaces
+- Added to `src/lib/claude.ts`:
+  - `generateFullResume()` - One-shot generation function
+  - `fetchAllSummaries()` - Fetches summary content from DB
+  - `fetchAllCareerHighlights()` - Fetches career highlights from DB
+  - `fetchAllPositionContent()` - Fetches position overviews and bullets
+- Position metadata already exists in `src/lib/rules.ts` (POSITIONS constant)
+- Fixed `tsconfig.json` to exclude scripts folder from build
+
+### Key Prompt Features
+- Full JD analysis context (priority/secondary themes, ATS keywords)
+- Complete content database injected (summaries, highlights, positions)
+- Quality rules inline:
+  - 40 word max per bullet (HARD LIMIT)
+  - No verb repetition within position
+  - Max 2 uses of any verb in entire resume
+  - Max 2 uses of any phrase in entire resume
+  - No jargon soup (compound noun chains)
+  - Preserve all metrics exactly
+- Branding rules for competitor handling
+- Content version selection based on format (long/short)
+- Output: JSON with summary, highlights, positions, themes_addressed, themes_not_addressed, verbs_used, content_ids_used
+
+### Next Session
+**V1.5 Session 3: One-Shot API Route** — Build `/api/generate-resume` endpoint that calls the master prompt.
+
+See `docs/SESSION_3_API_ROUTE.md` for full session details.
 
 ---
 
