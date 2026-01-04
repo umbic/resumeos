@@ -1,7 +1,69 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: V1.5 Session 7 - Summary & Highlights Quality
+> **Last Session**: V1.5 Session 8 - Keyword Gap Detection
+
+---
+
+## V1.5 Session 8 Completed: Keyword-Level Gap Detection
+
+### What Was Done
+Added keyword-level gap detection to catch missing ATS keywords that the theme-based detection missed.
+
+### Problem Solved
+- Quality score showed "Keywords: 100%" on resumes missing critical keywords (GTM, SaaS, API, Product Marketing)
+- Old system only checked themes_addressed vs themes_not_addressed
+- Didn't verify if specific keywords actually appeared in resume text
+
+### Changes Made
+
+**Types** (`src/types/index.ts`):
+- Added `ATSKeyword` interface with frequency tracking
+- Added `KeywordGap` interface for detected gaps
+- Updated `EnhancedJDAnalysis.ats_keywords` from `string[]` to `ATSKeyword[]`
+
+**JD Analysis** (`src/lib/claude.ts`):
+- Updated prompt to extract keyword frequency count
+- Mark keywords appearing 2+ times as `priority: 'high'`
+- Include frequency in JSON output format
+
+**Gap Detection** (`src/lib/gap-detection.ts`):
+- Added `detectKeywordGaps()` - checks if high-priority keywords appear in resume
+- Added `calculateActualKeywordCoverage()` - calculates real keyword presence
+- Added `getAllResumeText()` helper - combines all resume sections for search
+- Added variant matching (GTM ↔ go-to-market, B2B ↔ business-to-business)
+
+**Quality Check** (`src/lib/quality-check.ts`):
+- Updated `runQualityCheck()` to accept optional `atsKeywords` parameter
+- Use actual keyword coverage when ATS keywords provided
+- Updated `calculateGrade()` to cap grades based on keyword coverage:
+  - < 30% coverage → max grade D
+  - < 50% coverage → max grade C
+  - < 70% coverage → max grade B
+
+**Generate Resume** (`src/app/api/generate-resume/route.ts`):
+- Pass `jdAnalysis.ats_keywords` to `runQualityCheck()`
+- Call `detectKeywordGaps()` after generation
+- Return `keyword_gaps` in API response
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/types/index.ts` | Added ATSKeyword, KeywordGap interfaces |
+| `src/lib/claude.ts` | Updated JD analysis prompt for frequency |
+| `src/lib/gap-detection.ts` | Added detectKeywordGaps(), calculateActualKeywordCoverage() |
+| `src/lib/quality-check.ts` | Updated runQualityCheck() signature, grade capping |
+| `src/app/api/generate-resume/route.ts` | Integrated keyword gap detection |
+
+### Commit
+`183013d` - feat: add keyword-level gap detection
+
+---
+
+### Next Session Focus
+1. **Test keyword gap detection** - Verify missing keywords are detected
+2. **UI for keyword gaps** - Display keyword_gaps in the review panel
+3. **Address keyword gaps** - Allow user to regenerate with missing keywords
 
 ---
 
