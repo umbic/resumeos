@@ -133,8 +133,8 @@ ${jdAnalysis.ats_keywords.join(', ')}
 ## YOUR TASK
 
 Generate a COMPLETE resume with these sections:
-1. **Summary**: 3-4 sentences maximum
-2. **Career Highlights**: Exactly 5 bullets
+1. **Summary**: Exactly 4 sentences (50-75 words) — see SUMMARY REQUIREMENTS below
+2. **Career Highlights**: Exactly 5 highlights (40-55 words each) — see CAREER HIGHLIGHTS REQUIREMENTS below
 3. **Position 1**: Overview + ${p1BulletCount} bullets
 4. **Position 2**: Overview + ${p2BulletCount} bullets
 5. **Positions 3-6**: Overview only (no bullets)
@@ -219,11 +219,58 @@ ${brandingMode === 'generic' ? `- Use generic versions of content (content_gener
 
 ---
 
+## SUMMARY REQUIREMENTS
+
+The summary must be exactly 4 sentences following this narrative arc:
+
+1. **Identity statement**: Who you are, years of experience, core positioning (e.g., "Portfolio transformation leader who unifies fragmented marketing strategies into scalable growth engines")
+
+2. **Macro signature achievement**: A PATTERN of impact, not a single metric. Describe the type of transformation you repeatedly deliver.
+   - CORRECT: "Track record of transforming fragmented marketing organizations into unified growth engines across Fortune 500 enterprises"
+   - WRONG: "Built a $40M brand strategy practice at Deloitte Digital" (too specific/single achievement)
+
+3. **How you work**: Your approach, methodology, or cross-functional leadership style (e.g., "Cross-functional executive who orchestrates complex stakeholder ecosystems")
+
+4. **Outcome/value**: What results you deliver to organizations, framed in JD language
+
+Requirements:
+- Total length: 50-75 words
+- Integrate 2-3 priority keywords from JD naturally (not forced)
+- Must read as a cohesive narrative paragraph, not a list of attributes
+- Use source summaries as raw material, reshape to match JD themes
+
+---
+
+## CAREER HIGHLIGHTS REQUIREMENTS
+
+Each career highlight must follow this exact format:
+
+**[Bold hook phrase tailored to JD]**: [Narrative sentence connecting the achievement to context and measurable result]
+
+Example for a Portfolio Marketing JD:
+**Transformed premium card portfolio into growth engine for Fortune 100 financial services leader**: Unified fragmented regional marketing efforts into scalable demand generation system, delivering 50% YoY engagement growth and $60M in new revenue through integrated GTM activation.
+
+Requirements:
+- Total length per highlight: 40-55 words (longer than position bullets — these are mini-stories)
+- The bold hook (before the colon) should:
+  - Echo JD language naturally/interpretively (not keyword-stuffed)
+  - Be 8-12 words
+  - Frame the achievement in terms the target role cares about
+- The narrative portion (after the colon) should:
+  - Provide context on what you did
+  - Connect to a JD theme where possible
+  - End with measurable result(s)
+- Use source content from database as raw material, then REWRITE into narrative form
+- The connection to JD themes is what makes highlights compelling — reshape existing achievements to resonate with target role
+- Each highlight MUST include at least one quantified metric
+
+---
+
 ## CONTENT VERSION SELECTION
 
 Use these content versions based on format:
 - **Summary**: Use content_long for long format, content_medium for short
-- **Career Highlights**: Use content_medium for long format, content_short for short
+- **Career Highlights**: Use content_long as raw material (need more substance to hit 40-55 words)
 - **Position Overviews**: Use content_long for long format, content_medium for short
 - **Position Bullets**: Use content_medium (only in long format)
 
@@ -305,12 +352,16 @@ Return valid JSON only. No markdown, no explanation, just JSON:
 ## BEFORE YOU RESPOND
 
 Self-check:
-1. Is every bullet ≤40 words? Count them.
-2. Did any verb repeat within a position? Fix it.
-3. Did any phrase appear >2x? Use a synonym.
-4. Are all priority themes addressed somewhere?
-5. Did you preserve all metrics exactly?
-6. Did you avoid jargon soup?
+1. Is the summary exactly 4 sentences and 50-75 words? Count them.
+2. Does the summary follow the narrative arc (identity → pattern of impact → how you work → value)?
+3. Is every career highlight 40-55 words with a bold hook phrase before the colon?
+4. Does each career highlight include at least one quantified metric?
+5. Is every position bullet ≤40 words? Count them.
+6. Did any verb repeat within a position? Fix it.
+7. Did any phrase appear >2x? Use a synonym.
+8. Are all priority themes addressed somewhere?
+9. Did you preserve all metrics exactly?
+10. Did you avoid jargon soup?
 
 Now generate the resume.`;
 }
