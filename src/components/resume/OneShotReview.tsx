@@ -7,7 +7,7 @@ import { QualityIndicator } from './QualityIndicator';
 import { ResumePreview } from './ResumePreview';
 import { ChatRefinement } from './ChatRefinement';
 import { KeywordGaps } from './KeywordGaps';
-import { Download, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, RefreshCw, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 
 interface OneShotReviewProps {
   sessionId: string;
@@ -23,6 +23,8 @@ interface OneShotReviewProps {
   onRegenerate: () => void;
   onExport: () => void;
   isExporting: boolean;
+  onBackToDashboard?: () => void;
+  sessionName?: string;
 }
 
 export function OneShotReview({
@@ -39,6 +41,8 @@ export function OneShotReview({
   onRegenerate,
   onExport,
   isExporting,
+  onBackToDashboard,
+  sessionName,
 }: OneShotReviewProps) {
   const [showQualityDetails, setShowQualityDetails] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -50,11 +54,24 @@ export function OneShotReview({
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">
-              Resume for {targetTitle}
-            </h1>
-            <p className="text-sm text-gray-500">{targetCompany}</p>
+          <div className="flex items-center gap-4">
+            {onBackToDashboard && (
+              <button
+                onClick={onBackToDashboard}
+                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Dashboard
+              </button>
+            )}
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">
+                {sessionName || `Resume for ${targetTitle}`}
+              </h1>
+              <p className="text-sm text-gray-500">
+                {targetTitle} at {targetCompany}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

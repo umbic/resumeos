@@ -38,6 +38,9 @@ export const conflictRules = pgTable('conflict_rules', {
 export const sessions = pgTable('sessions', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
 
+  // Session metadata
+  name: text('name'), // User-provided session name (e.g., "Mastercard", "Anthropic GTM")
+
   // JD Analysis
   jobDescription: text('job_description'),
   targetTitle: text('target_title'),

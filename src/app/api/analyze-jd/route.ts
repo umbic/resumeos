@@ -6,7 +6,7 @@ import { COMPETITOR_MAP, filterExecutiveKeywords } from '@/lib/rules';
 
 export async function POST(request: NextRequest) {
   try {
-    const { jobDescription } = await request.json();
+    const { jobDescription, name } = await request.json();
 
     if (!jobDescription) {
       return NextResponse.json(
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
     // Create new session with enhanced jd_analysis
     const result = await sql`
       INSERT INTO sessions (
+        name,
         job_description,
         target_title,
         target_company,
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
         branding_mode,
         jd_analysis
       ) VALUES (
+        ${name || null},
         ${jobDescription},
         ${analysis.strategic.targetTitle},
         ${analysis.strategic.targetCompany},

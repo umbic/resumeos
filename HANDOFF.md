@@ -1,7 +1,93 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: V1.5 Session 8 - Keyword Gap Detection
+> **Last Session**: Session 4a - Named Sessions + Dashboard
+
+---
+
+## Session 4a Completed: Named Sessions + Dashboard
+
+### What Was Done
+Added named sessions and a dashboard to ResumeOS so users can save, name, and return to resume sessions.
+
+### Changes Made
+
+**Database Schema** (`src/drizzle/schema.ts`):
+- Added `name` field (TEXT, nullable) for user-provided session names
+
+**Migration**:
+- Generated `0003_red_molecule_man.sql` for the name column
+
+**New API Endpoints**:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/sessions` | List all sessions for dashboard |
+| GET | `/api/sessions/[id]` | Get single session details |
+| PATCH | `/api/sessions/[id]` | Update session name |
+| DELETE | `/api/sessions/[id]` | Delete a session |
+
+**Updated API Endpoints**:
+- `POST /api/analyze-jd` - Now accepts optional `name` parameter
+
+**New Components**:
+| Component | Description |
+|-----------|-------------|
+| `src/components/dashboard/SessionDashboard.tsx` | Main dashboard showing all sessions as cards |
+| `src/components/dashboard/NewSessionModal.tsx` | Modal for creating new named sessions |
+
+**UI Features**:
+- Dashboard shows all sessions sorted by most recently modified
+- Each session card displays: name (or "Unnamed Session"), target title, target company, quality score badge (A/B/C/D/F), created date, relative modified time
+- [Open] button loads session in editor
+- [Delete] button removes session with confirmation
+- [+ New Session] opens modal with name input, format selection, JD textarea
+- Back button in editor returns to dashboard
+- URL updates with `?session=<id>` for direct linking
+
+**Page Updates** (`src/app/page.tsx`):
+- Refactored to show dashboard by default
+- Added session loading state
+- Added URL parameter handling for `?session=<id>`
+- Added back-to-dashboard navigation
+
+**OneShotReview Updates** (`src/components/resume/OneShotReview.tsx`):
+- Added `onBackToDashboard` callback prop
+- Added `sessionName` prop for header display
+- Added back arrow button to dashboard
+
+### Files Created
+| File | Description |
+|------|-------------|
+| `src/app/api/sessions/route.ts` | GET sessions list |
+| `src/app/api/sessions/[id]/route.ts` | GET/PATCH/DELETE single session |
+| `src/components/dashboard/SessionDashboard.tsx` | Dashboard component |
+| `src/components/dashboard/NewSessionModal.tsx` | New session modal |
+| `src/drizzle/migrations/0003_red_molecule_man.sql` | Migration for name column |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/drizzle/schema.ts` | Added `name` field |
+| `src/app/api/analyze-jd/route.ts` | Accept optional `name` parameter |
+| `src/app/page.tsx` | Rewritten for dashboard flow |
+| `src/components/resume/OneShotReview.tsx` | Added back navigation + session name display |
+
+### Database Migration Required
+After deployment, run the migration to add the `name` column:
+```bash
+npx drizzle-kit push
+```
+or via Vercel:
+```bash
+npx dotenv -e .env.local -- npm run db:migrate
+```
+
+---
+
+### Next Session Focus: 4b - Section Editor
+1. Add Edit mode for individual sections
+2. Allow users to click a section and edit in-place
+3. Add save/cancel for edits
 
 ---
 

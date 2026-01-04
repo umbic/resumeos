@@ -1,11 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { OneShotInput } from '@/components/resume/OneShotInput';
+import { useState, useEffect } from 'react';
+import { SessionDashboard } from '@/components/dashboard/SessionDashboard';
+import { NewSessionModal } from '@/components/dashboard/NewSessionModal';
 import { OneShotReview } from '@/components/resume/OneShotReview';
 import type { GeneratedResume, Gap, QualityScore, KeywordGap, ATSKeyword } from '@/types';
 
 export default function Home() {
+  // Dashboard state
+  const [showNewSessionModal, setShowNewSessionModal] = useState(false);
+
+  // Resume editor state
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [resume, setResume] = useState<GeneratedResume | null>(null);
   const [gaps, setGaps] = useState<Gap[]>([]);
@@ -14,70 +19,93 @@ export default function Home() {
   const [qualityScore, setQualityScore] = useState<QualityScore | null>(null);
   const [targetTitle, setTargetTitle] = useState('');
   const [targetCompany, setTargetCompany] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [sessionName, setSessionName] = useState('');
+  const [isSessionLoading, setIsSessionLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const handleGenerate = async (jobDescription: string, format: 'long' | 'short') => {
-    setIsLoading(true);
-
-    try {
-      // Step 1: Create session and analyze JD
-      const analyzeResponse = await fetch('/api/analyze-jd', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobDescription, format }),
-      });
-
-      const analyzeData = await analyzeResponse.json();
-
-      if (!analyzeData.sessionId) {
-        throw new Error(analyzeData.error || 'Failed to analyze job description');
-      }
-
-      setSessionId(analyzeData.sessionId);
-      setTargetTitle(analyzeData.analysis?.targetTitle || analyzeData.analysis?.strategic?.targetTitle || 'Role');
-      setTargetCompany(analyzeData.analysis?.targetCompany || analyzeData.analysis?.strategic?.targetCompany || 'Company');
-
-      // Store ATS keywords from analysis (convert to ATSKeyword format if needed)
-      const keywords = analyzeData.analysis?.keywords || [];
-      const formattedKeywords: ATSKeyword[] = keywords.map((k: { keyword: string; frequency?: number; priority: string; category?: string }) => ({
-        keyword: k.keyword,
-        frequency: k.frequency || 1,
-        priority: k.priority as 'high' | 'medium' | 'low',
-        category: k.category,
-      }));
-      setAtsKeywords(formattedKeywords);
-
-      // Step 2: Generate full resume
-      const generateResponse = await fetch('/api/generate-resume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: analyzeData.sessionId }),
-      });
-
-      const generateData = await generateResponse.json();
-
-      if (!generateData.success) {
-        throw new Error(generateData.error || 'Failed to generate resume');
-      }
-
-      setResume(generateData.resume);
-      setGaps(generateData.gaps || []);
-      setKeywordGaps(generateData.keyword_gaps || []);
-      setQualityScore(generateData.quality_score);
-
-    } catch (error) {
-      console.error('Generation failed:', error);
-      alert('Failed to generate resume. Please try again.');
-    } finally {
-      setIsLoading(false);
+  // Check URL for session parameter on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlSessionId = params.get('session');
+    if (urlSessionId) {
+      loadSession(urlSessionId);
     }
+  }, []);
+
+  const loadSession = async (id: string) => {
+    setIsSessionLoading(true);
+    try {
+      // Get session data
+      const sessionResponse = await fetch(`/api/sessions/${id}`);
+      const sessionData = await sessionResponse.json();
+
+      if (!sessionData.session) {
+        throw new Error('Session not found');
+      }
+
+      const session = sessionData.session;
+
+      setSessionId(id);
+      setSessionName(session.name || '');
+      setTargetTitle(session.target_title || '');
+      setTargetCompany(session.target_company || '');
+
+      if (session.generated_resume) {
+        setResume(session.generated_resume);
+        setGaps(session.gaps || []);
+        setQualityScore(session.quality_score);
+
+        // Get ATS keywords from analysis
+        const keywords = session.jd_analysis?.keywords || [];
+        const formattedKeywords: ATSKeyword[] = keywords.map((k: { keyword: string; frequency?: number; priority: string; category?: string }) => ({
+          keyword: k.keyword,
+          frequency: k.frequency || 1,
+          priority: k.priority as 'high' | 'medium' | 'low',
+          category: k.category,
+        }));
+        setAtsKeywords(formattedKeywords);
+      }
+
+      // Update URL without reloading
+      window.history.pushState({}, '', `?session=${id}`);
+    } catch (error) {
+      console.error('Failed to load session:', error);
+      alert('Failed to load session');
+    } finally {
+      setIsSessionLoading(false);
+    }
+  };
+
+  const handleNewSession = () => {
+    setShowNewSessionModal(true);
+  };
+
+  const handleSessionCreated = async (newSessionId: string) => {
+    setShowNewSessionModal(false);
+    await loadSession(newSessionId);
+  };
+
+  const handleOpenSession = async (id: string) => {
+    await loadSession(id);
+  };
+
+  const handleBackToDashboard = () => {
+    setSessionId(null);
+    setResume(null);
+    setGaps([]);
+    setKeywordGaps([]);
+    setAtsKeywords([]);
+    setQualityScore(null);
+    setTargetTitle('');
+    setTargetCompany('');
+    setSessionName('');
+    window.history.pushState({}, '', '/');
   };
 
   const handleRegenerate = async () => {
     if (!sessionId) return;
 
-    setIsLoading(true);
+    setIsSessionLoading(true);
     try {
       const response = await fetch('/api/generate-resume', {
         method: 'POST',
@@ -96,7 +124,7 @@ export default function Home() {
     } catch (error) {
       console.error('Regeneration failed:', error);
     } finally {
-      setIsLoading(false);
+      setIsSessionLoading(false);
     }
   };
 
@@ -132,15 +160,39 @@ export default function Home() {
     }
   };
 
-  // Show input page if no resume generated yet
-  if (!resume) {
-    return <OneShotInput onGenerate={handleGenerate} isLoading={isLoading} />;
+  // Show loading state while loading a session
+  if (isSessionLoading && !resume) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-gray-500">Loading session...</p>
+        </div>
+      </div>
+    );
   }
 
-  // Show review page
+  // Show dashboard if no session is selected
+  if (!sessionId || !resume) {
+    return (
+      <>
+        <SessionDashboard
+          onNewSession={handleNewSession}
+          onOpenSession={handleOpenSession}
+        />
+        <NewSessionModal
+          isOpen={showNewSessionModal}
+          onClose={() => setShowNewSessionModal(false)}
+          onSessionCreated={handleSessionCreated}
+        />
+      </>
+    );
+  }
+
+  // Show resume editor
   return (
     <OneShotReview
-      sessionId={sessionId!}
+      sessionId={sessionId}
       resume={resume}
       gaps={gaps}
       keywordGaps={keywordGaps}
@@ -153,6 +205,8 @@ export default function Home() {
       onRegenerate={handleRegenerate}
       onExport={handleExport}
       isExporting={isExporting}
+      onBackToDashboard={handleBackToDashboard}
+      sessionName={sessionName}
     />
   );
 }
