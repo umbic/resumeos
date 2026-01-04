@@ -2,17 +2,22 @@
 
 import type { GeneratedResume } from '@/types';
 import { renderContent } from '@/lib/render-highlights';
+import { Plus, X } from 'lucide-react';
 
 interface ResumePreviewProps {
   resume: GeneratedResume;
   onSectionClick?: (sectionKey: string, content: string) => void;
   activeSection?: string | null;
+  onAddItem?: (type: 'highlight' | 'bullet', positionNumber?: number) => void;
+  onRemoveItem?: (type: 'highlight' | 'bullet', index: number, positionNumber?: number) => void;
 }
 
 export function ResumePreview({
   resume,
   onSectionClick,
   activeSection,
+  onAddItem,
+  onRemoveItem,
 }: ResumePreviewProps) {
 
   const sectionClass = (section: string) => `
@@ -47,17 +52,43 @@ export function ResumePreview({
 
       {/* Career Highlights */}
       <div className="mt-6">
-        <h2 className="text-sm font-bold uppercase tracking-wide border-b pb-1 mb-3">
-          Career Highlights
-        </h2>
+        <div className="flex items-center justify-between border-b pb-1 mb-3">
+          <h2 className="text-sm font-bold uppercase tracking-wide">
+            Career Highlights
+          </h2>
+          {onAddItem && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddItem('highlight');
+              }}
+              className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+              title="Add highlight"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          )}
+        </div>
         <ul className="space-y-2">
           {resume.career_highlights.map((highlight, index) => (
             <li
               key={index}
-              className={sectionClass(`highlight_${index + 1}`)}
+              className={`group relative ${sectionClass(`highlight_${index + 1}`)}`}
               onClick={() => onSectionClick?.(`highlight_${index + 1}`, highlight)}
             >
               {renderContent({ content: highlight })}
+              {onRemoveItem && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveItem('highlight', index);
+                  }}
+                  className="absolute -right-1 top-1 p-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                  title="Remove highlight"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -92,17 +123,58 @@ export function ResumePreview({
 
             {/* Bullets */}
             {position.bullets && position.bullets.length > 0 && (
-              <ul className="mt-2 space-y-2 list-disc list-inside">
-                {position.bullets.map((bullet, bulletIndex) => (
-                  <li
-                    key={bulletIndex}
-                    className={sectionClass(`position_${position.number}_bullet_${bulletIndex + 1}`)}
-                    onClick={() => onSectionClick?.(`position_${position.number}_bullet_${bulletIndex + 1}`, bullet)}
-                  >
-                    {renderContent({ content: bullet })}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-2">
+                <div className="flex items-center justify-end mb-1">
+                  {onAddItem && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddItem('bullet', position.number);
+                      }}
+                      className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      title="Add bullet"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+                <ul className="space-y-2 list-disc list-inside">
+                  {position.bullets.map((bullet, bulletIndex) => (
+                    <li
+                      key={bulletIndex}
+                      className={`group relative ${sectionClass(`position_${position.number}_bullet_${bulletIndex + 1}`)}`}
+                      onClick={() => onSectionClick?.(`position_${position.number}_bullet_${bulletIndex + 1}`, bullet)}
+                    >
+                      {renderContent({ content: bullet })}
+                      {onRemoveItem && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRemoveItem('bullet', bulletIndex, position.number);
+                          }}
+                          className="absolute -right-1 top-1 p-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                          title="Remove bullet"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {/* Add bullet button when no bullets exist */}
+            {(!position.bullets || position.bullets.length === 0) && onAddItem && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddItem('bullet', position.number);
+                }}
+                className="mt-2 flex items-center gap-1 text-xs text-gray-400 hover:text-blue-600 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add bullet
+              </button>
             )}
           </div>
         ))}

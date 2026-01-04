@@ -82,6 +82,75 @@ export function OneShotReview({
     setEditingSection({ key: sectionKey, content });
   };
 
+  const handleAddItem = async (type: 'highlight' | 'bullet', positionNumber?: number) => {
+    saveScrollPosition();
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add',
+          type,
+          positionNumber,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.resume) {
+        onResumeUpdate(data.resume);
+        restoreScrollPosition();
+
+        // Open editor for the new item
+        if (type === 'highlight') {
+          const newIndex = data.resume.career_highlights.length;
+          setEditingSection({
+            key: `highlight_${newIndex}`,
+            content: data.resume.career_highlights[newIndex - 1],
+          });
+          setActiveSection(`highlight_${newIndex}`);
+        } else if (type === 'bullet' && positionNumber) {
+          const position = data.resume.positions.find((p: { number: number }) => p.number === positionNumber);
+          if (position?.bullets) {
+            const newIndex = position.bullets.length;
+            setEditingSection({
+              key: `position_${positionNumber}_bullet_${newIndex}`,
+              content: position.bullets[newIndex - 1],
+            });
+            setActiveSection(`position_${positionNumber}_bullet_${newIndex}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to add item:', error);
+      alert('Failed to add item. Please try again.');
+    }
+  };
+
+  const handleRemoveItem = async (type: 'highlight' | 'bullet', index: number, positionNumber?: number) => {
+    saveScrollPosition();
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'remove',
+          type,
+          index,
+          positionNumber,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.resume) {
+        onResumeUpdate(data.resume);
+        restoreScrollPosition();
+      }
+    } catch (error) {
+      console.error('Failed to remove item:', error);
+      alert('Failed to remove item. Please try again.');
+    }
+  };
+
   const handleSectionSave = async (newContent: string) => {
     if (!editingSection) return;
 
@@ -174,6 +243,8 @@ export function OneShotReview({
                 resume={resume}
                 onSectionClick={handleSectionClick}
                 activeSection={activeSection}
+                onAddItem={handleAddItem}
+                onRemoveItem={handleRemoveItem}
               />
             </div>
           </div>

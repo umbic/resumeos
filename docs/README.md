@@ -1,37 +1,84 @@
-# V1 Upgrade Session Prompts
+# ResumeOS V1.5 Upgrade — Session Files
 
-Drop these files in your ResumeOS project folder. Run one per Claude Code session.
+These files guide Claude Code through implementing one-shot resume generation with gap recommendations.
 
-## Order
-
-| Session | File | What It Does | Time |
-|---------|------|--------------|------|
-| 1 | `SESSION_1_VERB_INFRA.md` | Database + types for verb tracking | 30 min |
-| 2 | `SESSION_2_VERB_PROMPTS.md` | Update prompts to accept verb constraints | 45 min |
-| 3 | `SESSION_3_WIRE_API.md` | Connect verb tracking through API routes | 30 min |
-| 4 | `SESSION_4_REWRITE_PROMPTS.md` | Rewrite all prompts for quality | 60 min |
-| 5 | `SESSION_5_CONVERSATION.md` | Add conversation history to all sections | 45 min |
-
-## How to Use
+## Quick Start
 
 1. Copy all files to your ResumeOS project root
-2. Start a fresh Claude Code session
-3. Say: `Read SESSION_1_VERB_INFRA.md and execute`
-4. Let Claude Code work, commit when done
-5. Update HANDOFF.md
-6. Start new session for next file
+2. Create a branch: `git checkout -b v1.5-one-shot`
+3. Start a fresh Claude Code session
+4. Say: `Read SESSION_1_DATABASE_TYPES.md and execute`
+5. Commit when done, then start new session for next file
 
-## Tips
+## Session Order
 
-- Use `/clear` between sessions
-- If context gets long, use `/compact`
-- Commit after each working piece (don't wait until end)
-- Test locally before pushing
+| # | File | What It Does | Time |
+|---|------|--------------|------|
+| 1 | `SESSION_1_DATABASE_TYPES.md` | Add types and DB columns | 30 min |
+| 2 | `SESSION_2_MASTER_PROMPT.md` | Create one-shot generation prompt | 60 min |
+| 3 | `SESSION_3_API_ROUTE.md` | Build /api/generate-resume endpoint | 45 min |
+| 4 | `SESSION_4_GAP_DETECTION.md` | Add gap detection + recommendations | 45 min |
+| 5 | `SESSION_5_QUALITY_GATE.md` | Add quality checks + auto-fix | 45 min |
+| 6 | `SESSION_6_UI_OVERHAUL.md` | Replace wizard with single-page flow | 60 min |
+
+**Total: ~4.5 hours across 6 sessions**
+
+## Between Sessions
+
+- Use `/clear` to start fresh
+- Commit after each session
+- Check that HANDOFF.md is updated
+- Push to branch before moving on
+
+## What V1.5 Changes
+
+| Before (V1) | After (V1.5) |
+|-------------|--------------|
+| 8-step wizard | Single page: generate → review |
+| Section-by-section generation | One-shot full resume |
+| Manual review each section | Automatic quality checks |
+| No gap detection | Smart gap recommendations |
+| Keywords stuffed | Narrative reshaping |
+
+## Key Files Created
+
+```
+src/
+├── types/index.ts                    (modified)
+├── drizzle/schema.ts                 (modified)
+├── lib/
+│   ├── prompts/master-generation.ts  (new)
+│   ├── gap-detection.ts              (new)
+│   ├── quality-check.ts              (new)
+│   └── quality-fix.ts                (new)
+├── app/api/
+│   ├── generate-resume/route.ts      (new)
+│   ├── address-gap/route.ts          (new)
+│   ├── skip-gap/route.ts             (new)
+│   └── refine/route.ts               (new)
+└── components/resume/
+    ├── OneShotInput.tsx              (new)
+    ├── OneShotReview.tsx             (new)
+    ├── ResumePreview.tsx             (new)
+    ├── ChatRefinement.tsx            (new)
+    ├── GapRecommendations.tsx        (new)
+    └── QualityIndicator.tsx          (new)
+```
+
+## Rollback
+
+If something breaks:
+```bash
+git checkout main
+git branch -D v1.5-one-shot
+```
+
+V1 remains untouched on main.
 
 ## After All Sessions
 
-Run full end-to-end test:
-1. Create new session
-2. Generate full resume
-3. Check: no verb repetition, natural keywords, good readability
-4. Export DOCX and review
+1. Full end-to-end test with real JD
+2. Compare output quality to V1
+3. Check DOCX export
+4. Merge to main when satisfied
+5. Deploy to Vercel

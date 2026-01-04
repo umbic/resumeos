@@ -52,26 +52,15 @@ export function KeywordGaps({ keywordGaps, atsKeywords }: KeywordGapsProps) {
                 <AlertCircle className="h-3.5 w-3.5" />
                 <span>Missing Keywords</span>
               </div>
-              <div className="space-y-2">
+              <div className="flex flex-wrap gap-1.5">
                 {missingKeywords.map((gap, i) => (
-                  <div
+                  <span
                     key={i}
-                    className="p-2 bg-red-50 rounded-md border border-red-100"
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-red-50 text-red-700 rounded border border-red-200"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900 text-sm">
-                        {gap.keyword}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {gap.frequency_in_jd}x in JD
-                      </span>
-                    </div>
-                    {gap.suggestion && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {gap.suggestion}
-                      </p>
-                    )}
-                  </div>
+                    {gap.keyword}
+                    <span className="text-red-400">({gap.frequency_in_jd}x)</span>
+                  </span>
                 ))}
               </div>
             </div>
