@@ -74,6 +74,11 @@ export async function POST(request: NextRequest) {
       usedPhrases: session.used_phrases || [],
     });
 
+    // Log the full prompt for debugging
+    console.log('========== REFINEMENT PROMPT ==========');
+    console.log(prompt);
+    console.log('========== END PROMPT ==========');
+
     // Call Claude
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
