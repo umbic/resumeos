@@ -311,6 +311,7 @@ ${userRequest}
 Refine the "${sectionName}" section based on the user's request.
 
 Rules:
+- CRITICAL: Every sentence must be grammatically complete with a subject and verb. Never produce fragments like "With 15 years experience, specializes in..." — this has no subject. Either use a name ("Umberto specializes") or restructure ("Strategic leader with 15 years who specializes...")
 - Maintain factual accuracy — don't invent metrics, clients, or claims
 - Keep within appropriate length constraints:
   - Bullets: ≤40 words
