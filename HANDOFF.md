@@ -1,7 +1,38 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: V1.5 Session 3 - One-Shot API Route
+> **Last Session**: V1.5 Session 4 - Gap Detection + Recommendations
+
+---
+
+## V1.5 Session 4 Completed: Gap Detection + Recommendations
+
+### What Was Done
+- Created `src/lib/gap-detection.ts`:
+  - `detectGaps()` - Identifies unaddressed priority themes
+  - `findReframingOpportunity()` - Uses Claude to find reframable content
+  - `addressGap()` - Regenerates affected sections to address a gap
+- Created `POST /api/address-gap` - Applies gap recommendation to resume
+- Created `POST /api/skip-gap` - Marks a gap as skipped
+- Integrated gap detection into `/api/generate-resume` route
+- Created `GapRecommendations` component for UI
+
+### Gap Logic
+- Only priority themes checked (not secondary)
+- Maximum 3 gaps surfaced per generation
+- Only gaps with reframing opportunities shown (actionable gaps)
+- Uses Claude to identify which existing content could be reframed
+
+### API Endpoints Added
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/address-gap | Apply gap recommendation to resume |
+| POST | /api/skip-gap | Mark gap as skipped |
+
+### Next Session
+**V1.5 Session 5: Quality Gate System** — Add quality checks and auto-fix for bullets.
+
+See `docs/SESSION_5_QUALITY_GATE.md` for full session details.
 
 ---
 

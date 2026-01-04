@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { generateFullResume } from '@/lib/claude';
+import { detectGaps } from '@/lib/gap-detection';
 import type { EnhancedJDAnalysis, JDAnalysis } from '@/types';
 
 /**
@@ -101,7 +102,10 @@ export async function POST(request: NextRequest) {
       targetCompany: session.target_company || '',
     });
 
-    // Store the generated resume
+    // Detect gaps between JD themes and generated resume
+    const gaps = await detectGaps(jdAnalysis, generatedResume);
+
+    // Store the generated resume and gaps
     // Format verbs as PostgreSQL array literal: {"verb1","verb2"}
     const verbsArray = generatedResume.verbs_used || [];
     const verbsLiteral = `{${verbsArray.map(v => `"${v.replace(/"/g, '\\"')}"`).join(',')}}`;
@@ -110,6 +114,7 @@ export async function POST(request: NextRequest) {
       UPDATE sessions
       SET
         generated_resume = ${JSON.stringify(generatedResume)}::jsonb,
+        gaps = ${JSON.stringify(gaps)}::jsonb,
         used_verbs = ${verbsLiteral}::text[],
         generation_version = 'v1.5',
         updated_at = NOW()
@@ -119,6 +124,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       resume: generatedResume,
+      gaps,
       themes_addressed: generatedResume.themes_addressed,
       themes_not_addressed: generatedResume.themes_not_addressed,
     });
