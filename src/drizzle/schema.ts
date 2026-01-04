@@ -1,6 +1,6 @@
 import { pgTable, text, integer, timestamp, jsonb, uuid, serial } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import type { JDAnalysis, VerbTracker } from '../types';
+import type { JDAnalysis, VerbTracker, GeneratedResume, Gap, QualityScore } from '../types';
 
 // Custom vector type for pgvector
 // Note: Vercel Postgres supports pgvector - we'll handle vectors as text and cast in queries
@@ -95,6 +95,14 @@ export const sessions = pgTable('sessions', {
   // State
   currentStep: integer('current_step').default(0),
   status: text('status').default('active'),
+
+  // V1.5 One-Shot Generation
+  generatedResume: jsonb('generated_resume').$type<GeneratedResume>(),
+  gaps: jsonb('gaps').$type<Gap[]>().default([]),
+  qualityScore: jsonb('quality_score').$type<QualityScore>(),
+  usedVerbs: text('used_verbs').array().default([]),
+  usedPhrases: text('used_phrases').array().default([]),
+  generationVersion: text('generation_version').default('v1'), // 'v1' or 'v1.5'
 
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

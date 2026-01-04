@@ -1,11 +1,51 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: Session 5 - Conversation History for All Sections (V1 Upgrade)
+> **Last Session**: V1.5 Session 1 - Database + Types for One-Shot Generation
 
 ---
 
-## Session 5 Completed: Conversation History for All Sections
+## V1.5 Session 1 Completed: Database + Types
+
+### What Was Done
+- Added new types to `src/types/index.ts`:
+  - `GeneratedResume` - One-shot resume structure with summary, highlights, positions
+  - `GeneratedPosition` - Position data with title, company, dates, location, overview, bullets
+  - `Gap` - Gap detection with severity and recommendations
+  - `GapRecommendation` - Suggestions for addressing gaps
+  - `QualityScore` - A-F grading with keyword/theme alignment percentages
+  - `QualityIssue` - Individual quality issues (length, verb repetition, jargon)
+  - `EnhancedJDAnalysis`, `JDTheme`, `ContentMapping` - Enhanced JD analysis types
+- Updated `src/drizzle/schema.ts`:
+  - Added `generated_resume` JSONB column
+  - Added `gaps` JSONB column (default: [])
+  - Added `quality_score` JSONB column
+  - Added `used_verbs` text array column
+  - Added `used_phrases` text array column
+  - Added `generation_version` text column (default: 'v1')
+- Generated migration: `0002_dazzling_karnak.sql`
+- Updated Zustand store (`src/lib/store.ts`):
+  - Added state: `generatedResume`, `gaps`, `qualityScore`, `isGenerating`
+  - Added actions: `setGeneratedResume`, `setGaps`, `setQualityScore`, `updateGapStatus`, `setIsGenerating`, `clearGeneration`
+
+### Migration File
+```sql
+ALTER TABLE "sessions" ADD COLUMN "generated_resume" jsonb;
+ALTER TABLE "sessions" ADD COLUMN "gaps" jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE "sessions" ADD COLUMN "quality_score" jsonb;
+ALTER TABLE "sessions" ADD COLUMN "used_verbs" text[] DEFAULT '{}';
+ALTER TABLE "sessions" ADD COLUMN "used_phrases" text[] DEFAULT '{}';
+ALTER TABLE "sessions" ADD COLUMN "generation_version" text DEFAULT 'v1';
+```
+
+### Next Session
+**V1.5 Session 2: Master Generation Prompt** — Create the one-shot generation prompt with full content database context.
+
+See `docs/V1_5_UPGRADE_PLAN.md` for the full upgrade plan.
+
+---
+
+## Session 5 Completed: Conversation History for All Sections (V1 Upgrade)
 
 ### What Was Done
 - Added `conversationHistory` state to Zustand store (`Record<string, ConversationMessage[]>`)

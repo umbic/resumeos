@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { JDAnalysis, JDKeyword, KeywordStatus, VerbTracker } from '../types';
+import type { JDAnalysis, JDKeyword, KeywordStatus, VerbTracker, GeneratedResume, Gap, QualityScore } from '../types';
 
 export interface Message {
   id: string;
@@ -87,6 +87,12 @@ interface ResumeState {
   // Conversation history per section (for multi-turn refinements)
   conversationHistory: Record<string, ConversationMessage[]>;
 
+  // V1.5 One-Shot Generation
+  generatedResume: GeneratedResume | null;
+  gaps: Gap[];
+  qualityScore: QualityScore | null;
+  isGenerating: boolean;
+
   // Actions
   setSessionId: (id: string) => void;
   setFormat: (format: 'long' | 'short') => void;
@@ -123,6 +129,13 @@ interface ResumeState {
   updateUsedVerbs: (verb: string, section: string) => void;
   addConversationMessage: (section: string, message: ConversationMessage) => void;
   clearSectionHistory: (section: string) => void;
+  // V1.5 Actions
+  setGeneratedResume: (resume: GeneratedResume) => void;
+  setGaps: (gaps: Gap[]) => void;
+  setQualityScore: (score: QualityScore) => void;
+  updateGapStatus: (gapId: string, status: 'addressed' | 'skipped') => void;
+  setIsGenerating: (generating: boolean) => void;
+  clearGeneration: () => void;
   reset: () => void;
 }
 
@@ -147,6 +160,11 @@ const initialState = {
   messages: [] as Message[],
   isLoading: false,
   conversationHistory: {} as Record<string, ConversationMessage[]>,
+  // V1.5 One-Shot Generation
+  generatedResume: null as GeneratedResume | null,
+  gaps: [] as Gap[],
+  qualityScore: null as QualityScore | null,
+  isGenerating: false,
 };
 
 export const useResumeStore = create<ResumeState>((set) => ({
@@ -276,6 +294,30 @@ export const useResumeStore = create<ResumeState>((set) => ({
         [section]: [],
       },
     })),
+
+  // V1.5 Actions
+  setGeneratedResume: (resume) => set({ generatedResume: resume }),
+
+  setGaps: (gaps) => set({ gaps }),
+
+  setQualityScore: (score) => set({ qualityScore: score }),
+
+  updateGapStatus: (gapId, status) =>
+    set((state) => ({
+      gaps: state.gaps.map((gap) =>
+        gap.id === gapId ? { ...gap, status } : gap
+      ),
+    })),
+
+  setIsGenerating: (generating) => set({ isGenerating: generating }),
+
+  clearGeneration: () =>
+    set({
+      generatedResume: null,
+      gaps: [],
+      qualityScore: null,
+      isGenerating: false,
+    }),
 
   reset: () => set(initialState),
 }));
