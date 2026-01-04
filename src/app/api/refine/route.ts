@@ -225,7 +225,7 @@ function buildRefinementPrompt(input: RefinementPromptInput): string {
     chatHistory,
     userRequest,
     usedVerbs,
-    usedPhrases,
+    // usedPhrases - removed from prompt, keeping in interface for future use
   } = input;
 
   const sectionName = getSectionDisplayName(sectionKey);
@@ -313,23 +313,42 @@ ${userRequest}
 
 ## INSTRUCTIONS
 
-Refine the "${sectionName}" section based on the user's request.
+Refine the "${sectionName}" section using the user's request as CREATIVE DIRECTION.
 
-Rules:
-- CRITICAL: Every sentence must be grammatically complete with a subject and verb. Never produce fragments like "With 15 years experience, specializes in..." — this has no subject. Either use a name ("Umberto specializes") or restructure ("Strategic leader with 15 years who specializes...")
-- Maintain factual accuracy — don't invent metrics, clients, or claims
-- Keep within appropriate length constraints:
-  - Bullets: ≤40 words
-  - Career Highlights: 40-55 words
-  - Summary: 50-75 words
-  - Position Overviews: 35-50 words
-- Consider JD themes and keywords, but don't force them unnaturally
-- Preserve the core achievement/message while adjusting framing
-- Don't use these verbs (already used elsewhere): ${usedVerbs.join(', ') || 'None'}
-- Don't overuse these phrases: ${usedPhrases.join(', ') || 'None'}
-- Keep language executive-level, not robotic
-- No jargon soup (compound noun chains like "B2B enterprise technology platform partner")
-- If user asks for something that would require fabrication, explain what you can do instead
+### CRITICAL: You Are a Writer, Not a Transcriber
 
-Return ONLY the refined content text. No explanations, preamble, or markdown formatting—just the text.`;
+The user's request describes their INTENT. Your job is to:
+1. Understand what they want to achieve
+2. Write compelling executive content that fulfills that intent
+3. Make it BETTER than they described — you have the JD context, use it
+
+DO NOT:
+- Transcribe their words back as content
+- Copy their phrasing verbatim
+- Produce mechanical, literal interpretations
+
+DO:
+- Use strong action verbs (architected, pioneered, transformed, drove)
+- Create narrative flow with clear cause → action → result
+- Naturally weave in JD priority themes where they fit
+- Write something that sounds like a polished executive resume, not a description of what should be in one
+
+### Example
+
+User request: "make it about sales enablement and product strategy, keep the metrics"
+
+BAD (literal transcription):
+"Developed sales enablement and product strategy initiatives that drove 9% customer acquisition."
+
+GOOD (creative interpretation):
+"Architected category-defining brand positioning that armed sales teams with differentiated product narratives, accelerating 9% customer acquisition and 64% revenue growth across enterprise accounts."
+
+### Content Rules
+- Factual accuracy — don't invent metrics, clients, or claims
+- Length limits: Bullets ≤40 words, Highlights 40-55 words, Summary 50-75 words
+- Avoid verbs already used: ${usedVerbs.join(', ') || 'None'}
+- No jargon soup (compound noun chains)
+- Executive tone — confident, specific, results-oriented
+
+Return ONLY the refined content. No explanations or preamble.`;
 }
