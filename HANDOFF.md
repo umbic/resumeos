@@ -55,15 +55,28 @@ Added keyword-level gap detection to catch missing ATS keywords that the theme-b
 | `src/lib/quality-check.ts` | Updated runQualityCheck() signature, grade capping |
 | `src/app/api/generate-resume/route.ts` | Integrated keyword gap detection |
 
-### Commit
-`183013d` - feat: add keyword-level gap detection
+### Commits
+- `183013d` - feat: add keyword-level gap detection
+- `547779c` - feat: add KeywordGaps UI component
+
+### UI Added
+**KeywordGaps Component** (`src/components/resume/KeywordGaps.tsx`):
+- Shows "Missing Keywords" section with high-priority keywords (2+ frequency) not in resume
+- Shows "Other Keywords" section with medium-priority keywords as reference
+- Includes suggestion for which section could address each missing keyword
+- Collapsible panel placed after Quality Score in review page
+
+**Page Updates** (`src/app/page.tsx`):
+- Added `keywordGaps` and `atsKeywords` state
+- Capture `keyword_gaps` from generate-resume API response
+- Capture keywords from analyze-jd API response
+- Pass both to OneShotReview component
 
 ---
 
 ### Next Session Focus
-1. **Test keyword gap detection** - Verify missing keywords are detected
-2. **UI for keyword gaps** - Display keyword_gaps in the review panel
-3. **Address keyword gaps** - Allow user to regenerate with missing keywords
+1. **Test keyword gaps UI** - Verify missing keywords display correctly
+2. **Address keyword gaps** - Allow user to regenerate with missing keywords (optional)
 
 ---
 
