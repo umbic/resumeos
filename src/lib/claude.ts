@@ -209,25 +209,80 @@ Return ONLY the JSON object, no other text.`,
       console.log('First parse failed, attempting repair...');
 
       // Repair common JSON issues
-      const repaired = cleaned
+      let repaired = cleaned
         // Remove control characters except newlines and tabs
         .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
         // Fix trailing commas in arrays
         .replace(/,(\s*[\]}])/g, '$1')
         // Fix trailing commas in objects
-        .replace(/,(\s*})/g, '$1');
+        .replace(/,(\s*})/g, '$1')
+        // Fix missing commas between array elements (}\s*{)
+        .replace(/\}(\s*)\{/g, '},$1{')
+        // Fix missing commas between string and object in arrays ("text"\s*{)
+        .replace(/"(\s*)\{/g, '",$1{')
+        // Fix missing commas after strings in arrays ("text"\s*")
+        .replace(/"(\s+)"/g, '",$1"');
 
       try {
         return JSON.parse(repaired) as RawJDAnalysisResponse;
-      } catch {
-        // Try to truncate at last valid array/object close
+      } catch (secondError) {
+        console.log('Second parse failed, trying truncation...', secondError);
+
+        // Try to find the last complete keywords array and truncate there
+        // Look for the pattern: "keywords": [...] and ensure it closes properly
+        const keywordsMatch = repaired.match(/"keywords"\s*:\s*\[/);
+        if (keywordsMatch) {
+          const keywordsStart = repaired.indexOf(keywordsMatch[0]);
+          const arrayStart = repaired.indexOf('[', keywordsStart);
+
+          // Find matching closing bracket by counting depth
+          let depth = 0;
+          let lastValidArrayEnd = -1;
+          for (let i = arrayStart; i < repaired.length; i++) {
+            if (repaired[i] === '[') depth++;
+            if (repaired[i] === ']') {
+              depth--;
+              if (depth === 0) {
+                lastValidArrayEnd = i;
+                break;
+              }
+            }
+            // Track last complete object in array
+            if (repaired[i] === '}' && depth === 1) {
+              lastValidArrayEnd = i;
+            }
+          }
+
+          // If we found an incomplete array, try to close it
+          if (lastValidArrayEnd > arrayStart && depth > 0) {
+            // Find where to truncate - after last complete object
+            const beforeTruncate = repaired.substring(0, lastValidArrayEnd + 1);
+            const afterKeywords = repaired.substring(lastValidArrayEnd + 1);
+
+            // Close the array and find remaining structure
+            const remainingMatch = afterKeywords.match(/\s*,?\s*"recommendedBrandingMode"[\s\S]*$/);
+            if (remainingMatch) {
+              repaired = beforeTruncate + '],' + remainingMatch[0].replace(/^\s*,?\s*/, '');
+            } else {
+              // Just close the structure
+              repaired = beforeTruncate + '], "recommendedBrandingMode": "branded", "reasoning": "Unable to parse full response"}';
+            }
+
+            try {
+              return JSON.parse(repaired) as RawJDAnalysisResponse;
+            } catch {
+              // Continue to final fallback
+            }
+          }
+        }
+
+        // Final fallback: truncate at last valid structure
         const lastValidClose = Math.max(
           repaired.lastIndexOf('}'),
           repaired.lastIndexOf(']')
         );
 
         if (lastValidClose > 0) {
-          // Find matching opening brace
           let depth = 0;
           let truncatePoint = -1;
           for (let i = lastValidClose; i >= 0; i--) {
