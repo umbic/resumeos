@@ -93,6 +93,7 @@ export async function GET(
         generated_resume,
         gaps,
         quality_score,
+        refinement_history,
         created_at,
         updated_at
       FROM sessions

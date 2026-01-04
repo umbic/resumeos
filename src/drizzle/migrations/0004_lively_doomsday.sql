@@ -1,0 +1,1 @@
+ALTER TABLE "sessions" ADD COLUMN "refinement_history" jsonb DEFAULT '[]'::jsonb;

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import Anthropic from '@anthropic-ai/sdk';
-import type { GeneratedResume, EnhancedJDAnalysis, JDAnalysis } from '@/types';
+import { v4 as uuidv4 } from 'uuid';
+import type { GeneratedResume, EnhancedJDAnalysis, JDAnalysis, RefinementMessage } from '@/types';
 
 const anthropic = new Anthropic();
 
@@ -9,21 +10,29 @@ export async function POST(request: NextRequest) {
   try {
     const {
       sessionId,
-      section, // 'summary' | 'highlight_1' | 'position_1_overview' | 'position_1_bullet_1' etc.
-      instruction,
-      conversationHistory = []
+      sectionKey,      // 'summary' | 'highlight_1' | 'position_1_overview' | 'position_1_bullet_1' etc.
+      currentContent,  // Current text of the section
+      userMessage,     // What user wants changed
     } = await request.json();
 
-    if (!sessionId || !section || !instruction) {
+    if (!sessionId || !sectionKey || !userMessage) {
       return NextResponse.json(
-        { error: 'sessionId, section, and instruction are required' },
+        { error: 'sessionId, sectionKey, and userMessage are required' },
         { status: 400 }
       );
     }
 
-    // Get current resume
+    // Fetch full session data for context
     const sessionResult = await sql`
-      SELECT generated_resume, jd_analysis, used_verbs, used_phrases, target_title, target_company
+      SELECT
+        job_description,
+        jd_analysis,
+        generated_resume,
+        refinement_history,
+        used_verbs,
+        used_phrases,
+        target_title,
+        target_company
       FROM sessions
       WHERE id = ${sessionId}
     `;
@@ -45,61 +54,74 @@ export async function POST(request: NextRequest) {
     }
 
     const resume = session.generated_resume as GeneratedResume;
-    const usedVerbs = session.used_verbs || [];
-    const usedPhrases = session.used_phrases || [];
+    const jdAnalysis = session.jd_analysis as EnhancedJDAnalysis | JDAnalysis | null;
+    const jobDescription = session.job_description || '';
+    const refinementHistory = (session.refinement_history || []) as RefinementMessage[];
 
-    // Get current content for this section
-    const currentContent = extractSectionContent(resume, section);
+    // Filter chat history to only this section
+    const sectionHistory = refinementHistory.filter(m => m.section === sectionKey);
 
-    if (!currentContent) {
-      return NextResponse.json(
-        { error: `Section "${section}" not found in resume` },
-        { status: 400 }
-      );
-    }
-
-    // Build refinement prompt
+    // Build the comprehensive refinement prompt
     const prompt = buildRefinementPrompt({
-      section,
+      jobDescription,
+      jdAnalysis,
+      fullResume: resume,
+      sectionKey,
       currentContent,
-      instruction,
-      conversationHistory,
-      usedVerbs,
-      usedPhrases,
-      jdAnalysis: session.jd_analysis,
-      targetTitle: session.target_title,
-      targetCompany: session.target_company,
+      chatHistory: sectionHistory,
+      userRequest: userMessage,
+      usedVerbs: session.used_verbs || [],
+      usedPhrases: session.used_phrases || [],
     });
 
+    // Call Claude
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
-      messages: [
-        { role: 'user', content: prompt },
-      ],
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }],
     });
 
     const refinedContent = response.content[0].type === 'text'
       ? response.content[0].text.trim()
       : '';
 
-    // Update the resume with refined content
-    const updatedResume = updateSectionContent(resume, section, refinedContent);
+    // Create new chat messages
+    const newMessages: RefinementMessage[] = [
+      {
+        id: uuidv4(),
+        section: sectionKey,
+        role: 'user',
+        content: userMessage,
+        timestamp: new Date().toISOString(),
+      },
+      {
+        id: uuidv4(),
+        section: sectionKey,
+        role: 'assistant',
+        content: refinedContent,
+        timestamp: new Date().toISOString(),
+      },
+    ];
 
-    // Save back to database
+    // Update the resume with refined content
+    const updatedResume = updateSectionContent(resume, sectionKey, refinedContent);
+
+    // Append chat history and update resume
+    const updatedHistory = [...refinementHistory, ...newMessages];
+
     await sql`
       UPDATE sessions
       SET
         generated_resume = ${JSON.stringify(updatedResume)}::jsonb,
+        refinement_history = ${JSON.stringify(updatedHistory)}::jsonb,
         updated_at = NOW()
       WHERE id = ${sessionId}
     `;
 
     return NextResponse.json({
       success: true,
-      section,
-      refined_content: refinedContent,
-      resume: updatedResume,
+      refinedContent,
+      chatHistory: updatedHistory.filter(m => m.section === sectionKey),
     });
 
   } catch (error) {
@@ -111,34 +133,32 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function extractSectionContent(resume: GeneratedResume, section: string): string {
-  if (section === 'summary') {
-    return resume.summary;
+// ============================================
+// Helper Functions
+// ============================================
+
+function getSectionDisplayName(sectionKey: string): string {
+  if (sectionKey === 'summary') return 'Summary';
+
+  if (sectionKey.startsWith('highlight_')) {
+    const num = sectionKey.split('_')[1];
+    return `Career Highlight ${num}`;
   }
 
-  if (section.startsWith('highlight_')) {
-    const index = parseInt(section.split('_')[1]) - 1;
-    return resume.career_highlights[index] || '';
-  }
+  if (sectionKey.startsWith('position_')) {
+    const parts = sectionKey.split('_');
+    const posNum = parts[1];
+    const field = parts[2];
 
-  if (section.startsWith('position_')) {
-    const parts = section.split('_');
-    const posNum = parseInt(parts[1]);
-    const position = resume.positions.find(p => p.number === posNum);
-
-    if (!position) return '';
-
-    if (parts[2] === 'overview') {
-      return position.overview;
+    if (field === 'overview') {
+      return `Position ${posNum} Overview`;
     }
-
-    if (parts[2] === 'bullet') {
-      const bulletIndex = parseInt(parts[3]) - 1;
-      return position.bullets?.[bulletIndex] || '';
+    if (field === 'bullet') {
+      return `Position ${posNum} Bullet ${parts[3]}`;
     }
   }
 
-  return '';
+  return sectionKey;
 }
 
 function updateSectionContent(
@@ -178,51 +198,132 @@ function updateSectionContent(
   return updated;
 }
 
-function buildRefinementPrompt(input: {
-  section: string;
+interface RefinementPromptInput {
+  jobDescription: string;
+  jdAnalysis: EnhancedJDAnalysis | JDAnalysis | null;
+  fullResume: GeneratedResume;
+  sectionKey: string;
   currentContent: string;
-  instruction: string;
-  conversationHistory: Array<{ role: string; content: string }>;
+  chatHistory: RefinementMessage[];
+  userRequest: string;
   usedVerbs: string[];
   usedPhrases: string[];
-  jdAnalysis: JDAnalysis | EnhancedJDAnalysis | null;
-  targetTitle: string;
-  targetCompany: string;
-}): string {
-  // Extract theme info from either analysis format
+}
+
+function buildRefinementPrompt(input: RefinementPromptInput): string {
+  const {
+    jobDescription,
+    jdAnalysis,
+    fullResume,
+    sectionKey,
+    currentContent,
+    chatHistory,
+    userRequest,
+    usedVerbs,
+    usedPhrases,
+  } = input;
+
+  const sectionName = getSectionDisplayName(sectionKey);
+
+  // Extract JD analysis info based on format
+  let targetTitle = '';
+  let targetCompany = '';
   let priorityThemes: string[] = [];
-  if (input.jdAnalysis) {
-    if ('priority_themes' in input.jdAnalysis) {
+  let atsKeywords: string[] = [];
+
+  if (jdAnalysis) {
+    if ('priority_themes' in jdAnalysis) {
       // EnhancedJDAnalysis
-      priorityThemes = input.jdAnalysis.priority_themes.map(t => t.theme);
-    } else if ('strategic' in input.jdAnalysis) {
+      targetTitle = jdAnalysis.target_title;
+      targetCompany = jdAnalysis.target_company;
+      priorityThemes = jdAnalysis.priority_themes.map(t => t.theme);
+      atsKeywords = jdAnalysis.ats_keywords.map(k => `${k.keyword} (${k.frequency}x)`);
+    } else if ('strategic' in jdAnalysis) {
       // JDAnalysis
-      priorityThemes = input.jdAnalysis.strategic.positioningThemes;
+      targetTitle = jdAnalysis.strategic.targetTitle;
+      targetCompany = jdAnalysis.strategic.targetCompany;
+      priorityThemes = jdAnalysis.strategic.positioningThemes;
     }
   }
 
-  return `You are refining a section of an executive resume.
+  // Build positions section for context
+  const positionsText = fullResume.positions.map(p => {
+    let posText = `\n**${p.title}** | ${p.company} | ${p.dates}\n${p.overview}`;
+    if (p.bullets && p.bullets.length > 0) {
+      posText += '\n' + p.bullets.map(b => `• ${b}`).join('\n');
+    }
+    return posText;
+  }).join('\n');
 
-## CURRENT CONTENT
-${input.currentContent}
+  // Build chat history section
+  const historyText = chatHistory.length > 0
+    ? chatHistory.map(m => `**${m.role === 'user' ? 'User' : 'Claude'}**: ${m.content}`).join('\n\n')
+    : '';
 
-## USER INSTRUCTION
-${input.instruction}
+  return `You are refining a specific section of an executive resume. You have full context of the job description and entire resume.
 
-## CONVERSATION HISTORY
-${input.conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n') || 'No previous conversation'}
+## TARGET ROLE
+**Title**: ${targetTitle || 'Not specified'}
+**Company**: ${targetCompany || 'Not specified'}
 
-## RULES (Still Apply)
-- Maximum 40 words for bullets
-- Preserve all metrics and facts exactly
-- Don't use these verbs (already used): ${input.usedVerbs.join(', ') || 'None'}
-- Don't use these phrases more than 2x: ${input.usedPhrases.join(', ') || 'None'}
+## PRIORITY THEMES (from JD analysis)
+${priorityThemes.length > 0 ? priorityThemes.map(t => `- ${t}`).join('\n') : '- None specified'}
+
+## ATS KEYWORDS TO CONSIDER
+${atsKeywords.length > 0 ? atsKeywords.map(k => `- ${k}`).join('\n') : '- None specified'}
+
+## FULL JOB DESCRIPTION
+${jobDescription || 'Not provided'}
+
+---
+
+## CURRENT FULL RESUME
+
+### Summary
+${fullResume.summary}
+
+### Career Highlights
+${fullResume.career_highlights.map((h, i) => `${i + 1}. ${h}`).join('\n')}
+
+### Positions
+${positionsText}
+
+---
+
+## SECTION TO REFINE
+**Section**: ${sectionName}
+
+**Current Content**:
+${currentContent}
+
+${historyText ? `
+## PREVIOUS REFINEMENT CONVERSATION
+${historyText}
+` : ''}
+
+## USER REQUEST
+${userRequest}
+
+---
+
+## INSTRUCTIONS
+
+Refine the "${sectionName}" section based on the user's request.
+
+Rules:
+- Maintain factual accuracy — don't invent metrics, clients, or claims
+- Keep within appropriate length constraints:
+  - Bullets: ≤40 words
+  - Career Highlights: 40-55 words
+  - Summary: 50-75 words
+  - Position Overviews: 35-50 words
+- Consider JD themes and keywords, but don't force them unnaturally
+- Preserve the core achievement/message while adjusting framing
+- Don't use these verbs (already used elsewhere): ${usedVerbs.join(', ') || 'None'}
+- Don't overuse these phrases: ${usedPhrases.join(', ') || 'None'}
 - Keep language executive-level, not robotic
 - No jargon soup (compound noun chains like "B2B enterprise technology platform partner")
+- If user asks for something that would require fabrication, explain what you can do instead
 
-## JD CONTEXT
-Target: ${input.targetTitle} at ${input.targetCompany}
-Priority themes: ${priorityThemes.join(', ') || 'Not specified'}
-
-Return ONLY the refined content. No explanation, no markdown, just the text.`;
+Return ONLY the refined content text. No explanations, preamble, or markdown formatting—just the text.`;
 }

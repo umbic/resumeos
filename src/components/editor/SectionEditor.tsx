@@ -4,8 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { X, Pencil, MessageSquare, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ContentBank } from './ContentBank';
+import { RefineChat } from './RefineChat';
+import type { RefinementMessage } from '@/types';
 
 interface SectionEditorProps {
+  sessionId: string;
   sectionKey: string;
   currentContent: string;
   usedContentIds?: string[]; // Content IDs already used in the resume
@@ -93,6 +96,7 @@ interface ContentBankItem {
 }
 
 export function SectionEditor({
+  sessionId,
   sectionKey,
   currentContent,
   usedContentIds = [],
@@ -108,8 +112,40 @@ export function SectionEditor({
   const [loadingBank, setLoadingBank] = useState(false);
   const [bankFetched, setBankFetched] = useState(false);
 
+  // Chat refinement state
+  const [chatHistory, setChatHistory] = useState<RefinementMessage[]>([]);
+  const [chatHistoryFetched, setChatHistoryFetched] = useState(false);
+
   const wordCount = countWords(content);
   const displayName = getSectionDisplayName(sectionKey);
+
+  // Fetch chat history when component mounts or Refine tab is selected
+  const fetchChatHistory = useCallback(async () => {
+    if (chatHistoryFetched) return;
+
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}`);
+      const data = await response.json();
+
+      if (data.session?.refinement_history) {
+        const sectionHistory = data.session.refinement_history.filter(
+          (m: RefinementMessage) => m.section === sectionKey
+        );
+        setChatHistory(sectionHistory);
+      }
+      setChatHistoryFetched(true);
+    } catch (error) {
+      console.error('Failed to fetch chat history:', error);
+      setChatHistoryFetched(true);
+    }
+  }, [sessionId, sectionKey, chatHistoryFetched]);
+
+  // Fetch chat history when Refine tab is activated
+  useEffect(() => {
+    if (activeTab === 'refine' && !chatHistoryFetched) {
+      fetchChatHistory();
+    }
+  }, [activeTab, chatHistoryFetched, fetchChatHistory]);
 
   // Fetch bank items when Bank tab is selected
   const fetchBankItems = useCallback(async () => {
@@ -164,6 +200,12 @@ export function SectionEditor({
   const handleBankSelect = (selectedContent: string) => {
     setContent(selectedContent);
     setActiveTab('edit'); // Switch to edit mode so user can refine if needed
+  };
+
+  const handleRefined = (newContent: string, updatedHistory: RefinementMessage[]) => {
+    setContent(newContent);
+    setChatHistory(updatedHistory);
+    setActiveTab('edit'); // Switch to edit mode to review/save
   };
 
   const hasChanges = content !== currentContent;
@@ -266,12 +308,13 @@ export function SectionEditor({
           )}
 
           {activeTab === 'refine' && (
-            <div className="flex items-center justify-center h-48 text-gray-500">
-              <div className="text-center">
-                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                <p>Refine with AI coming in next session</p>
-              </div>
-            </div>
+            <RefineChat
+              sessionId={sessionId}
+              sectionKey={sectionKey}
+              currentContent={content}
+              chatHistory={chatHistory}
+              onRefined={handleRefined}
+            />
           )}
 
           {activeTab === 'bank' && (

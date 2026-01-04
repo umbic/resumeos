@@ -143,3 +143,15 @@ export interface ContentMapping {
   content_ids: string[];
   reframe_suggestion?: string;
 }
+
+// ============================================
+// Chat Refinement Types
+// ============================================
+
+export interface RefinementMessage {
+  id: string;
+  section: string;       // "summary", "highlight_1", "position_1_overview", etc.
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;     // ISO date string
+}

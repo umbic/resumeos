@@ -1,7 +1,115 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: Session 4c - Content Bank
+> **Last Session**: Session 4d - Chat Refinement
+
+---
+
+## Session 4d Completed: Chat Refinement with Full Context
+
+### What Was Done
+Added contextual chat refinement to the Section Editor. The "Refine" tab is now functional and sends full context (JD, JD analysis, entire resume, and chat history) to Claude for intelligent refinements.
+
+### Changes Made
+
+**Database Schema** (`src/drizzle/schema.ts`):
+- Added `refinement_history` JSONB column for storing per-section chat history
+
+**Migration**:
+- Generated `0004_lively_doomsday.sql` for the refinement_history column
+
+**New Type** (`src/types/index.ts`):
+- Added `RefinementMessage` interface with id, section, role, content, timestamp
+
+**Updated API Endpoint**: `src/app/api/refine/route.ts`
+
+Complete rewrite with full context awareness:
+- Request now takes: `sessionId`, `sectionKey`, `currentContent`, `userMessage`
+- Fetches full session data (JD, JD analysis, full resume, chat history)
+- Builds comprehensive prompt with all context
+- Saves chat history and updated resume to database
+- Returns refined content and updated chat history
+
+Response:
+```json
+{
+  "success": true,
+  "refinedContent": "...",
+  "chatHistory": [/* RefinementMessage[] for this section */]
+}
+```
+
+**Updated API Endpoint**: `src/app/api/sessions/[id]/route.ts`
+- GET now returns `refinement_history` field
+
+**New Component**: `src/components/editor/RefineChat.tsx`
+- Displays current section content (read-only)
+- Shows chat history for this section with user/assistant message bubbles
+- Quick suggestion chips (e.g., "Make it shorter", "Emphasize leadership")
+- Text input for refinement requests
+- Loading state while Claude processes
+- Error handling and display
+- Calls `onRefined` callback with new content and updated history
+
+**Updated SectionEditor** (`src/components/editor/SectionEditor.tsx`):
+- Added `sessionId` prop (required for refine API)
+- Added `chatHistory` state and `chatHistoryFetched` flag
+- Fetches chat history when Refine tab is opened
+- Integrated `RefineChat` component in Refine tab
+- `handleRefined` callback updates content, history, and switches to Edit tab
+
+**Updated OneShotReview** (`src/components/resume/OneShotReview.tsx`):
+- Now passes `sessionId` to SectionEditor
+
+### Refinement Prompt Context
+
+Each refinement request includes:
+1. **Target Role** - Title and company from JD analysis
+2. **Priority Themes** - From JD analysis
+3. **ATS Keywords** - With frequency counts
+4. **Full JD** - Complete job description text
+5. **Full Resume** - Summary, highlights, all positions with bullets
+6. **Section to Refine** - Current content being edited
+7. **Chat History** - Previous refinements for this section
+8. **User Request** - What the user wants changed
+9. **Quality Rules** - Word limits, verb constraints, anti-jargon rules
+
+### Files Created
+| File | Description |
+|------|-------------|
+| `src/components/editor/RefineChat.tsx` | Chat refinement UI component |
+| `src/drizzle/migrations/0004_lively_doomsday.sql` | Migration for refinement_history |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/types/index.ts` | Added RefinementMessage type |
+| `src/drizzle/schema.ts` | Added refinement_history column |
+| `src/app/api/refine/route.ts` | Complete rewrite with full context |
+| `src/app/api/sessions/[id]/route.ts` | Return refinement_history in GET |
+| `src/components/editor/SectionEditor.tsx` | Added sessionId prop, chat history state, RefineChat integration |
+| `src/components/resume/OneShotReview.tsx` | Pass sessionId to SectionEditor |
+
+### Testing Steps
+1. Open a session with a generated resume
+2. Click any section to open the editor
+3. Click the "Refine" tab
+4. See current content displayed at top
+5. Type a refinement request (e.g., "Make it shorter") or click a suggestion
+6. Click Send button
+7. Loading state appears while Claude processes
+8. Refined content appears, automatically switches to Edit tab
+9. Can save the refined content or continue refining
+10. Close and reopen editor - chat history persists
+11. Refinements are context-aware (reference JD themes, aware of full resume)
+
+---
+
+### Next Session Focus: 4e - Integration & Polish
+1. Final testing of all Section Editor tabs (Edit, Refine, Bank)
+2. Bug fixes and UX polish
+3. Verify refinements preserve quality rules
+4. End-to-end flow testing
 
 ---
 
@@ -85,13 +193,6 @@ Response:
 |------|--------|
 | `src/components/editor/SectionEditor.tsx` | Added bank tab functionality, usedContentIds prop |
 | `src/components/resume/OneShotReview.tsx` | Pass usedContentIds to SectionEditor |
-
----
-
-### Next Session Focus: 4d - Chat Refinement
-1. Add AI-powered refinement to the Refine tab
-2. Allow users to describe changes in natural language
-3. Claude refines content while preserving quality rules
 
 ---
 
