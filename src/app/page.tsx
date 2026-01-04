@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { OneShotInput } from '@/components/resume/OneShotInput';
 import { OneShotReview } from '@/components/resume/OneShotReview';
-import type { GeneratedResume, Gap, QualityScore } from '@/types';
+import type { GeneratedResume, Gap, QualityScore, KeywordGap, ATSKeyword } from '@/types';
 
 export default function Home() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [resume, setResume] = useState<GeneratedResume | null>(null);
   const [gaps, setGaps] = useState<Gap[]>([]);
+  const [keywordGaps, setKeywordGaps] = useState<KeywordGap[]>([]);
+  const [atsKeywords, setAtsKeywords] = useState<ATSKeyword[]>([]);
   const [qualityScore, setQualityScore] = useState<QualityScore | null>(null);
   const [targetTitle, setTargetTitle] = useState('');
   const [targetCompany, setTargetCompany] = useState('');
@@ -36,6 +38,16 @@ export default function Home() {
       setTargetTitle(analyzeData.analysis?.targetTitle || analyzeData.analysis?.strategic?.targetTitle || 'Role');
       setTargetCompany(analyzeData.analysis?.targetCompany || analyzeData.analysis?.strategic?.targetCompany || 'Company');
 
+      // Store ATS keywords from analysis (convert to ATSKeyword format if needed)
+      const keywords = analyzeData.analysis?.keywords || [];
+      const formattedKeywords: ATSKeyword[] = keywords.map((k: { keyword: string; frequency?: number; priority: string; category?: string }) => ({
+        keyword: k.keyword,
+        frequency: k.frequency || 1,
+        priority: k.priority as 'high' | 'medium' | 'low',
+        category: k.category,
+      }));
+      setAtsKeywords(formattedKeywords);
+
       // Step 2: Generate full resume
       const generateResponse = await fetch('/api/generate-resume', {
         method: 'POST',
@@ -51,6 +63,7 @@ export default function Home() {
 
       setResume(generateData.resume);
       setGaps(generateData.gaps || []);
+      setKeywordGaps(generateData.keyword_gaps || []);
       setQualityScore(generateData.quality_score);
 
     } catch (error) {
@@ -77,6 +90,7 @@ export default function Home() {
       if (data.success) {
         setResume(data.resume);
         setGaps(data.gaps || []);
+        setKeywordGaps(data.keyword_gaps || []);
         setQualityScore(data.quality_score);
       }
     } catch (error) {
@@ -129,6 +143,8 @@ export default function Home() {
       sessionId={sessionId!}
       resume={resume}
       gaps={gaps}
+      keywordGaps={keywordGaps}
+      atsKeywords={atsKeywords}
       qualityScore={qualityScore!}
       targetTitle={targetTitle}
       targetCompany={targetCompany}

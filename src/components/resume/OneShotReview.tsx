@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import type { GeneratedResume, Gap, QualityScore } from '@/types';
+import type { GeneratedResume, Gap, QualityScore, KeywordGap, ATSKeyword } from '@/types';
 import { GapRecommendations } from './GapRecommendations';
 import { QualityIndicator } from './QualityIndicator';
 import { ResumePreview } from './ResumePreview';
 import { ChatRefinement } from './ChatRefinement';
+import { KeywordGaps } from './KeywordGaps';
 import { Download, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface OneShotReviewProps {
   sessionId: string;
   resume: GeneratedResume;
   gaps: Gap[];
+  keywordGaps: KeywordGap[];
+  atsKeywords: ATSKeyword[];
   qualityScore: QualityScore;
   targetTitle: string;
   targetCompany: string;
@@ -26,6 +29,8 @@ export function OneShotReview({
   sessionId,
   resume,
   gaps,
+  keywordGaps,
+  atsKeywords,
   qualityScore,
   targetTitle,
   targetCompany,
@@ -111,6 +116,12 @@ export function OneShotReview({
                 />
               </div>
             </div>
+
+            {/* Keyword Gaps */}
+            <KeywordGaps
+              keywordGaps={keywordGaps}
+              atsKeywords={atsKeywords}
+            />
 
             {/* Gap Recommendations */}
             {openGaps.length > 0 && (
