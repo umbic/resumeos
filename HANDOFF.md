@@ -1,7 +1,37 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: V1.5 Session 2 - Master Generation Prompt
+> **Last Session**: V1.5 Session 3 - One-Shot API Route
+
+---
+
+## V1.5 Session 3 Completed: One-Shot API Route
+
+### What Was Done
+- Created `POST /api/generate-resume` — single call generates complete resume
+  - Fetches session with JD analysis
+  - Converts V1 JDAnalysis to V1.5 EnhancedJDAnalysis format
+  - Calls `generateFullResume()` from Session 2
+  - Stores generated resume, verbs, and generation version in session
+- Created `POST /api/refine` — handles chat-based refinements
+  - Supports sections: summary, highlight_N, position_N_overview, position_N_bullet_N
+  - Preserves quality rules (40 word max, verb/phrase constraints)
+  - Updates specific section while keeping rest of resume intact
+- Added `verbs_used` field to `GeneratedResume` type
+- Existing V1 routes (`/api/generate-section`, `/api/analyze-jd`) unchanged for backward compatibility
+
+### API Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/generate-resume | One-shot full resume generation |
+| POST | /api/refine | Chat-based section refinement |
+| POST | /api/analyze-jd | JD analysis (unchanged, V1) |
+| POST | /api/generate-section | Section generation (unchanged, V1) |
+
+### Next Session
+**V1.5 Session 4: Gap Detection + Recommendations** — Add gap detection and content recommendations.
+
+See `docs/SESSION_4_GAP_DETECTION.md` for full session details.
 
 ---
 

@@ -58,6 +58,7 @@ export interface GeneratedResume {
   positions: GeneratedPosition[];
   themes_addressed: string[];
   themes_not_addressed: string[];
+  verbs_used: string[];
   content_ids_used: string[];
   generated_at: string; // ISO date
 }
