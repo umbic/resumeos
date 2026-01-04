@@ -1,7 +1,60 @@
 # ResumeOS - Session Handoff
 
-> **Last Updated**: 2026-01-03
-> **Last Session**: V1.5 Session 6 - UI Overhaul (V1.5 COMPLETE)
+> **Last Updated**: 2026-01-04
+> **Last Session**: V1.5 Session 7 - Summary & Highlights Quality
+
+---
+
+## V1.5 Session 7 Completed: Summary & Career Highlights Quality
+
+### What Was Done
+Enhanced the master generation prompt to produce higher-quality summaries and career highlights.
+
+### Issues Addressed
+- Summary was too short (2 sentences) without narrative structure
+- Career highlights were short/punchy but not reframed to JD themes
+- Quality score gave false "A" grades to resumes missing critical keywords
+
+### Changes Made
+
+**Summary Requirements** (new section):
+- Exactly 4 sentences following narrative arc:
+  1. Identity statement (who you are, years of experience)
+  2. Macro signature achievement (PATTERN of impact, not single metric)
+  3. How you work (approach, methodology, cross-functional style)
+  4. Outcome/value (framed in JD language)
+- Total length: 50-75 words
+- Integrate 2-3 priority keywords naturally
+
+**Career Highlights Requirements** (new section):
+- Format: `**[Bold hook phrase]**: [Narrative sentence with context + metric]`
+- Total length: 40-55 words per highlight (longer than bullets)
+- Bold hook: 8-12 words, echo JD language
+- Each highlight MUST include quantified metric
+- Use content_long as raw material for more substance
+
+**Self-Check** (updated):
+- Expanded from 6 to 10 items
+- Added summary word count and narrative arc checks
+- Added highlight format and metric checks
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/lib/prompts/master-generation.ts` | Added SUMMARY REQUIREMENTS and CAREER HIGHLIGHTS REQUIREMENTS sections |
+
+### Commit
+`bad74bd` - feat: enhance summary and career highlights requirements in master prompt
+
+---
+
+### Next Session Focus
+1. **Test with real JD** - Generate resume and verify:
+   - Summary is 4 sentences, 50-75 words, tells a narrative
+   - Career highlights are 40-55 words with bold hooks and metrics
+   - Keywords (GTM, SaaS, API, Product Marketing) appear naturally
+2. **Quality gate refinement** - Consider adjusting quality check to catch missing keywords
+3. **Bug fixes** - Address any issues from testing
 
 ---
 
