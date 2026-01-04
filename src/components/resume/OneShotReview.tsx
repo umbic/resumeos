@@ -223,9 +223,9 @@ export function OneShotReview({
       {/* Section Editor Modal */}
       {editingSection && (
         <SectionEditor
-          sessionId={sessionId}
           sectionKey={editingSection.key}
           currentContent={editingSection.content}
+          usedContentIds={resume.content_ids_used || []}
           onClose={() => {
             setEditingSection(null);
             setActiveSection(null);

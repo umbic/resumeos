@@ -1,7 +1,97 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: Session 4b - Section Editor with Edit Mode
+> **Last Session**: Session 4c - Content Bank
+
+---
+
+## Session 4c Completed: Content Bank
+
+### What Was Done
+Added a "Bank" tab to the Section Editor that shows alternative content options from the database. Users can browse and select alternative content items to replace current section content.
+
+### Changes Made
+
+**New API Endpoint**: `src/app/api/content-bank/route.ts`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/content-bank` | Fetch alternative content items |
+
+Query Parameters:
+- `type` (required): `summary`, `career_highlight`, `bullet`, or `overview`
+- `position` (optional): Position number (1-6) for bullets/overviews
+- `exclude` (optional): Comma-separated content IDs to exclude (already used items)
+
+Response:
+```json
+{
+  "items": [
+    {
+      "id": "CH-03",
+      "type": "career_highlight",
+      "position": null,
+      "contentShort": "...",
+      "contentMedium": "...",
+      "contentLong": "...",
+      "contentGeneric": "...",
+      "categoryTags": ["consumer", "DTC"],
+      "outcomeTags": ["growth", "revenue"]
+    }
+  ]
+}
+```
+
+**New Component**: `src/components/editor/ContentBank.tsx`
+- Displays scrollable list of alternative content items
+- Each card shows:
+  - Content ID as header
+  - Content preview (uses contentLong, falls back to contentMedium/Short)
+  - Category and outcome tags
+  - [Use This] button to select content
+- For overviews: Shows Short/Medium/Long versions as separate cards
+- Handles loading state and empty state
+
+**Updated SectionEditor** (`src/components/editor/SectionEditor.tsx`):
+- Added `usedContentIds` prop to track already-used content
+- Added bank items state and loading state
+- Added `getBankQueryParams()` helper to parse section key into API query params
+- Fetches bank items when Bank tab is clicked (lazy loading)
+- [Use This] puts selected content in textarea and switches to Edit tab
+- Removed unused `sessionId` prop (not needed)
+
+**Updated OneShotReview** (`src/components/resume/OneShotReview.tsx`):
+- Passes `usedContentIds={resume.content_ids_used || []}` to SectionEditor
+- Removed `sessionId` prop from SectionEditor (unused)
+
+### Content Bank Query Mapping
+
+| Section Type | API Query |
+|--------------|-----------|
+| Summary | `type=summary` |
+| Career Highlights | `type=career_highlight&exclude=<used_ids>` |
+| P1 Bullets | `type=bullet&position=1&exclude=<used_ids>` |
+| P2 Bullets | `type=bullet&position=2&exclude=<used_ids>` |
+| P3-P6 Bullets | `type=bullet&position=N` |
+| Overviews | `type=overview&position=N` (shows 3 version cards) |
+
+### Files Created
+| File | Description |
+|------|-------------|
+| `src/app/api/content-bank/route.ts` | GET endpoint for fetching content items |
+| `src/components/editor/ContentBank.tsx` | Content bank display component |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/components/editor/SectionEditor.tsx` | Added bank tab functionality, usedContentIds prop |
+| `src/components/resume/OneShotReview.tsx` | Pass usedContentIds to SectionEditor |
+
+---
+
+### Next Session Focus: 4d - Chat Refinement
+1. Add AI-powered refinement to the Refine tab
+2. Allow users to describe changes in natural language
+3. Claude refines content while preserving quality rules
 
 ---
 
@@ -73,13 +163,6 @@ Response:
 |------|--------|
 | `src/components/resume/ResumePreview.tsx` | Pass content with section clicks |
 | `src/components/resume/OneShotReview.tsx` | Integrate section editor |
-
----
-
-### Next Session Focus: 4c - Content Bank
-1. Add Bank tab functionality to SectionEditor
-2. Show available content items from database
-3. Allow swapping section content with bank items
 
 ---
 

@@ -1,18 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Pencil, MessageSquare, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ContentBank } from './ContentBank';
 
 interface SectionEditorProps {
-  sessionId: string;
   sectionKey: string;
   currentContent: string;
+  usedContentIds?: string[]; // Content IDs already used in the resume
   onClose: () => void;
   onSave: (newContent: string) => void;
 }
 
 type EditorTab = 'edit' | 'refine' | 'bank';
+
+// Content bank query params
+interface BankQueryParams {
+  type: 'summary' | 'career_highlight' | 'bullet' | 'overview';
+  position?: number;
+}
+
+// Parse section key to get bank query params
+function getBankQueryParams(sectionKey: string): BankQueryParams {
+  if (sectionKey === 'summary') {
+    return { type: 'summary' };
+  }
+
+  if (sectionKey.startsWith('highlight_')) {
+    return { type: 'career_highlight' };
+  }
+
+  if (sectionKey.startsWith('position_')) {
+    const parts = sectionKey.split('_');
+    const posNum = parseInt(parts[1]);
+    const field = parts[2];
+
+    if (field === 'overview') {
+      return { type: 'overview', position: posNum };
+    }
+
+    if (field === 'bullet') {
+      return { type: 'bullet', position: posNum };
+    }
+  }
+
+  // Default fallback
+  return { type: 'summary' };
+}
 
 function getSectionDisplayName(sectionKey: string): string {
   if (sectionKey === 'summary') return 'Summary';
@@ -42,9 +77,25 @@ function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(word => word.length > 0).length;
 }
 
+// Content item from the API
+interface ContentBankItem {
+  id: string;
+  type: string;
+  position: number | null;
+  contentShort: string | null;
+  contentMedium: string | null;
+  contentLong: string | null;
+  contentGeneric: string | null;
+  categoryTags: string[] | null;
+  outcomeTags: string[] | null;
+  functionTags: string[] | null;
+  brandTags: string[] | null;
+}
+
 export function SectionEditor({
   sectionKey,
   currentContent,
+  usedContentIds = [],
   onClose,
   onSave,
 }: SectionEditorProps) {
@@ -52,8 +103,54 @@ export function SectionEditor({
   const [content, setContent] = useState(currentContent);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Bank state
+  const [bankItems, setBankItems] = useState<ContentBankItem[]>([]);
+  const [loadingBank, setLoadingBank] = useState(false);
+  const [bankFetched, setBankFetched] = useState(false);
+
   const wordCount = countWords(content);
   const displayName = getSectionDisplayName(sectionKey);
+
+  // Fetch bank items when Bank tab is selected
+  const fetchBankItems = useCallback(async () => {
+    if (bankFetched) return; // Don't refetch if already loaded
+
+    setLoadingBank(true);
+    try {
+      const params = getBankQueryParams(sectionKey);
+
+      const queryParams = new URLSearchParams({
+        type: params.type,
+      });
+
+      if (params.position !== undefined) {
+        queryParams.set('position', params.position.toString());
+      }
+
+      if (usedContentIds.length > 0) {
+        queryParams.set('exclude', usedContentIds.join(','));
+      }
+
+      const response = await fetch(`/api/content-bank?${queryParams.toString()}`);
+      const data = await response.json();
+
+      if (data.items) {
+        setBankItems(data.items);
+      }
+      setBankFetched(true);
+    } catch (error) {
+      console.error('Failed to fetch content bank:', error);
+    } finally {
+      setLoadingBank(false);
+    }
+  }, [sectionKey, usedContentIds, bankFetched]);
+
+  // Fetch when Bank tab is activated
+  useEffect(() => {
+    if (activeTab === 'bank' && !bankFetched) {
+      fetchBankItems();
+    }
+  }, [activeTab, bankFetched, fetchBankItems]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -62,6 +159,11 @@ export function SectionEditor({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleBankSelect = (selectedContent: string) => {
+    setContent(selectedContent);
+    setActiveTab('edit'); // Switch to edit mode so user can refine if needed
   };
 
   const hasChanges = content !== currentContent;
@@ -173,12 +275,12 @@ export function SectionEditor({
           )}
 
           {activeTab === 'bank' && (
-            <div className="flex items-center justify-center h-48 text-gray-500">
-              <div className="text-center">
-                <Database className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                <p>Content Bank coming in next session</p>
-              </div>
-            </div>
+            <ContentBank
+              sectionKey={sectionKey}
+              items={bankItems}
+              loading={loadingBank}
+              onSelect={handleBankSelect}
+            />
           )}
         </div>
 
