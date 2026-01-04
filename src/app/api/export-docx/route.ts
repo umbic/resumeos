@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { Packer } from 'docx';
 import { generateResumeDocument } from '@/lib/docx-export';
 import { STATIC_CONTENT, POSITIONS, getContentVersion, shouldUseGeneric } from '@/lib/rules';
+import type { GeneratedResume } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
         approved_summary,
         approved_highlights,
         approved_positions,
+        generated_resume,
         format,
         branding_mode
       FROM sessions
@@ -42,8 +44,76 @@ export async function POST(request: NextRequest) {
     const brandingMode = session.branding_mode || 'branded';
     const targetCompany = session.target_company || '';
 
+    // Check if we have a V1.5 generated_resume
+    let generatedResume: GeneratedResume | null = null;
+    if (typeof session.generated_resume === 'string') {
+      try {
+        generatedResume = JSON.parse(session.generated_resume);
+      } catch {
+        generatedResume = null;
+      }
+    } else if (session.generated_resume && typeof session.generated_resume === 'object') {
+      generatedResume = session.generated_resume as GeneratedResume;
+    }
+
+    // If we have a V1.5 generated resume, use it
+    if (generatedResume) {
+      // Build positions from generated resume
+      const positions: { [key: number]: {
+        title: string;
+        company: string;
+        location: string;
+        dates: string;
+        overview: string;
+        bullets: string[];
+      }} = {};
+
+      for (const pos of generatedResume.positions) {
+        positions[pos.number] = {
+          title: pos.title,
+          company: pos.company,
+          location: pos.location,
+          dates: pos.dates,
+          overview: pos.overview,
+          bullets: pos.bullets || [],
+        };
+      }
+
+      // Build header
+      const header = {
+        name: STATIC_CONTENT.header.name,
+        title: generatedResume.positions[0]?.title || session.target_title || 'Brand Strategist',
+        location: STATIC_CONTENT.header.location,
+        phone: STATIC_CONTENT.header.phone,
+        email: STATIC_CONTENT.header.email,
+      };
+
+      // Generate document
+      const doc = generateResumeDocument({
+        header,
+        summary: generatedResume.summary,
+        highlights: generatedResume.career_highlights,
+        positions,
+        education: STATIC_CONTENT.education,
+        format,
+      });
+
+      // Generate buffer
+      const buffer = await Packer.toBuffer(doc);
+
+      // Return as downloadable file
+      const filename = `${header.name.replace(/\s+/g, '_')}_Resume_${new Date().toISOString().split('T')[0]}.docx`;
+
+      return new NextResponse(new Uint8Array(buffer), {
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+        },
+      });
+    }
+
+    // Fall back to V1 export logic for backward compatibility
     // Get approved highlights content
-    // Handle JSONB that may come back as string from @vercel/postgres
     let highlightIds: string[] = [];
     if (typeof session.approved_highlights === 'string') {
       try {
@@ -96,7 +166,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Build positions data
-    // Handle JSONB that may come back as string from @vercel/postgres
     let approvedPositions: {
       [key: number]: {
         title: string;
@@ -140,7 +209,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Build header
-    // Handle JSONB that may come back as string from @vercel/postgres
     let approvedHeader: {
       name?: string;
       title?: string;

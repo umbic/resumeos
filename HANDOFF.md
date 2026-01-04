@@ -1,7 +1,47 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-03
-> **Last Session**: V1.5 Session 5 - Quality Gate System
+> **Last Session**: V1.5 Session 6 - UI Overhaul (V1.5 COMPLETE)
+
+---
+
+## V1.5 Session 6 Completed: UI Overhaul
+
+### What Was Done
+- Created `OneShotInput` component (JD paste + format selection + generate button)
+- Created `OneShotReview` component (full resume preview + side panels)
+- Created `ResumePreview` component (clickable sections for refinement)
+- Created `ChatRefinement` component (per-section chat refinement)
+- Replaced main page with new one-shot flow
+- Updated DOCX export to use `generated_resume` (with V1 fallback)
+
+### New UI Flow
+```
+Page 1: Paste JD → Select Format → [Generate Resume]
+                        ↓
+Page 2: Full Resume Preview | Quality Score | Gaps | Chat Refinement
+                        ↓
+                 [Export DOCX]
+```
+
+### Files Changed
+| File | Change |
+|------|--------|
+| `src/components/resume/OneShotInput.tsx` | New |
+| `src/components/resume/OneShotReview.tsx` | New |
+| `src/components/resume/ResumePreview.tsx` | New |
+| `src/components/resume/ChatRefinement.tsx` | New |
+| `src/app/page.tsx` | Rewritten |
+| `src/app/api/export-docx/route.ts` | Modified |
+
+### V1.5 COMPLETE!
+
+The one-shot generation system is now fully implemented:
+- Paste JD → Generate complete resume in ~20 seconds
+- Quality checks run automatically with auto-fix
+- Gaps detected and addressable with one click
+- Per-section chat refinement
+- DOCX export
 
 ---
 
