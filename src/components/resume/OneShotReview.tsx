@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import type { GeneratedResume, Gap, QualityScore, KeywordGap, ATSKeyword } from '@/types';
 import { GapRecommendations } from './GapRecommendations';
 import { QualityIndicator } from './QualityIndicator';
@@ -52,7 +52,30 @@ export function OneShotReview({
     content: string;
   } | null>(null);
 
+  // Ref for preserving scroll position
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const savedScrollPosition = useRef<number>(0);
+
   const openGaps = gaps.filter(g => g.status === 'open');
+
+  // Save scroll position before update
+  const saveScrollPosition = useCallback(() => {
+    if (previewContainerRef.current) {
+      savedScrollPosition.current = previewContainerRef.current.scrollTop;
+    }
+  }, []);
+
+  // Restore scroll position after update
+  const restoreScrollPosition = useCallback(() => {
+    if (previewContainerRef.current) {
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        if (previewContainerRef.current) {
+          previewContainerRef.current.scrollTop = savedScrollPosition.current;
+        }
+      });
+    }
+  }, []);
 
   const handleSectionClick = (sectionKey: string, content: string) => {
     setActiveSection(sectionKey);
@@ -61,6 +84,9 @@ export function OneShotReview({
 
   const handleSectionSave = async (newContent: string) => {
     if (!editingSection) return;
+
+    // Save scroll position before update
+    saveScrollPosition();
 
     try {
       const response = await fetch(`/api/sessions/${sessionId}/section`, {
@@ -76,6 +102,8 @@ export function OneShotReview({
 
       if (data.success && data.resume) {
         onResumeUpdate(data.resume);
+        // Restore scroll position after update
+        restoreScrollPosition();
       }
 
       setEditingSection(null);
@@ -138,7 +166,10 @@ export function OneShotReview({
 
           {/* Left Column: Resume Preview */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div
+              ref={previewContainerRef}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-h-[calc(100vh-140px)] overflow-y-auto"
+            >
               <ResumePreview
                 resume={resume}
                 onSectionClick={handleSectionClick}

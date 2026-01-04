@@ -2,76 +2,124 @@ import React from 'react';
 
 interface RenderContentProps {
   content: string;
-  showHighlights: boolean;
+  showHighlights?: boolean;
 }
 
 /**
- * Renders content with optional highlight markers.
- * When showHighlights is true, <mark> tags are rendered as yellow highlights.
- * When false, the mark tags are stripped and plain text is returned.
+ * Parses text and renders markdown **bold** and <mark> tags as React elements.
  */
-export function renderContent({ content, showHighlights }: RenderContentProps): React.ReactNode {
+export function renderContent({ content, showHighlights = false }: RenderContentProps): React.ReactNode {
   if (!content) return null;
 
-  if (!showHighlights) {
-    // Strip mark tags and return plain text
-    return content.replace(/<\/?mark>/g, '');
-  }
+  // First strip mark tags if not showing highlights
+  const processedContent = showHighlights ? content : content.replace(/<\/?mark>/g, '');
 
-  // Parse and render with highlights
+  // Parse both **bold** and <mark> tags
   const parts: React.ReactNode[] = [];
-  let remaining = content;
   let keyIndex = 0;
 
-  while (remaining.length > 0) {
-    const markStart = remaining.indexOf('<mark>');
+  // Regex to find **bold** text or <mark>highlighted</mark> text
+  const pattern = /\*\*([^*]+)\*\*|<mark>([^<]+)<\/mark>/g;
+  let lastIndex = 0;
+  let match;
 
-    if (markStart === -1) {
-      // No more marks, add remaining text
-      parts.push(remaining);
-      break;
+  while ((match = pattern.exec(processedContent)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(processedContent.slice(lastIndex, match.index));
     }
 
-    // Add text before the mark
-    if (markStart > 0) {
-      parts.push(remaining.slice(0, markStart));
+    if (match[1]) {
+      // **bold** match
+      parts.push(
+        <strong key={keyIndex++} className="font-semibold">
+          {match[1]}
+        </strong>
+      );
+    } else if (match[2] && showHighlights) {
+      // <mark> match (only render if showing highlights)
+      parts.push(
+        <mark key={keyIndex++} className="bg-yellow-200 rounded px-0.5">
+          {match[2]}
+        </mark>
+      );
+    } else if (match[2]) {
+      // <mark> but not showing highlights - just add the text
+      parts.push(match[2]);
     }
 
-    // Find the closing tag
-    const markEnd = remaining.indexOf('</mark>', markStart);
-
-    if (markEnd === -1) {
-      // No closing tag, add remaining as-is
-      parts.push(remaining.slice(markStart));
-      break;
-    }
-
-    // Extract the highlighted content
-    const highlightedContent = remaining.slice(markStart + 6, markEnd);
-
-    parts.push(
-      <mark
-        key={keyIndex++}
-        className="bg-yellow-200 rounded px-0.5"
-      >
-        {highlightedContent}
-      </mark>
-    );
-
-    // Move past the closing tag
-    remaining = remaining.slice(markEnd + 7);
+    lastIndex = match.index + match[0].length;
   }
 
-  return <>{parts}</>;
+  // Add remaining text
+  if (lastIndex < processedContent.length) {
+    parts.push(processedContent.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? <>{parts}</> : processedContent;
 }
 
 /**
- * Strips all <mark> tags from content.
- * Used for DOCX export and other plain text outputs.
+ * Strips all <mark> tags and **bold** markers from content.
+ * Used for plain text outputs.
  */
 export function stripMarks(content: string): string {
   if (!content) return '';
-  return content.replace(/<\/?mark>/g, '');
+  return content
+    .replace(/<\/?mark>/g, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1');
+}
+
+/**
+ * Segment of text for DOCX rendering
+ */
+export interface TextSegment {
+  text: string;
+  bold: boolean;
+}
+
+/**
+ * Parses content and returns segments with bold flags.
+ * Used for DOCX export to render **bold** text as actual bold.
+ */
+export function parseTextSegments(content: string): TextSegment[] {
+  if (!content) return [];
+
+  // Strip mark tags first
+  const cleaned = content.replace(/<\/?mark>/g, '');
+
+  const segments: TextSegment[] = [];
+  const pattern = /\*\*([^*]+)\*\*/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = pattern.exec(cleaned)) !== null) {
+    // Add non-bold text before this match
+    if (match.index > lastIndex) {
+      segments.push({
+        text: cleaned.slice(lastIndex, match.index),
+        bold: false,
+      });
+    }
+
+    // Add bold segment
+    segments.push({
+      text: match[1],
+      bold: true,
+    });
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining non-bold text
+  if (lastIndex < cleaned.length) {
+    segments.push({
+      text: cleaned.slice(lastIndex),
+      bold: false,
+    });
+  }
+
+  return segments;
 }
 
 /**

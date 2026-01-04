@@ -1,6 +1,7 @@
 'use client';
 
 import type { GeneratedResume } from '@/types';
+import { renderContent } from '@/lib/render-highlights';
 
 interface ResumePreviewProps {
   resume: GeneratedResume;
@@ -15,8 +16,10 @@ export function ResumePreview({
 }: ResumePreviewProps) {
 
   const sectionClass = (section: string) => `
-    cursor-pointer rounded p-2 -m-2 transition-colors
-    ${activeSection === section ? 'bg-blue-50 ring-2 ring-blue-300' : 'hover:bg-gray-50'}
+    cursor-pointer rounded p-2 -m-2 transition-all duration-150
+    ${activeSection === section
+      ? 'bg-blue-50 ring-2 ring-blue-300'
+      : 'hover:bg-blue-50/50 hover:ring-1 hover:ring-blue-200'}
   `;
 
   return (
@@ -38,7 +41,7 @@ export function ResumePreview({
         onClick={() => onSectionClick?.('summary', resume.summary)}
       >
         <p className="text-gray-800 leading-relaxed">
-          {resume.summary}
+          {renderContent({ content: resume.summary })}
         </p>
       </div>
 
@@ -54,7 +57,7 @@ export function ResumePreview({
               className={sectionClass(`highlight_${index + 1}`)}
               onClick={() => onSectionClick?.(`highlight_${index + 1}`, highlight)}
             >
-              {highlight}
+              {renderContent({ content: highlight })}
             </li>
           ))}
         </ul>
@@ -83,7 +86,7 @@ export function ResumePreview({
               onClick={() => onSectionClick?.(`position_${position.number}_overview`, position.overview)}
             >
               <p className="text-gray-700">
-                {position.overview}
+                {renderContent({ content: position.overview })}
               </p>
             </div>
 
@@ -96,7 +99,7 @@ export function ResumePreview({
                     className={sectionClass(`position_${position.number}_bullet_${bulletIndex + 1}`)}
                     onClick={() => onSectionClick?.(`position_${position.number}_bullet_${bulletIndex + 1}`, bullet)}
                   >
-                    {bullet}
+                    {renderContent({ content: bullet })}
                   </li>
                 ))}
               </ul>

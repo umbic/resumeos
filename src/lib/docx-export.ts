@@ -9,7 +9,7 @@ import {
   TabStopType,
   BorderStyle,
 } from 'docx';
-import { stripMarks } from './render-highlights';
+import { parseTextSegments } from './render-highlights';
 
 interface HeaderData {
   name: string;
@@ -126,14 +126,18 @@ function createSectionHeader(text: string): Paragraph {
 }
 
 function createSummaryParagraph(summary: string): Paragraph {
+  const segments = parseTextSegments(summary);
+  const children = segments.map(segment =>
+    new TextRun({
+      text: segment.text,
+      font: { name: FONT_MINOR },
+      size: STYLES.body.size,
+      bold: segment.bold,
+    })
+  );
+
   return new Paragraph({
-    children: [
-      new TextRun({
-        text: stripMarks(summary),
-        font: { name: FONT_MINOR },
-        size: STYLES.body.size,
-      }),
-    ],
+    children,
     spacing: {
       before: STYLES.body.before,
       after: STYLES.body.after,
@@ -142,10 +146,35 @@ function createSummaryParagraph(summary: string): Paragraph {
 }
 
 function createHighlightParagraph(highlight: string): Paragraph {
-  // Strip mark tags before processing
-  const cleanHighlight = stripMarks(highlight);
+  // Parse segments for **bold** markdown
+  const segments = parseTextSegments(highlight);
 
-  // Parse for bold hook phrase (text before the colon)
+  // If any segment is already marked bold via **, just render those
+  const hasBoldMarkdown = segments.some(s => s.bold);
+
+  if (hasBoldMarkdown) {
+    // Use markdown-based bold
+    const children = segments.map(segment =>
+      new TextRun({
+        text: segment.text,
+        font: { name: FONT_MINOR },
+        size: STYLES.highlight.size,
+        bold: segment.bold,
+      })
+    );
+
+    return new Paragraph({
+      children,
+      bullet: { level: 0 },
+      spacing: {
+        before: STYLES.highlight.before,
+        after: STYLES.highlight.after,
+      },
+    });
+  }
+
+  // Fallback: Parse for bold hook phrase (text before the colon)
+  const cleanHighlight = segments.map(s => s.text).join('');
   const colonIndex = cleanHighlight.indexOf(':');
   const children: TextRun[] = [];
 
@@ -230,14 +259,18 @@ function createCompanyParagraph(company: string, location: string): Paragraph {
 }
 
 function createOverviewParagraph(overview: string): Paragraph {
+  const segments = parseTextSegments(overview);
+  const children = segments.map(segment =>
+    new TextRun({
+      text: segment.text,
+      font: { name: FONT_MINOR },
+      size: STYLES.body.size,
+      bold: segment.bold,
+    })
+  );
+
   return new Paragraph({
-    children: [
-      new TextRun({
-        text: stripMarks(overview),
-        font: { name: FONT_MINOR },
-        size: STYLES.body.size,
-      }),
-    ],
+    children,
     spacing: {
       before: STYLES.body.before,
       after: STYLES.body.after,
@@ -246,14 +279,18 @@ function createOverviewParagraph(overview: string): Paragraph {
 }
 
 function createBulletParagraph(bullet: string): Paragraph {
+  const segments = parseTextSegments(bullet);
+  const children = segments.map(segment =>
+    new TextRun({
+      text: segment.text,
+      font: { name: FONT_MINOR },
+      size: STYLES.bullet.size,
+      bold: segment.bold,
+    })
+  );
+
   return new Paragraph({
-    children: [
-      new TextRun({
-        text: stripMarks(bullet),
-        font: { name: FONT_MINOR },
-        size: STYLES.bullet.size,
-      }),
-    ],
+    children,
     bullet: { level: 0 },
     spacing: {
       before: STYLES.bullet.before,
