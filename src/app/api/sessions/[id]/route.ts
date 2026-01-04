@@ -92,6 +92,7 @@ export async function GET(
         branding_mode,
         generated_resume,
         gaps,
+        keyword_gaps,
         quality_score,
         refinement_history,
         created_at,

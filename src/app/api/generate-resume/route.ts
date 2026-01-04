@@ -149,6 +149,7 @@ export async function POST(request: NextRequest) {
       SET
         generated_resume = ${JSON.stringify(finalResume)}::jsonb,
         gaps = ${JSON.stringify(gaps)}::jsonb,
+        keyword_gaps = ${JSON.stringify(keywordGaps)}::jsonb,
         quality_score = ${JSON.stringify(qualityScore)}::jsonb,
         used_verbs = ${verbsLiteral}::text[],
         generation_version = 'v1.5',

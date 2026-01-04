@@ -53,6 +53,7 @@ export default function Home() {
       if (session.generated_resume) {
         setResume(session.generated_resume);
         setGaps(session.gaps || []);
+        setKeywordGaps(session.keyword_gaps || []);
         setQualityScore(session.quality_score);
 
         // Get ATS keywords from analysis
