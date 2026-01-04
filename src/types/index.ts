@@ -18,6 +18,7 @@ export interface JDKeyword {
   id: string;                    // Auto-generated UUID (kw_xxx)
   keyword: string;               // "brand strategy"
   category: KeywordCategory;
+  frequency?: number;            // How many times it appears in JD
   priority: KeywordPriority;
   placement: string;             // "title, requirements"
   status: KeywordStatus;
@@ -105,13 +106,29 @@ export interface QualityIssue {
   autoFixed?: boolean;
 }
 
+// ATS Keyword with frequency tracking
+export interface ATSKeyword {
+  keyword: string;
+  frequency: number; // How many times it appears in JD
+  priority: 'high' | 'medium' | 'low'; // high = 2+, medium = 1, low = nice-to-have
+  category?: KeywordCategory;
+}
+
+// Keyword Gap detection
+export interface KeywordGap {
+  keyword: string;
+  frequency_in_jd: number;
+  found_in_resume: boolean;
+  suggestion?: string; // Suggested sections where it could fit
+}
+
 // Enhanced JD Analysis (extends existing)
 export interface EnhancedJDAnalysis {
   target_title: string;
   target_company: string;
   priority_themes: JDTheme[];
   secondary_themes: JDTheme[];
-  ats_keywords: string[];
+  ats_keywords: ATSKeyword[]; // Changed from string[] to ATSKeyword[]
   content_mapping: ContentMapping[]; // Which content items map to which themes
 }
 

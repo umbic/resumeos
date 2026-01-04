@@ -1,4 +1,5 @@
-import type { GeneratedResume, QualityScore, QualityIssue } from '@/types';
+import type { GeneratedResume, QualityScore, QualityIssue, ATSKeyword } from '@/types';
+import { calculateActualKeywordCoverage } from './gap-detection';
 
 // Common action verbs to track
 const ACTION_VERBS = [
@@ -19,8 +20,13 @@ const JARGON_PATTERNS = [
 /**
  * Run quality checks on a generated resume.
  * Returns a QualityScore with grade, coverage metrics, and issues.
+ * @param resume - The generated resume to check
+ * @param atsKeywords - Optional ATS keywords for accurate coverage calculation
  */
-export function runQualityCheck(resume: GeneratedResume): QualityScore {
+export function runQualityCheck(
+  resume: GeneratedResume,
+  atsKeywords?: ATSKeyword[]
+): QualityScore {
   const issues: QualityIssue[] = [];
 
   // Check summary
@@ -50,9 +56,15 @@ export function runQualityCheck(resume: GeneratedResume): QualityScore {
   const errorCount = issues.filter(i => i.severity === 'error').length;
   const warningCount = issues.filter(i => i.severity === 'warning').length;
 
-  const overall = calculateGrade(errorCount, warningCount);
-  const keywordCoverage = calculateKeywordCoverage(resume);
+  // Use actual keyword coverage if ATS keywords provided
+  const keywordCoverage = atsKeywords
+    ? calculateActualKeywordCoverage(atsKeywords, resume)
+    : calculateKeywordCoverage(resume);
+
   const themeAlignment = calculateThemeAlignment(resume);
+
+  // Calculate grade with keyword coverage cap
+  const overall = calculateGrade(errorCount, warningCount, keywordCoverage);
 
   return {
     overall,
@@ -281,14 +293,40 @@ function checkPhraseRepetition(resume: GeneratedResume): QualityIssue[] {
   return issues;
 }
 
-function calculateGrade(errors: number, warnings: number): QualityScore['overall'] {
-  if (errors === 0 && warnings === 0) return 'A';
-  if (errors === 0 && warnings <= 2) return 'A';
-  if (errors === 0 && warnings <= 4) return 'B';
-  if (errors <= 1 && warnings <= 4) return 'B';
-  if (errors <= 2 && warnings <= 6) return 'C';
-  if (errors <= 4) return 'D';
-  return 'F';
+function calculateGrade(
+  errors: number,
+  warnings: number,
+  keywordCoverage: number = 100
+): QualityScore['overall'] {
+  // Calculate base grade from errors/warnings
+  let baseGrade: QualityScore['overall'];
+  if (errors === 0 && warnings === 0) baseGrade = 'A';
+  else if (errors === 0 && warnings <= 2) baseGrade = 'A';
+  else if (errors === 0 && warnings <= 4) baseGrade = 'B';
+  else if (errors <= 1 && warnings <= 4) baseGrade = 'B';
+  else if (errors <= 2 && warnings <= 6) baseGrade = 'C';
+  else if (errors <= 4) baseGrade = 'D';
+  else baseGrade = 'F';
+
+  // Cap grade based on keyword coverage
+  // If keyword coverage < 30%, cap at 'D'
+  // If keyword coverage < 50%, cap at 'C'
+  // If keyword coverage < 70%, cap at 'B'
+  const gradeOrder: QualityScore['overall'][] = ['A', 'B', 'C', 'D', 'F'];
+  let maxGrade: QualityScore['overall'] = 'A';
+
+  if (keywordCoverage < 30) {
+    maxGrade = 'D';
+  } else if (keywordCoverage < 50) {
+    maxGrade = 'C';
+  } else if (keywordCoverage < 70) {
+    maxGrade = 'B';
+  }
+
+  // Return the worse of baseGrade or maxGrade
+  const baseIndex = gradeOrder.indexOf(baseGrade);
+  const maxIndex = gradeOrder.indexOf(maxGrade);
+  return gradeOrder[Math.max(baseIndex, maxIndex)];
 }
 
 function calculateKeywordCoverage(resume: GeneratedResume): number {

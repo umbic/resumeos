@@ -59,6 +59,7 @@ interface RawJDAnalysisResponse {
   keywords: Array<{
     keyword: string;
     category: 'hard_skill' | 'soft_skill' | 'industry_term' | 'seniority_signal';
+    frequency?: number; // How many times it appears in JD
     priority: 'high' | 'medium' | 'low';
     placement: string;
   }>;
@@ -124,8 +125,11 @@ Examples: years of experience mentioned, level words like "senior", "director", 
 For each keyword, provide:
 - **keyword**: Exact phrase from JD
 - **category**: hard_skill | soft_skill | industry_term | seniority_signal
-- **priority**: high | medium | low (based on frequency and placement in JD)
+- **frequency**: How many times this keyword (or close variants) appears in the JD
+- **priority**: high (frequency 2+), medium (frequency 1), low (nice-to-have or implied)
 - **placement**: Where it appeared (title, requirements, responsibilities, nice-to-have)
+
+IMPORTANT: Count actual frequency carefully. If "GTM" appears 3 times in the JD, frequency should be 3.
 
 ---
 
@@ -155,12 +159,14 @@ Return as JSON:
     {
       "keyword": "brand strategy",
       "category": "hard_skill",
+      "frequency": 3,
       "priority": "high",
       "placement": "title, requirements"
     },
     {
       "keyword": "wealth management",
       "category": "industry_term",
+      "frequency": 2,
       "priority": "high",
       "placement": "throughout"
     }
@@ -184,8 +190,73 @@ Return ONLY the JSON object, no other text.`,
     throw new Error('Unexpected response type');
   }
 
+  // Helper to repair and parse JSON response
+  const repairAndParseJSON = (text: string): RawJDAnalysisResponse => {
+    // Remove markdown code fences
+    let cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+    // Extract JSON object
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON object found in response');
+    }
+    cleaned = jsonMatch[0];
+
+    // Try direct parse first
+    try {
+      return JSON.parse(cleaned) as RawJDAnalysisResponse;
+    } catch (firstError) {
+      console.log('First parse failed, attempting repair...');
+
+      // Repair common JSON issues
+      const repaired = cleaned
+        // Remove control characters except newlines and tabs
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+        // Fix trailing commas in arrays
+        .replace(/,(\s*[\]}])/g, '$1')
+        // Fix trailing commas in objects
+        .replace(/,(\s*})/g, '$1');
+
+      try {
+        return JSON.parse(repaired) as RawJDAnalysisResponse;
+      } catch {
+        // Try to truncate at last valid array/object close
+        const lastValidClose = Math.max(
+          repaired.lastIndexOf('}'),
+          repaired.lastIndexOf(']')
+        );
+
+        if (lastValidClose > 0) {
+          // Find matching opening brace
+          let depth = 0;
+          let truncatePoint = -1;
+          for (let i = lastValidClose; i >= 0; i--) {
+            const char = repaired[i];
+            if (char === '}' || char === ']') depth++;
+            if (char === '{' || char === '[') depth--;
+            if (depth === 0 && char === '{') {
+              truncatePoint = lastValidClose + 1;
+              break;
+            }
+          }
+
+          if (truncatePoint > 0) {
+            const truncated = repaired.substring(0, truncatePoint);
+            try {
+              return JSON.parse(truncated) as RawJDAnalysisResponse;
+            } catch {
+              // Continue to throw original error
+            }
+          }
+        }
+
+        throw firstError;
+      }
+    }
+  };
+
   try {
-    const parsed = JSON.parse(content.text) as RawJDAnalysisResponse;
+    const parsed = repairAndParseJSON(content.text);
     return {
       analysis: {
         strategic: parsed.strategic,
@@ -198,25 +269,10 @@ Return ONLY the JSON object, no other text.`,
       recommendedBrandingMode: parsed.recommendedBrandingMode,
       reasoning: parsed.reasoning,
     };
-  } catch {
-    // Try to extract JSON from the response
-    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]) as RawJDAnalysisResponse;
-      return {
-        analysis: {
-          strategic: parsed.strategic,
-          keywords: parsed.keywords.map((k, i) => ({
-            ...k,
-            id: `kw_${String(i + 1).padStart(3, '0')}`,
-            status: 'unaddressed' as const,
-          })),
-        },
-        recommendedBrandingMode: parsed.recommendedBrandingMode,
-        reasoning: parsed.reasoning,
-      };
-    }
-    throw new Error('Failed to parse JD analysis response');
+  } catch (parseError) {
+    console.error('JSON parse error:', parseError);
+    console.error('Response text (first 500 chars):', content.text.substring(0, 500));
+    throw new Error(`Failed to parse JD analysis response: ${parseError}`);
   }
 }
 

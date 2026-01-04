@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { generateFullResume } from '@/lib/claude';
-import { detectGaps } from '@/lib/gap-detection';
+import { detectGaps, detectKeywordGaps } from '@/lib/gap-detection';
 import { runQualityCheck } from '@/lib/quality-check';
 import { autoFixIssues } from '@/lib/quality-fix';
 import type { EnhancedJDAnalysis, JDAnalysis } from '@/types';
@@ -29,10 +29,15 @@ function convertToEnhancedAnalysis(
     jd_evidence: `Supporting theme for role`,
   }));
 
-  // Extract ATS keywords from the keyword objects
+  // Extract ATS keywords with frequency tracking
   const atsKeywords = jdAnalysis.keywords
     .filter((k) => k.priority === 'high' || k.priority === 'medium')
-    .map((k) => k.keyword);
+    .map((k) => ({
+      keyword: k.keyword,
+      frequency: k.frequency || 1, // Default to 1 if not provided
+      priority: k.priority,
+      category: k.category,
+    }));
 
   return {
     target_title: targetTitle || jdAnalysis.strategic.targetTitle,
@@ -104,8 +109,8 @@ export async function POST(request: NextRequest) {
       targetCompany: session.target_company || '',
     });
 
-    // Run quality check
-    let qualityScore = runQualityCheck(generatedResume);
+    // Run quality check with ATS keywords for accurate coverage
+    let qualityScore = runQualityCheck(generatedResume, jdAnalysis.ats_keywords);
 
     // Auto-fix critical issues
     let finalResume = generatedResume;
@@ -116,8 +121,8 @@ export async function POST(request: NextRequest) {
       );
       finalResume = fixedResume;
 
-      // Re-run quality check after fixes
-      qualityScore = runQualityCheck(finalResume);
+      // Re-run quality check after fixes (with ATS keywords)
+      qualityScore = runQualityCheck(finalResume, jdAnalysis.ats_keywords);
 
       // Mark fixed issues
       qualityScore.issues = qualityScore.issues.map(issue => {
@@ -130,6 +135,9 @@ export async function POST(request: NextRequest) {
 
     // Detect gaps between JD themes and generated resume
     const gaps = await detectGaps(jdAnalysis, finalResume);
+
+    // Detect keyword-level gaps (specific ATS keywords missing)
+    const keywordGaps = detectKeywordGaps(jdAnalysis.ats_keywords, finalResume);
 
     // Store the generated resume, gaps, and quality score
     // Format verbs as PostgreSQL array literal: {"verb1","verb2"}
@@ -152,6 +160,7 @@ export async function POST(request: NextRequest) {
       success: true,
       resume: finalResume,
       gaps,
+      keyword_gaps: keywordGaps,
       quality_score: qualityScore,
       themes_addressed: finalResume.themes_addressed,
       themes_not_addressed: finalResume.themes_not_addressed,

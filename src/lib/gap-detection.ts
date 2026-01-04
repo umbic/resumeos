@@ -2,7 +2,9 @@ import type {
   Gap,
   GapRecommendation,
   EnhancedJDAnalysis,
-  GeneratedResume
+  GeneratedResume,
+  ATSKeyword,
+  KeywordGap
 } from '@/types';
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -42,6 +44,105 @@ export async function detectGaps(
 
   // Limit to top 3 most important gaps
   return gaps.slice(0, 3);
+}
+
+/**
+ * Get all text from a resume for keyword searching
+ */
+function getAllResumeText(resume: GeneratedResume): string {
+  const parts: string[] = [
+    resume.summary,
+    ...resume.career_highlights,
+    ...resume.positions.flatMap(p => [
+      p.overview,
+      ...(p.bullets || []),
+    ]),
+  ];
+  return parts.join(' ').toLowerCase();
+}
+
+/**
+ * Detect keyword gaps between JD ATS keywords and what's in the resume.
+ * Only checks high-priority keywords (frequency 2+).
+ */
+export function detectKeywordGaps(
+  atsKeywords: ATSKeyword[],
+  generatedResume: GeneratedResume
+): KeywordGap[] {
+  const gaps: KeywordGap[] = [];
+  const resumeText = getAllResumeText(generatedResume);
+
+  // Only check high-priority keywords (frequency 2+)
+  const highPriorityKeywords = atsKeywords.filter(k => k.priority === 'high');
+
+  for (const kw of highPriorityKeywords) {
+    const keywordLower = kw.keyword.toLowerCase();
+
+    // Check if keyword appears in resume (exact match or close variant)
+    const found = resumeText.includes(keywordLower) ||
+      // Also check common variants
+      (keywordLower === 'gtm' && resumeText.includes('go-to-market')) ||
+      (keywordLower === 'go-to-market' && resumeText.includes('gtm')) ||
+      (keywordLower === 'saas' && resumeText.includes('software as a service')) ||
+      (keywordLower === 'b2b' && resumeText.includes('business-to-business')) ||
+      (keywordLower === 'api' && (resumeText.includes('apis') || resumeText.includes('api ')));
+
+    if (!found) {
+      gaps.push({
+        keyword: kw.keyword,
+        frequency_in_jd: kw.frequency,
+        found_in_resume: false,
+        suggestion: suggestKeywordPlacement(kw.keyword, kw.category),
+      });
+    }
+  }
+
+  // Sort by frequency (most important first)
+  return gaps.sort((a, b) => b.frequency_in_jd - a.frequency_in_jd);
+}
+
+/**
+ * Suggest where a keyword could be placed based on its category
+ */
+function suggestKeywordPlacement(keyword: string, category?: string): string {
+  switch (category) {
+    case 'hard_skill':
+      return `Consider adding "${keyword}" to Summary or Career Highlights`;
+    case 'industry_term':
+      return `Consider integrating "${keyword}" into position overviews`;
+    case 'soft_skill':
+      return `Consider weaving "${keyword}" into leadership descriptions`;
+    case 'seniority_signal':
+      return `Consider highlighting "${keyword}" in Summary`;
+    default:
+      return `Consider adding "${keyword}" naturally to relevant sections`;
+  }
+}
+
+/**
+ * Calculate keyword coverage percentage
+ */
+export function calculateActualKeywordCoverage(
+  atsKeywords: ATSKeyword[],
+  generatedResume: GeneratedResume
+): number {
+  const highPriorityKeywords = atsKeywords.filter(k => k.priority === 'high');
+
+  if (highPriorityKeywords.length === 0) return 100;
+
+  const resumeText = getAllResumeText(generatedResume);
+
+  const found = highPriorityKeywords.filter(kw => {
+    const keywordLower = kw.keyword.toLowerCase();
+    return resumeText.includes(keywordLower) ||
+      (keywordLower === 'gtm' && resumeText.includes('go-to-market')) ||
+      (keywordLower === 'go-to-market' && resumeText.includes('gtm')) ||
+      (keywordLower === 'saas' && resumeText.includes('software as a service')) ||
+      (keywordLower === 'b2b' && resumeText.includes('business-to-business')) ||
+      (keywordLower === 'api' && (resumeText.includes('apis') || resumeText.includes('api ')));
+  });
+
+  return Math.round((found.length / highPriorityKeywords.length) * 100);
 }
 
 /**
