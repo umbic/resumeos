@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { contentItems } from '@/drizzle/schema';
-import { eq, and, notInArray, or, isNull } from 'drizzle-orm';
+import { eq, and, notInArray, or } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -86,39 +86,8 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ items: itemsWithBrandTags, hasVariants: true });
         }
 
-        // No variants - fall back to showing all OTHER base items (different achievements)
-        // For bullets, filter by position
-        const fallbackConditions = [
-          eq(contentItems.type, type),
-          isNull(contentItems.baseId), // Only base items, not variants
-          notInArray(contentItems.id, [currentId]), // Exclude current
-        ];
-
-        if (type === 'bullet' && current.position) {
-          fallbackConditions.push(eq(contentItems.position, current.position));
-        }
-
-        const fallbackItems = await db
-          .select({
-            id: contentItems.id,
-            type: contentItems.type,
-            position: contentItems.position,
-            contentShort: contentItems.contentShort,
-            contentMedium: contentItems.contentMedium,
-            contentLong: contentItems.contentLong,
-            contentGeneric: contentItems.contentGeneric,
-            categoryTags: contentItems.categoryTags,
-            outcomeTags: contentItems.outcomeTags,
-            functionTags: contentItems.functionTags,
-            brandTags: contentItems.brandTags,
-            baseId: contentItems.baseId,
-            variantLabel: contentItems.variantLabel,
-            themeTags: contentItems.themeTags,
-          })
-          .from(contentItems)
-          .where(and(...fallbackConditions));
-
-        return NextResponse.json({ items: fallbackItems, hasVariants: false });
+        // No variants found for this item - return empty (don't show unrelated items)
+        return NextResponse.json({ items: [], hasVariants: false });
       }
     }
 
