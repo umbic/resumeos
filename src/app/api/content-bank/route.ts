@@ -2,6 +2,42 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { contentItems } from '@/drizzle/schema';
 import { eq, and, notInArray, or } from 'drizzle-orm';
+import { CONFLICT_MAP, REVERSE_CONFLICT_MAP } from '@/lib/rules';
+
+// Get the conflict pair for an item (the item that shares the same achievement)
+function getConflictPair(itemId: string): string | null {
+  // Check if this item has a direct conflict (CH → P-B)
+  const directConflicts = CONFLICT_MAP[itemId];
+  if (directConflicts && directConflicts.length > 0) {
+    return directConflicts[0]; // Return the first conflict pair
+  }
+
+  // Check reverse conflict (P-B → CH)
+  const reverseConflicts = REVERSE_CONFLICT_MAP[itemId];
+  if (reverseConflicts && reverseConflicts.length > 0) {
+    return reverseConflicts[0]; // Return the first conflict pair
+  }
+
+  return null;
+}
+
+// Standard select fields for content items
+const contentSelectFields = {
+  id: contentItems.id,
+  type: contentItems.type,
+  position: contentItems.position,
+  contentShort: contentItems.contentShort,
+  contentMedium: contentItems.contentMedium,
+  contentLong: contentItems.contentLong,
+  contentGeneric: contentItems.contentGeneric,
+  categoryTags: contentItems.categoryTags,
+  outcomeTags: contentItems.outcomeTags,
+  functionTags: contentItems.functionTags,
+  brandTags: contentItems.brandTags,
+  baseId: contentItems.baseId,
+  variantLabel: contentItems.variantLabel,
+  themeTags: contentItems.themeTags,
+};
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -15,9 +51,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // If currentId is provided, find variants of the same base
+    // If currentId is provided, find variants of the same base or conflict pair
     if (currentId && (type === 'career_highlight' || type === 'bullet')) {
-      // First, get the current item to determine its base_id and position
+      // First, get the current item to determine its base_id
       const currentItem = await db
         .select({
           id: contentItems.id,
@@ -33,60 +69,30 @@ export async function GET(request: NextRequest) {
         // Determine the base ID: if current has a baseId, use it; otherwise current IS the base
         const baseId = current.baseId || current.id;
 
-        // Get the base item to get its brandTags (for variants that don't have them)
-        const baseItem = await db
-          .select({
-            id: contentItems.id,
-            brandTags: contentItems.brandTags,
-          })
-          .from(contentItems)
-          .where(eq(contentItems.id, baseId))
-          .limit(1);
+        // STEP 1: Try to find direct variants of this item's base
+        const directVariants = await fetchVariantsForBase(baseId, currentId);
 
-        const baseBrandTags = baseItem[0]?.brandTags || null;
-
-        // Find all items that share this base (the base itself + all its variants)
-        // Exclude the current item being edited
-        const variantItems = await db
-          .select({
-            id: contentItems.id,
-            type: contentItems.type,
-            position: contentItems.position,
-            contentShort: contentItems.contentShort,
-            contentMedium: contentItems.contentMedium,
-            contentLong: contentItems.contentLong,
-            contentGeneric: contentItems.contentGeneric,
-            categoryTags: contentItems.categoryTags,
-            outcomeTags: contentItems.outcomeTags,
-            functionTags: contentItems.functionTags,
-            brandTags: contentItems.brandTags,
-            baseId: contentItems.baseId,
-            variantLabel: contentItems.variantLabel,
-            themeTags: contentItems.themeTags,
-          })
-          .from(contentItems)
-          .where(
-            and(
-              eq(contentItems.type, type),
-              or(
-                eq(contentItems.id, baseId), // The base item itself
-                eq(contentItems.baseId, baseId) // All variants of this base
-              ),
-              notInArray(contentItems.id, [currentId]) // Exclude current item
-            )
-          );
-
-        // If variants found, add base's brandTags to variants that don't have them
-        if (variantItems.length > 0) {
-          const itemsWithBrandTags = variantItems.map(item => ({
-            ...item,
-            // Use base's brandTags if item has no brandTags (null or empty array)
-            brandTags: (item.brandTags && item.brandTags.length > 0) ? item.brandTags : baseBrandTags,
-          }));
-          return NextResponse.json({ items: itemsWithBrandTags, hasVariants: true });
+        if (directVariants.length > 0) {
+          return NextResponse.json({ items: directVariants, hasVariants: true });
         }
 
-        // No variants found for this item - return empty (don't show unrelated items)
+        // STEP 2: No direct variants - check for conflict pair
+        const conflictPairId = getConflictPair(baseId);
+
+        if (conflictPairId) {
+          // Fetch variants of the conflict pair instead
+          const conflictVariants = await fetchVariantsForBase(conflictPairId, currentId);
+
+          if (conflictVariants.length > 0) {
+            return NextResponse.json({
+              items: conflictVariants,
+              hasVariants: true,
+              fromConflictPair: true
+            });
+          }
+        }
+
+        // STEP 3: No variants found and no conflict pair variants - return empty
         return NextResponse.json({ items: [], hasVariants: false });
       }
     }
@@ -144,4 +150,45 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Helper function to fetch variants for a given base ID
+async function fetchVariantsForBase(baseId: string, excludeId: string) {
+  // Get the base item to get its brandTags
+  const baseItem = await db
+    .select({
+      id: contentItems.id,
+      brandTags: contentItems.brandTags,
+    })
+    .from(contentItems)
+    .where(eq(contentItems.id, baseId))
+    .limit(1);
+
+  const baseBrandTags = baseItem[0]?.brandTags || null;
+
+  // Find all items that share this base (the base itself + all its variants)
+  // Exclude the current item being edited
+  const variantItems = await db
+    .select(contentSelectFields)
+    .from(contentItems)
+    .where(
+      and(
+        or(
+          eq(contentItems.id, baseId), // The base item itself
+          eq(contentItems.baseId, baseId) // All variants of this base
+        ),
+        notInArray(contentItems.id, [excludeId]) // Exclude current item
+      )
+    );
+
+  // Add base's brandTags to variants that don't have them
+  if (variantItems.length > 0) {
+    return variantItems.map(item => ({
+      ...item,
+      // Use base's brandTags if item has no brandTags (null or empty array)
+      brandTags: (item.brandTags && item.brandTags.length > 0) ? item.brandTags : baseBrandTags,
+    }));
+  }
+
+  return [];
 }
