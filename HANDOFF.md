@@ -1,7 +1,78 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: Session 4d - Chat Refinement
+> **Last Session**: Session 5 - Variant System
+
+---
+
+## Session 5 Completed: Variant System for Career Highlights & Bullets
+
+### What Was Done
+Added a variant system to ResumeOS. Variants are different framings of the same achievement — same facts/metrics, different angles depending on what the target JD emphasizes.
+
+### Database Schema Changes
+
+Added 6 new columns to `content_items` table (`src/drizzle/schema.ts`):
+```typescript
+base_id: text('base_id'),              // e.g., "CH-01" for variant "CH-01-V1"
+variant_label: text('variant_label'),  // e.g., "Team Leadership"
+context: text('context'),              // The situation/challenge
+method: text('method'),                // The approach taken
+theme_tags: jsonb('theme_tags'),       // Variant-specific emphasis tags
+industry_tags: jsonb('industry_tags'), // Industries this content is relevant to
+```
+
+### Variants Created
+
+| Base ID | Achievement | Variants |
+|---------|-------------|----------|
+| CH-01 | Deloitte Practice ($40M) | 5 |
+| CH-02 | NWSL (50% attendance) | 5 |
+| CH-03 | OOFOS (191% sales) | 4 |
+| CH-04 | Deloitte Rebrand (43% leads) | 5 |
+| CH-05 | PfizerForAll ($727M) | 4 |
+| CH-06 | LTK ($2.8B→$5B) | 5 |
+| CH-07 | NYU Langone (1.6M appts) | 3 |
+| CH-08 | Gateway/Wholecare (30K) | 3 |
+| CH-09 | Amex CRM (5%/12%) | 4 |
+| CH-10 | GE Innovation (Cannes) | 4 |
+| CH-11 | AI Tools (32% cost) | 4 |
+| P1-B01 | Synovus (64.3% revenue) | 3 |
+| P1-B06 | J&J Cell & Gene (20% sales) | 3 |
+| P1-B10 | New York Life (23% awareness) | 3 |
+
+**Totals**: 14 base items updated, 55 variants seeded, 119 total content items
+
+### Files Created
+| File | Description |
+|------|-------------|
+| `src/data/career-highlight-variants.json` | 14 base items + 55 variants with metadata |
+| `src/drizzle/migrations/0005_brief_night_thrasher.sql` | Migration for new columns |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/drizzle/schema.ts` | Added 6 new columns for variant system |
+| `scripts/seed-database.ts` | Updated to seed variants with embeddings |
+
+### Variant Data Structure
+
+Each variant includes:
+- `id`: Unique ID (e.g., "CH-01-V1")
+- `base_id`: Parent achievement (e.g., "CH-01")
+- `variant_label`: Framing angle (e.g., "Practice Building", "Team Leadership")
+- `context`: The situation/challenge this framing addresses
+- `method`: The approach taken (for this angle)
+- `content`: Full variant text with bold hook and metrics
+- `theme_tags`: Tags for semantic matching to JD themes
+
+### Commit
+`daf0863` - feat: add variant system schema and seed career highlight variants
+
+### Next Steps
+1. Update search-content API to leverage variants
+2. Add variant selection to generation prompt
+3. UI for displaying/selecting variants
 
 ---
 
