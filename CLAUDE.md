@@ -124,7 +124,7 @@ If applying to competitors (McKinsey, BCG, etc.), use generic versions that hide
 ## Content Database
 
 The content database (`src/data/content-database.json`) contains:
-- 20 Summaries (5 each: BR, CA, B2B, GE categories)
+- **8 Thematic Summaries** (SUM-B2B, SUM-FS, SUM-TECH, SUM-CON, SUM-CE, SUM-PM, SUM-BS, SUM-PG)
 - 11 Career Highlights
 - 10 Position 1 Bullets
 - 9 Position 2 Bullets
@@ -134,4 +134,25 @@ The content database (`src/data/content-database.json`) contains:
 - 1 Position 6 Bullet
 - 6 Position Overviews
 
-Each item has embeddings for semantic search and multiple content versions (short, medium, long, generic).
+The variants database (`src/data/variants.json`) contains:
+- 21 Base items with industry/function metadata
+- 76 CH and bullet variants with theme tags
+- **16 Overview variants** (8 for P1, 8 for P2 - one per theme)
+
+## 3-Level Scoring System
+
+Content selection uses a 3-level scoring system based on JD analysis:
+
+| Level | Tags | Purpose |
+|-------|------|---------|
+| Industry | `industryTags` | Match sector (B2B, financial-services, technology, consumer, etc.) |
+| Function | `functionTags` | Match role type (brand-strategy, product-marketing, GTM, etc.) |
+| Theme | `themeTags` | Match specific skills/approaches (acquisition, creative-excellence, etc.) |
+
+**Summary Selection**: Scores all 8 summaries using industry + function + theme, selects highest.
+
+**Overview Selection**:
+- P1/P2: Scores 8 variants each using industry + function + theme, selects best match
+- P3-P6: Uses base overviews (no variants)
+
+**CH/Bullet Selection**: Uses existing variant scoring system with theme tags.
