@@ -1,29 +1,10 @@
 import { sql } from '@vercel/postgres';
 import OpenAI from 'openai';
-import contentDatabase from '../src/data/content-database.json';
-import variantsDatabase from '../src/data/variants.json';
+import masterContent from '../src/data/master-content.json';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-interface ContentItem {
-  id: string;
-  type: string;
-  position: number | null;
-  title?: string;
-  contentShort: string | null;
-  contentMedium: string | null;
-  contentLong: string | null;
-  contentGeneric: string | null;
-  brandTags: string[];
-  categoryTags: string[];
-  functionTags: string[];
-  industryTags?: string[];
-  themeTags?: string[];
-  outcomeTags: string[];
-  exclusiveMetrics: string[];
-}
 
 async function generateEmbedding(text: string): Promise<number[]> {
   const response = await openai.embeddings.create({
@@ -33,16 +14,18 @@ async function generateEmbedding(text: string): Promise<number[]> {
   return response.data[0].embedding;
 }
 
-function createEmbeddingText(item: ContentItem): string {
+function createEmbeddingText(item: {
+  contentLong?: string;
+  industryTags?: string[];
+  functionTags?: string[];
+  themeTags?: string[];
+}): string {
   const parts = [
-    item.contentLong || item.contentMedium || item.contentShort,
+    item.contentLong,
     item.industryTags?.join(', '),
     item.functionTags?.join(', '),
     item.themeTags?.join(', '),
-    item.outcomeTags?.join(', '),
-    item.categoryTags?.join(', '),
   ].filter(Boolean);
-
   return parts.join(' | ');
 }
 
@@ -50,10 +33,7 @@ async function ensureSchema() {
   console.log('Ensuring pgvector extension...');
   await sql`CREATE EXTENSION IF NOT EXISTS vector`;
 
-  // Tables are managed by Drizzle, so we just ensure new columns exist
-  // Add any missing columns for variant system
-  console.log('Ensuring variant columns exist...');
-
+  console.log('Ensuring columns exist...');
   const columns = [
     { name: 'title', sql: `ALTER TABLE content_items ADD COLUMN IF NOT EXISTS title TEXT` },
     { name: 'industry_tags', sql: `ALTER TABLE content_items ADD COLUMN IF NOT EXISTS industry_tags JSONB DEFAULT '[]'` },
@@ -69,27 +49,21 @@ async function ensureSchema() {
       await sql.query(col.sql);
       console.log(`  ✓ ${col.name}`);
     } catch (error: unknown) {
-      // Column might already exist with different syntax - that's OK
       const message = error instanceof Error ? error.message : String(error);
       if (!message.includes('already exists')) {
-        console.log(`  - ${col.name} (already exists or error)`);
+        console.log(`  - ${col.name} (exists)`);
       }
     }
   }
-
   console.log('Schema ready!');
 }
 
-async function seedContentItems() {
-  console.log(`\nSeeding ${contentDatabase.items.length} content items...`);
+async function seedSummaries() {
+  console.log(`\nSeeding ${masterContent.summaries.length} summaries...`);
 
-  // Clear existing data
-  await sql`DELETE FROM content_items`;
-
-  let count = 0;
-  for (const item of contentDatabase.items) {
-    const embeddingText = createEmbeddingText(item as ContentItem);
-    console.log(`Generating embedding for ${item.id}...`);
+  for (const item of masterContent.summaries) {
+    const embeddingText = createEmbeddingText(item);
+    console.log(`  Generating embedding for ${item.id}...`);
 
     const embedding = await generateEmbedding(embeddingText);
     const embeddingStr = `[${embedding.join(',')}]`;
@@ -97,48 +71,297 @@ async function seedContentItems() {
     await sql`
       INSERT INTO content_items (
         id, type, position, title,
-        content_short, content_medium, content_long, content_generic,
-        brand_tags, category_tags, function_tags, industry_tags, theme_tags, outcome_tags, exclusive_metrics,
+        content_long,
+        industry_tags, function_tags, theme_tags,
         embedding
       ) VALUES (
         ${item.id},
-        ${item.type},
-        ${item.position},
-        ${item.title || null},
-        ${item.contentShort},
-        ${item.contentMedium},
+        'summary',
+        ${null},
+        ${item.title},
         ${item.contentLong},
-        ${item.contentGeneric},
-        ${JSON.stringify(item.brandTags || [])},
-        ${JSON.stringify(item.categoryTags || [])},
+        ${JSON.stringify(item.industryTags || [])},
+        ${JSON.stringify(item.functionTags || [])},
+        ${JSON.stringify(item.themeTags || [])},
+        ${embeddingStr}::vector
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        title = EXCLUDED.title,
+        content_long = EXCLUDED.content_long,
+        industry_tags = EXCLUDED.industry_tags,
+        function_tags = EXCLUDED.function_tags,
+        theme_tags = EXCLUDED.theme_tags,
+        embedding = EXCLUDED.embedding
+    `;
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  console.log(`Seeded ${masterContent.summaries.length} summaries!`);
+}
+
+async function seedCareerHighlights() {
+  console.log(`\nSeeding ${masterContent.careerHighlights.length} career highlights...`);
+
+  for (const item of masterContent.careerHighlights) {
+    // Seed base item
+    const embeddingText = createEmbeddingText(item);
+    console.log(`  Generating embedding for ${item.id}...`);
+
+    const embedding = await generateEmbedding(embeddingText);
+    const embeddingStr = `[${embedding.join(',')}]`;
+
+    await sql`
+      INSERT INTO content_items (
+        id, type, position, title,
+        content_long,
+        function_tags, industry_tags, exclusive_metrics,
+        embedding
+      ) VALUES (
+        ${item.id},
+        'career_highlight',
+        ${null},
+        ${item.title},
+        ${item.contentLong},
         ${JSON.stringify(item.functionTags || [])},
         ${JSON.stringify(item.industryTags || [])},
-        ${JSON.stringify(item.themeTags || [])},
-        ${JSON.stringify(item.outcomeTags || [])},
         ${JSON.stringify(item.exclusiveMetrics || [])},
         ${embeddingStr}::vector
       )
+      ON CONFLICT (id) DO UPDATE SET
+        title = EXCLUDED.title,
+        content_long = EXCLUDED.content_long,
+        function_tags = EXCLUDED.function_tags,
+        industry_tags = EXCLUDED.industry_tags,
+        exclusive_metrics = EXCLUDED.exclusive_metrics,
+        embedding = EXCLUDED.embedding
     `;
 
-    count++;
-    if (count % 10 === 0) {
-      console.log(`  Progress: ${count}/${contentDatabase.items.length}`);
-    }
-
-    // Rate limiting for OpenAI API
     await new Promise((resolve) => setTimeout(resolve, 100));
-  }
 
-  console.log(`Seeded ${count} content items!`);
+    // Seed variants
+    for (const variant of item.variants || []) {
+      const variantEmbeddingText = `${variant.content} | ${variant.themeTags?.join(', ')}`;
+      console.log(`    Generating embedding for ${variant.id}...`);
+
+      const variantEmbedding = await generateEmbedding(variantEmbeddingText);
+      const variantEmbeddingStr = `[${variantEmbedding.join(',')}]`;
+
+      await sql`
+        INSERT INTO content_items (
+          id, type, position,
+          content_long,
+          base_id, variant_label, theme_tags,
+          function_tags, industry_tags,
+          embedding
+        ) VALUES (
+          ${variant.id},
+          'career_highlight',
+          ${null},
+          ${variant.content},
+          ${item.id},
+          ${variant.label},
+          ${JSON.stringify(variant.themeTags || [])},
+          ${JSON.stringify(item.functionTags || [])},
+          ${JSON.stringify(item.industryTags || [])},
+          ${variantEmbeddingStr}::vector
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          content_long = EXCLUDED.content_long,
+          base_id = EXCLUDED.base_id,
+          variant_label = EXCLUDED.variant_label,
+          theme_tags = EXCLUDED.theme_tags,
+          function_tags = EXCLUDED.function_tags,
+          industry_tags = EXCLUDED.industry_tags,
+          embedding = EXCLUDED.embedding
+      `;
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+  console.log(`Seeded career highlights with variants!`);
+}
+
+async function seedOverviews() {
+  console.log(`\nSeeding ${masterContent.overviews.length} overviews...`);
+
+  for (const item of masterContent.overviews) {
+    // Seed base item
+    const embeddingText = createEmbeddingText(item);
+    console.log(`  Generating embedding for ${item.id}...`);
+
+    const embedding = await generateEmbedding(embeddingText);
+    const embeddingStr = `[${embedding.join(',')}]`;
+
+    await sql`
+      INSERT INTO content_items (
+        id, type, position, title,
+        content_long,
+        function_tags, industry_tags,
+        embedding
+      ) VALUES (
+        ${item.id},
+        'overview',
+        ${item.position},
+        ${item.title},
+        ${item.contentLong},
+        ${JSON.stringify(item.functionTags || [])},
+        ${JSON.stringify(item.industryTags || [])},
+        ${embeddingStr}::vector
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        title = EXCLUDED.title,
+        position = EXCLUDED.position,
+        content_long = EXCLUDED.content_long,
+        function_tags = EXCLUDED.function_tags,
+        industry_tags = EXCLUDED.industry_tags,
+        embedding = EXCLUDED.embedding
+    `;
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Seed variants
+    for (const variant of item.variants || []) {
+      const variantEmbeddingText = `${item.contentLong} | ${variant.themeTags?.join(', ')}`;
+      console.log(`    Generating embedding for ${variant.id}...`);
+
+      const variantEmbedding = await generateEmbedding(variantEmbeddingText);
+      const variantEmbeddingStr = `[${variantEmbedding.join(',')}]`;
+
+      await sql`
+        INSERT INTO content_items (
+          id, type, position, title,
+          content_long,
+          base_id, variant_label, theme_tags,
+          function_tags, industry_tags,
+          embedding
+        ) VALUES (
+          ${variant.id},
+          'overview',
+          ${item.position},
+          ${variant.title || null},
+          ${item.contentLong},
+          ${item.id},
+          ${variant.id.split('-').pop()},
+          ${JSON.stringify(variant.themeTags || [])},
+          ${JSON.stringify(item.functionTags || [])},
+          ${JSON.stringify(item.industryTags || [])},
+          ${variantEmbeddingStr}::vector
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          title = EXCLUDED.title,
+          position = EXCLUDED.position,
+          content_long = EXCLUDED.content_long,
+          base_id = EXCLUDED.base_id,
+          variant_label = EXCLUDED.variant_label,
+          theme_tags = EXCLUDED.theme_tags,
+          function_tags = EXCLUDED.function_tags,
+          industry_tags = EXCLUDED.industry_tags,
+          embedding = EXCLUDED.embedding
+      `;
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+  console.log(`Seeded overviews with variants!`);
+}
+
+async function seedPositionBullets() {
+  console.log('\nSeeding position bullets...');
+
+  for (const [posKey, bullets] of Object.entries(masterContent.positionBullets)) {
+    const position = parseInt(posKey.replace('P', ''));
+    console.log(`\n  Position ${position}: ${bullets.length} bullets`);
+
+    for (const item of bullets) {
+      // Seed base item
+      const embeddingText = createEmbeddingText(item);
+      console.log(`    Generating embedding for ${item.id}...`);
+
+      const embedding = await generateEmbedding(embeddingText);
+      const embeddingStr = `[${embedding.join(',')}]`;
+
+      await sql`
+        INSERT INTO content_items (
+          id, type, position, title,
+          content_long,
+          function_tags, industry_tags, exclusive_metrics,
+          embedding
+        ) VALUES (
+          ${item.id},
+          'bullet',
+          ${position},
+          ${item.title},
+          ${item.contentLong},
+          ${JSON.stringify(item.functionTags || [])},
+          ${JSON.stringify(item.industryTags || [])},
+          ${JSON.stringify(item.exclusiveMetrics || [])},
+          ${embeddingStr}::vector
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          title = EXCLUDED.title,
+          position = EXCLUDED.position,
+          content_long = EXCLUDED.content_long,
+          function_tags = EXCLUDED.function_tags,
+          industry_tags = EXCLUDED.industry_tags,
+          exclusive_metrics = EXCLUDED.exclusive_metrics,
+          embedding = EXCLUDED.embedding
+      `;
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Seed variants
+      for (const variant of item.variants || []) {
+        const variantContent = variant.contentLong || item.contentLong;
+        const variantEmbeddingText = `${variantContent} | ${variant.themeTags?.join(', ')}`;
+        console.log(`      Generating embedding for ${variant.id}...`);
+
+        const variantEmbedding = await generateEmbedding(variantEmbeddingText);
+        const variantEmbeddingStr = `[${variantEmbedding.join(',')}]`;
+
+        await sql`
+          INSERT INTO content_items (
+            id, type, position,
+            content_long,
+            base_id, variant_label, theme_tags,
+            function_tags, industry_tags, exclusive_metrics,
+            embedding
+          ) VALUES (
+            ${variant.id},
+            'bullet',
+            ${position},
+            ${variantContent},
+            ${item.id},
+            ${variant.label},
+            ${JSON.stringify(variant.themeTags || [])},
+            ${JSON.stringify(variant.functionTags || item.functionTags || [])},
+            ${JSON.stringify(variant.industryTags || item.industryTags || [])},
+            ${JSON.stringify(variant.exclusiveMetrics || item.exclusiveMetrics || [])},
+            ${variantEmbeddingStr}::vector
+          )
+          ON CONFLICT (id) DO UPDATE SET
+            content_long = EXCLUDED.content_long,
+            base_id = EXCLUDED.base_id,
+            variant_label = EXCLUDED.variant_label,
+            theme_tags = EXCLUDED.theme_tags,
+            function_tags = EXCLUDED.function_tags,
+            industry_tags = EXCLUDED.industry_tags,
+            exclusive_metrics = EXCLUDED.exclusive_metrics,
+            embedding = EXCLUDED.embedding
+        `;
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
+  }
+  console.log('\nSeeded all position bullets with variants!');
 }
 
 async function seedConflictRules() {
   console.log('\nSeeding conflict rules...');
 
-  // Clear existing data
   await sql`DELETE FROM conflict_rules`;
 
-  for (const rule of contentDatabase.conflictRules) {
+  for (const rule of masterContent.conflictRules) {
     await sql`
       INSERT INTO conflict_rules (item_id, conflicts_with, reason)
       VALUES (
@@ -149,221 +372,40 @@ async function seedConflictRules() {
     `;
   }
 
-  console.log(`Seeded ${contentDatabase.conflictRules.length} conflict rules!`);
-}
-
-interface BaseItem {
-  id: string;
-  title?: string;
-  client: string;
-  generic_terms: string[];
-  branded_by_default: boolean;
-  industry_tags: string[];
-  function_tags: string[];
-  exclusive_metrics: string[];
-  conflicts_with: string[];
-}
-
-interface Variant {
-  id: string;
-  base_id: string;
-  variant_label: string;
-  context: string;
-  method: string;
-  outcome: string;
-  content: string;
-  theme_tags: string[];
-}
-
-interface OverviewVariant {
-  id: string;
-  title?: string;
-  base_id: string;
-  variant_label: string;
-  position: number;
-  content: string;
-  industry_tags: string[];
-  function_tags: string[];
-  theme_tags: string[];
-}
-
-function createVariantEmbeddingText(variant: Variant): string {
-  const parts = [
-    variant.content,
-    variant.theme_tags?.join(', '),
-    variant.context,
-  ].filter(Boolean);
-
-  return parts.join(' | ');
-}
-
-async function updateBaseItemsWithMetadata() {
-  console.log('\nUpdating base items with industry/function tags...');
-
-  let count = 0;
-  for (const baseItem of variantsDatabase.base_items as BaseItem[]) {
-    // Check if base item exists in content_items
-    const existing = await sql`
-      SELECT id FROM content_items WHERE id = ${baseItem.id}
-    `;
-
-    if (existing.rows.length > 0) {
-      // Update existing base item with new metadata
-      await sql`
-        UPDATE content_items
-        SET
-          title = ${baseItem.title || null},
-          industry_tags = ${JSON.stringify(baseItem.industry_tags)},
-          function_tags = ${JSON.stringify(baseItem.function_tags)},
-          exclusive_metrics = ${JSON.stringify(baseItem.exclusive_metrics)}
-        WHERE id = ${baseItem.id}
-      `;
-      count++;
-      console.log(`  Updated ${baseItem.id} with title and industry/function tags`);
-    } else {
-      console.log(`  Skipping ${baseItem.id} - not found in content_items`);
-    }
-  }
-
-  console.log(`Updated ${count} base items with metadata!`);
-}
-
-async function seedVariants() {
-  console.log(`\nSeeding ${variantsDatabase.variants.length} variants...`);
-
-  // Delete existing variants (items with base_id set)
-  await sql`DELETE FROM content_items WHERE base_id IS NOT NULL`;
-
-  let count = 0;
-  for (const variant of variantsDatabase.variants as Variant[]) {
-    // Find the base item to get type and position
-    const baseItem = variantsDatabase.base_items.find(b => b.id === variant.base_id) as BaseItem | undefined;
-
-    // Determine type from base_id prefix
-    let type = 'career_highlight';
-    let position: number | null = null;
-
-    if (variant.base_id.startsWith('P1-')) {
-      type = 'bullet';
-      position = 1;
-    } else if (variant.base_id.startsWith('P2-')) {
-      type = 'bullet';
-      position = 2;
-    }
-
-    const embeddingText = createVariantEmbeddingText(variant);
-    console.log(`Generating embedding for ${variant.id}...`);
-
-    const embedding = await generateEmbedding(embeddingText);
-    const embeddingStr = `[${embedding.join(',')}]`;
-
-    await sql`
-      INSERT INTO content_items (
-        id, type, position,
-        content_long,
-        function_tags, industry_tags, exclusive_metrics,
-        base_id, variant_label, context, method, theme_tags,
-        embedding
-      ) VALUES (
-        ${variant.id},
-        ${type},
-        ${position},
-        ${variant.content},
-        ${JSON.stringify(baseItem?.function_tags || [])},
-        ${JSON.stringify(baseItem?.industry_tags || [])},
-        ${JSON.stringify(baseItem?.exclusive_metrics || [])},
-        ${variant.base_id},
-        ${variant.variant_label},
-        ${variant.context},
-        ${variant.method},
-        ${JSON.stringify(variant.theme_tags || [])},
-        ${embeddingStr}::vector
-      )
-    `;
-
-    count++;
-    if (count % 10 === 0) {
-      console.log(`  Progress: ${count}/${variantsDatabase.variants.length}`);
-    }
-
-    // Rate limiting for OpenAI API
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  console.log(`Seeded ${count} variants!`);
-}
-
-async function seedOverviewVariants() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const overviewVariants = (variantsDatabase as any).overview_variants as OverviewVariant[] | undefined;
-
-  if (!overviewVariants || overviewVariants.length === 0) {
-    console.log('\nNo overview_variants found, skipping...');
-    return;
-  }
-
-  console.log(`\nSeeding ${overviewVariants.length} overview variants...`);
-
-  let count = 0;
-  for (const variant of overviewVariants) {
-    const embeddingText = `${variant.content} | ${variant.industry_tags?.join(', ')} | ${variant.function_tags?.join(', ')} | ${variant.theme_tags?.join(', ')}`;
-    console.log(`Generating embedding for ${variant.id}...`);
-
-    const embedding = await generateEmbedding(embeddingText);
-    const embeddingStr = `[${embedding.join(',')}]`;
-
-    await sql`
-      INSERT INTO content_items (
-        id, type, position, title,
-        content_long,
-        base_id, variant_label,
-        industry_tags, function_tags, theme_tags,
-        embedding
-      ) VALUES (
-        ${variant.id},
-        'overview',
-        ${variant.position},
-        ${variant.title || null},
-        ${variant.content},
-        ${variant.base_id},
-        ${variant.variant_label},
-        ${JSON.stringify(variant.industry_tags || [])},
-        ${JSON.stringify(variant.function_tags || [])},
-        ${JSON.stringify(variant.theme_tags || [])},
-        ${embeddingStr}::vector
-      )
-    `;
-
-    count++;
-    console.log(`  Seeded overview variant ${variant.id}`);
-
-    // Rate limiting for OpenAI API
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  console.log(`Seeded ${count} overview variants!`);
+  console.log(`Seeded ${masterContent.conflictRules.length} conflict rules!`);
 }
 
 async function main() {
-  console.log('Starting database seeding...\n');
+  console.log('Starting database seeding from master-content.json...\n');
 
   try {
     await ensureSchema();
-    await seedContentItems();
+    await seedSummaries();
+    await seedCareerHighlights();
+    await seedOverviews();
+    await seedPositionBullets();
     await seedConflictRules();
-    await updateBaseItemsWithMetadata();
-    await seedVariants();
-    await seedOverviewVariants();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const overviewVariantsCount = ((variantsDatabase as any).overview_variants || []).length;
+    // Count totals
+    const summaries = masterContent.summaries.length;
+    const chBase = masterContent.careerHighlights.length;
+    const chVariants = masterContent.careerHighlights.reduce((sum, ch) => sum + (ch.variants?.length || 0), 0);
+    const ovBase = masterContent.overviews.length;
+    const ovVariants = masterContent.overviews.reduce((sum, ov) => sum + (ov.variants?.length || 0), 0);
+
+    let bulletBase = 0;
+    let bulletVariants = 0;
+    for (const bullets of Object.values(masterContent.positionBullets)) {
+      bulletBase += bullets.length;
+      bulletVariants += bullets.reduce((sum, b) => sum + (b.variants?.length || 0), 0);
+    }
 
     console.log('\n✅ Database seeding completed successfully!');
-    console.log(`   - ${contentDatabase.items.length} content items`);
-    console.log(`   - ${contentDatabase.conflictRules.length} conflict rules`);
-    console.log(`   - ${variantsDatabase.base_items.length} base items updated`);
-    console.log(`   - ${variantsDatabase.variants.length} variants seeded`);
-    console.log(`   - ${overviewVariantsCount} overview variants seeded`);
+    console.log(`   - ${summaries} summaries`);
+    console.log(`   - ${chBase} career highlights + ${chVariants} variants`);
+    console.log(`   - ${ovBase} overviews + ${ovVariants} variants`);
+    console.log(`   - ${bulletBase} bullets + ${bulletVariants} variants`);
+    console.log(`   - ${masterContent.conflictRules.length} conflict rules`);
   } catch (error) {
     console.error('Error seeding database:', error);
     process.exit(1);
