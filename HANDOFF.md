@@ -120,8 +120,69 @@ npx drizzle-kit push
 
 This creates the `session_diagnostics` table.
 
-### Commit
-`2ab0016` - feat: add comprehensive diagnostics tab
+### Commits
+- `2ab0016` - feat: add comprehensive diagnostics tab
+- `f960427` - fix: make diagnostics fail gracefully when table doesn't exist
+- `a9e07d7` - feat: add JSON export for diagnostics
+
+### JSON Export Format
+
+The Export button downloads a well-structured JSON file:
+
+```json
+{
+  "_exportInfo": {
+    "exportedAt": "2026-01-05T...",
+    "sessionId": "uuid",
+    "description": "ResumeOS Generation Diagnostics Export"
+  },
+  "summary": {
+    "totalEvents": 8,
+    "totalDurationMs": 12340,
+    "totalDurationSeconds": "12.34",
+    "tokens": { "sent": 2340, "received": 1890, "total": 4230 },
+    "estimatedCostUSD": "0.031200",
+    "hasErrors": false
+  },
+  "steps": [
+    {
+      "stepName": "content_selection",
+      "stepLabel": "2. Content Selection",
+      "eventCount": 5,
+      "events": [
+        {
+          "eventId": "uuid",
+          "step": "content_selection",
+          "substep": "scoring_career_highlights",
+          "status": "success",
+          "timing": { "startedAt": "...", "durationMs": 23 },
+          "decisions": [
+            { "decision": "Score CH-01", "reason": "Industry: 6, Function: 3", "data": {...} }
+          ],
+          "llmCall": null,
+          "inputData": {...},
+          "outputData": {...}
+        }
+      ]
+    },
+    {
+      "stepName": "rewrite",
+      "stepLabel": "3. Rewrite (Claude)",
+      "events": [
+        {
+          "llmCall": {
+            "promptSent": "# Resume Rewriting Task...",
+            "promptTokens": 2340,
+            "responseReceived": "{...}",
+            "responseTokens": 1890
+          }
+        }
+      ]
+    }
+  ],
+  "rawEvents": [...]
+}
+```
 
 ---
 
