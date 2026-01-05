@@ -8,6 +8,7 @@ export const contentItems = pgTable('content_items', {
   id: text('id').primaryKey(),
   type: text('type').notNull(), // "summary", "career_highlight", "bullet", "overview"
   position: integer('position'), // 1-6 for position-specific, NULL otherwise
+  title: text('title'), // Human-readable title (e.g., "Deloitte Practice", "NWSL")
 
   // Content versions
   contentShort: text('content_short'),

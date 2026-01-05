@@ -11,6 +11,7 @@ interface ContentItem {
   id: string;
   type: string;
   position: number | null;
+  title?: string;
   contentShort: string | null;
   contentMedium: string | null;
   contentLong: string | null;
@@ -54,6 +55,7 @@ async function ensureSchema() {
   console.log('Ensuring variant columns exist...');
 
   const columns = [
+    { name: 'title', sql: `ALTER TABLE content_items ADD COLUMN IF NOT EXISTS title TEXT` },
     { name: 'industry_tags', sql: `ALTER TABLE content_items ADD COLUMN IF NOT EXISTS industry_tags JSONB DEFAULT '[]'` },
     { name: 'base_id', sql: `ALTER TABLE content_items ADD COLUMN IF NOT EXISTS base_id TEXT` },
     { name: 'variant_label', sql: `ALTER TABLE content_items ADD COLUMN IF NOT EXISTS variant_label TEXT` },
@@ -94,7 +96,7 @@ async function seedContentItems() {
 
     await sql`
       INSERT INTO content_items (
-        id, type, position,
+        id, type, position, title,
         content_short, content_medium, content_long, content_generic,
         brand_tags, category_tags, function_tags, industry_tags, theme_tags, outcome_tags, exclusive_metrics,
         embedding
@@ -102,6 +104,7 @@ async function seedContentItems() {
         ${item.id},
         ${item.type},
         ${item.position},
+        ${item.title || null},
         ${item.contentShort},
         ${item.contentMedium},
         ${item.contentLong},
@@ -151,6 +154,7 @@ async function seedConflictRules() {
 
 interface BaseItem {
   id: string;
+  title?: string;
   client: string;
   generic_terms: string[];
   branded_by_default: boolean;
@@ -173,6 +177,7 @@ interface Variant {
 
 interface OverviewVariant {
   id: string;
+  title?: string;
   base_id: string;
   variant_label: string;
   position: number;
@@ -207,13 +212,14 @@ async function updateBaseItemsWithMetadata() {
       await sql`
         UPDATE content_items
         SET
+          title = ${baseItem.title || null},
           industry_tags = ${JSON.stringify(baseItem.industry_tags)},
           function_tags = ${JSON.stringify(baseItem.function_tags)},
           exclusive_metrics = ${JSON.stringify(baseItem.exclusive_metrics)}
         WHERE id = ${baseItem.id}
       `;
       count++;
-      console.log(`  Updated ${baseItem.id} with industry/function tags`);
+      console.log(`  Updated ${baseItem.id} with title and industry/function tags`);
     } else {
       console.log(`  Skipping ${baseItem.id} - not found in content_items`);
     }
@@ -308,7 +314,7 @@ async function seedOverviewVariants() {
 
     await sql`
       INSERT INTO content_items (
-        id, type, position,
+        id, type, position, title,
         content_long,
         base_id, variant_label,
         industry_tags, function_tags, theme_tags,
@@ -317,6 +323,7 @@ async function seedOverviewVariants() {
         ${variant.id},
         'overview',
         ${variant.position},
+        ${variant.title || null},
         ${variant.content},
         ${variant.base_id},
         ${variant.variant_label},
