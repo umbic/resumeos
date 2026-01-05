@@ -4,6 +4,9 @@ import { analyzeJobDescription } from '@/lib/claude';
 import { generateEmbedding } from '@/lib/openai';
 import { COMPETITOR_MAP, filterExecutiveKeywords } from '@/lib/rules';
 
+// Increase timeout for Claude analysis (Vercel Pro: 300s, Hobby: 60s)
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const { jobDescription, name } = await request.json();

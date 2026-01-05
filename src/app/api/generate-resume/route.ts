@@ -6,6 +6,9 @@ import { runQualityCheck } from '@/lib/quality-check';
 import { autoFixIssues } from '@/lib/quality-fix';
 import type { EnhancedJDAnalysis, JDAnalysis } from '@/types';
 
+// Increase timeout for Claude generation (Vercel Pro: 300s, Hobby: 60s)
+export const maxDuration = 60;
+
 /**
  * Convert existing JDAnalysis format to EnhancedJDAnalysis format
  * This bridges V1 and V1.5 analysis formats
