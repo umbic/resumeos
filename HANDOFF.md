@@ -121,7 +121,7 @@ npx drizzle-kit push
 This creates the `session_diagnostics` table.
 
 ### Commit
-`TBD` - feat: add comprehensive diagnostics tab
+`2ab0016` - feat: add comprehensive diagnostics tab
 
 ---
 
