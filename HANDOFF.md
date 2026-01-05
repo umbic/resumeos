@@ -1,7 +1,94 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-05
-> **Last Session**: Session 11 - Enhanced Industry Detection
+> **Last Session**: Session 12 - ContentPicker Modal Fixes
+
+---
+
+## Session 12 Completed: ContentPicker Modal Fixes
+
+### Problem Solved
+
+The "Add Career Highlight" modal had two issues:
+1. **Duplicate category names**: Multiple CH items with the same brand tag (e.g., 3 Deloitte items) all displayed as just "Deloitte", making them indistinguishable
+2. **All categories showing**: The modal showed all 11 CH categories instead of only the unused ones
+
+### Solution
+
+#### Fix 1: Unique Descriptive Names
+Updated `ContentPicker.tsx` to show `"Brand: Achievement..."` format instead of just the brand tag.
+
+**Before:**
+```
+Deloitte (5 variants)
+Deloitte (4 variants)
+Deloitte (5 variants)
+```
+
+**After:**
+```
+Deloitte: Built Deloitte's brand strategy practice from ground up t... (5 variants)
+Deloitte: Designed AI-powered solutions reducing production costs b... (4 variants)
+Deloitte: Led Deloitte rebrand expanding beyond audit, generating 4... (5 variants)
+```
+
+#### Fix 2: Category-Level Filtering
+Changed filtering logic from "hide variants that are used" to "hide entire category if ANY variant is used".
+
+**Before:** Show category if any variant still available
+**After:** Hide entire category when any content from that category is already on resume
+
+#### Fix 3: API Field Selection
+The content-bank API wasn't returning `baseId`, `variantLabel`, and `themeTags` fields needed for proper grouping.
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/app/api/content-bank/route.ts` | Use `contentSelectFields` (includes baseId, variantLabel, themeTags) instead of partial fields |
+| `src/components/editor/ContentPicker.tsx` | Show "Brand: Achievement..." format; hide entire category when any variant is used |
+
+### Key Code Changes
+
+**content-bank/route.ts:**
+```typescript
+// Before: Only returned partial fields
+items = await db.select({ id, type, contentShort, ... })
+
+// After: Returns full fields for proper grouping
+items = await db.select(contentSelectFields)
+```
+
+**ContentPicker.tsx - Display Name:**
+```typescript
+// Before
+const brandName = item.brandTags?.[0] || item.id;
+
+// After
+const brandTag = item.brandTags?.[0] || '';
+const shortDesc = item.contentShort || '';
+let brandName = brandTag && shortDesc
+  ? `${brandTag}: ${achievement}`
+  : shortDesc || brandTag || item.id;
+```
+
+**ContentPicker.tsx - Filtering:**
+```typescript
+// Before: Show group if ANY variant available
+const hasAvailable = group.variants.some(v => !usedIds.includes(v.id));
+
+// After: Hide group if ANY variant is used
+const anyUsed = group.variants.some(v => usedIds.includes(v.id));
+if (!anyUsed) availableGroups.push(group);
+```
+
+### Note on Filtering
+
+The filtering works correctly when `content_ids_used` is populated. This array is set during:
+1. Initial resume generation (`claude.ts` line ~1227)
+2. Manual content selection via ContentPicker (`sessions/[id]/items/route.ts`)
+
+If an older session doesn't show filtered results, regenerate the resume to populate `content_ids_used`.
 
 ---
 
