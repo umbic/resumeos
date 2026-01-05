@@ -95,6 +95,23 @@ Test with a JD to verify:
 
 ### Commits
 - `33e79ad` - feat: implement V2 deterministic scoring engine
+- `fce0392` - fix: add position overviews and all 6 positions to V2 generation
+
+### Bug Fix: Missing Overviews & Positions 3-6
+
+Initial V2 implementation only generated P1/P2 bullets without overviews, and omitted positions 3-6 entirely.
+
+**Root Cause**: `generateResumeV2()` only created 2 positions with empty overview fields.
+
+**Fix Applied**:
+1. **content-selector.ts**: Added `OverviewItem` interface and overview selection (fetches OV-P1 through OV-P6)
+2. **rewrite-only.ts**: Added "POSITION OVERVIEWS (6)" section to prompt with output format
+3. **claude.ts**: Updated `generateResumeV2()` to:
+   - Extract overviews from Claude's rewritten response
+   - Include all 6 positions in output
+   - Fall back to original content if rewrite missing
+
+**Verified**: All 6 positions now display with overviews, P1/P2 have bullets.
 
 ---
 
