@@ -50,12 +50,15 @@ export async function detectGaps(
  * Get all text from a resume for keyword searching
  */
 function getAllResumeText(resume: GeneratedResume): string {
+  // Helper to ensure value is a string
+  const toStr = (val: unknown): string => typeof val === 'string' ? val : String(val || '');
+
   const parts: string[] = [
-    resume.summary,
-    ...resume.career_highlights,
+    toStr(resume.summary),
+    ...resume.career_highlights.map(toStr),
     ...resume.positions.flatMap(p => [
-      p.overview,
-      ...(p.bullets || []),
+      toStr(p.overview),
+      ...(p.bullets || []).map(toStr),
     ]),
   ];
   return parts.join(' ').toLowerCase();
@@ -164,7 +167,7 @@ But the resume doesn't explicitly address this.
 ${resume.summary}
 
 ### Career Highlights
-${resume.career_highlights.map((h, i) => `${i + 1}. ${h}`).join('\n')}
+${resume.career_highlights.map((h, i) => `${i + 1}. ${typeof h === 'string' ? h : String(h || '')}`).join('\n')}
 
 ### Position 1 Overview
 ${resume.positions[0]?.overview || 'N/A'}

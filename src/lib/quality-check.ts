@@ -77,8 +77,11 @@ export function runQualityCheck(
 function checkSummary(summary: string): QualityIssue[] {
   const issues: QualityIssue[] = [];
 
+  // Safety check: ensure summary is a string
+  const summaryText = typeof summary === 'string' ? summary : String(summary || '');
+
   // Check sentence count (should be 3-4)
-  const sentences = summary.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const sentences = summaryText.split(/[.!?]+/).filter(s => s.trim().length > 0);
   if (sentences.length > 5) {
     issues.push({
       type: 'bullet_length',
@@ -89,7 +92,7 @@ function checkSummary(summary: string): QualityIssue[] {
   }
 
   // Check for jargon
-  issues.push(...checkJargon(summary, 'summary'));
+  issues.push(...checkJargon(summaryText, 'summary'));
 
   return issues;
 }
@@ -98,8 +101,11 @@ function checkHighlight(highlight: string, index: number): QualityIssue[] {
   const issues: QualityIssue[] = [];
   const location = `highlight_${index}`;
 
+  // Safety check: ensure highlight is a string
+  const highlightText = typeof highlight === 'string' ? highlight : String(highlight || '');
+
   // Check word count
-  const wordCount = highlight.split(/\s+/).length;
+  const wordCount = highlightText.split(/\s+/).length;
   if (wordCount > 50) {
     issues.push({
       type: 'bullet_length',
@@ -110,7 +116,7 @@ function checkHighlight(highlight: string, index: number): QualityIssue[] {
   }
 
   // Check for jargon
-  issues.push(...checkJargon(highlight, location));
+  issues.push(...checkJargon(highlightText, location));
 
   return issues;
 }
@@ -119,8 +125,11 @@ function checkOverview(overview: string, positionNumber: number): QualityIssue[]
   const issues: QualityIssue[] = [];
   const location = `position_${positionNumber}_overview`;
 
+  // Safety check: ensure overview is a string
+  const overviewText = typeof overview === 'string' ? overview : String(overview || '');
+
   // Check for jargon
-  issues.push(...checkJargon(overview, location));
+  issues.push(...checkJargon(overviewText, location));
 
   return issues;
 }
@@ -133,8 +142,11 @@ function checkBullet(
   const issues: QualityIssue[] = [];
   const location = `position_${positionNumber}_bullet_${bulletNumber}`;
 
+  // Safety check: ensure bullet is a string
+  const bulletText = typeof bullet === 'string' ? bullet : String(bullet || '');
+
   // Check word count (HARD LIMIT: 40)
-  const wordCount = bullet.split(/\s+/).length;
+  const wordCount = bulletText.split(/\s+/).length;
   if (wordCount > 40) {
     issues.push({
       type: 'bullet_length',
@@ -152,7 +164,7 @@ function checkBullet(
   }
 
   // Check for jargon
-  issues.push(...checkJargon(bullet, location));
+  issues.push(...checkJargon(bulletText, location));
 
   return issues;
 }
@@ -197,11 +209,13 @@ function checkVerbRepetition(resume: GeneratedResume): QualityIssue[] {
 
   // Track verb usage
   for (const { text, location } of sections) {
-    const words = text.toLowerCase().split(/\s+/);
+    // Safety check: ensure text is a string
+    const textStr = typeof text === 'string' ? text : String(text || '');
+    const words = textStr.toLowerCase().split(/\s+/);
     const firstWord = words[0]?.replace(/[^a-z]/g, '');
 
     for (const verb of ACTION_VERBS) {
-      if (firstWord === verb || text.toLowerCase().includes(` ${verb} `)) {
+      if (firstWord === verb || textStr.toLowerCase().includes(` ${verb} `)) {
         if (!verbUsage[verb]) {
           verbUsage[verb] = [];
         }
@@ -266,13 +280,14 @@ function checkPhraseRepetition(resume: GeneratedResume): QualityIssue[] {
     'business value',
   ];
 
-  // Combine all text
+  // Combine all text (ensure all items are strings)
+  const toStr = (val: unknown): string => typeof val === 'string' ? val : String(val || '');
   const allText = [
-    resume.summary,
-    ...resume.career_highlights,
+    toStr(resume.summary),
+    ...resume.career_highlights.map(toStr),
     ...resume.positions.flatMap(p => [
-      p.overview,
-      ...(p.bullets || []),
+      toStr(p.overview),
+      ...(p.bullets || []).map(toStr),
     ]),
   ].join(' ').toLowerCase();
 

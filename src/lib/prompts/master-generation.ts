@@ -582,5 +582,34 @@ export function parseGenerationResponse(response: string): GeneratedResume {
     parsed.generated_at = new Date().toISOString();
   }
 
+  // Transform career_highlights from objects to strings if needed
+  // Claude returns: { id, base_id, variant_label, content }
+  // We need: string[]
+  if (Array.isArray(parsed.career_highlights)) {
+    parsed.career_highlights = parsed.career_highlights.map((ch: unknown) => {
+      if (typeof ch === 'string') return ch;
+      if (ch && typeof ch === 'object' && 'content' in ch) {
+        return (ch as { content: string }).content;
+      }
+      return String(ch);
+    });
+  }
+
+  // Transform position bullets from objects to strings if needed
+  if (Array.isArray(parsed.positions)) {
+    parsed.positions = parsed.positions.map((pos: { bullets?: unknown[] }) => {
+      if (pos.bullets && Array.isArray(pos.bullets)) {
+        pos.bullets = pos.bullets.map((b: unknown) => {
+          if (typeof b === 'string') return b;
+          if (b && typeof b === 'object' && 'content' in b) {
+            return (b as { content: string }).content;
+          }
+          return String(b);
+        });
+      }
+      return pos;
+    });
+  }
+
   return parsed as GeneratedResume;
 }
