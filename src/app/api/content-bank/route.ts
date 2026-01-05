@@ -21,6 +21,24 @@ function getConflictPair(itemId: string): string | null {
   return null;
 }
 
+// Find all CH base IDs that conflict with bullets at a specific position
+function getCHItemsForPosition(positionNumber: number): string[] {
+  const chItems: string[] = [];
+  const positionPrefix = `P${positionNumber}-B`;
+
+  // Look through CONFLICT_MAP to find CH items that conflict with this position's bullets
+  for (const [chId, bulletIds] of Object.entries(CONFLICT_MAP)) {
+    if (chId.startsWith('CH-')) {
+      const hasPositionConflict = bulletIds.some(bid => bid.startsWith(positionPrefix));
+      if (hasPositionConflict) {
+        chItems.push(chId);
+      }
+    }
+  }
+
+  return chItems;
+}
+
 // Standard select fields for content items
 const contentSelectFields = {
   id: contentItems.id,
@@ -116,6 +134,35 @@ export async function GET(request: NextRequest) {
         .select(contentSelectFields)
         .from(contentItems)
         .where(and(...conditions));
+    }
+
+    // For bullet queries with position, also include CH items that conflict with bullets at that position
+    // This allows users to choose between a Position bullet and its related CH category
+    if (type === 'bullet' && position) {
+      const positionNumber = parseInt(position);
+      const relatedCHIds = getCHItemsForPosition(positionNumber);
+
+      if (relatedCHIds.length > 0) {
+        // Fetch CH items (base + variants) that conflict with this position's bullets
+        const chItemsQuery = await db
+          .select(contentSelectFields)
+          .from(contentItems)
+          .where(
+            or(
+              // Base CH items
+              ...relatedCHIds.map(chId => eq(contentItems.id, chId)),
+              // Variants of those CH items
+              ...relatedCHIds.map(chId => eq(contentItems.baseId, chId))
+            )
+          );
+
+        // Filter out excluded items and merge with bullet items
+        const filteredCHItems = exclude.length > 0
+          ? chItemsQuery.filter(item => !exclude.includes(item.id))
+          : chItemsQuery;
+
+        items = [...items, ...filteredCHItems];
+      }
     }
 
     return NextResponse.json({ items });
