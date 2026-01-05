@@ -1,7 +1,61 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: Session 6 - Complete Variant System with Three-Level Matching
+> **Last Session**: Session 7 - Bug Fixes & Codebase Cleanup
+
+---
+
+## Session 7 Completed: Bug Fixes & Codebase Cleanup
+
+### What Was Done
+
+Fixed critical bugs and cleaned up unused files from the codebase.
+
+### Bug Fixes
+
+#### 1. `e.split is not a function` Error
+**Problem**: Resume generation was failing with `TypeError: e.split is not a function`
+
+**Root Cause**: The master generation prompt tells Claude to return `career_highlights` and `bullets` as objects with `{id, base_id, variant_label, content}`, but the TypeScript types and quality-check code expected plain strings.
+
+**Fix**:
+- `src/lib/prompts/master-generation.ts`: Added transformation in `parseGenerationResponse()` to extract `.content` from objects
+- `src/lib/quality-check.ts`: Added safety checks to convert non-strings before calling `.split()`
+- `src/lib/gap-detection.ts`: Added `toStr()` helper for `getAllResumeText()` function
+
+#### 2. Past Sessions Not Opening
+**Problem**: Clicking "Open" on old sessions would return to dashboard instead of showing the resume
+
+**Root Cause**: Old sessions stored `career_highlights` as objects in the database. When loaded, the UI tried to render objects as strings and failed silently.
+
+**Fix**:
+- `src/app/page.tsx`: Added transformation in `loadSession()` to convert legacy object format to strings
+- `src/lib/render-highlights.tsx`: Added safety check in `renderContent()` to extract `.content` from objects
+
+### Codebase Cleanup
+
+Removed **26 unused files** totaling **7,213 lines**:
+
+| Category | Files Removed |
+|----------|---------------|
+| Unused component | `src/components/resume/OneShotInput.tsx` (replaced by OneShotReview) |
+| Test artifacts | `DEBUG_RESUME.docx`, `TEST_RESUME_ANTHROPIC.docx`, `TEST_V1_5_RESUME.docx`, `files.zip` |
+| Legacy root docs | `PROMPT_AUDIT_REQUEST.md`, `PROMPT_AUDIT_RESULTS.md`, `REPO_ANALYSIS.md`, `TEST_RESULTS.md`, `TEST_V1_5_RESULTS.md` |
+| Old docs folder | 18 files of v1/v2 architecture documentation |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/lib/prompts/master-generation.ts` | Transform objects to strings in parseGenerationResponse() |
+| `src/lib/quality-check.ts` | Safety checks for .split() calls |
+| `src/lib/gap-detection.ts` | toStr() helper for getAllResumeText() |
+| `src/app/page.tsx` | Transform legacy resume format when loading sessions |
+| `src/lib/render-highlights.tsx` | Safety check in renderContent() |
+
+### Commits
+- `5b6eb0b` - fix: handle object-to-string conversion in resume parsing
+- `343228e` - fix: handle legacy resume format when loading sessions
+- `efbc275` - chore: remove unused files and legacy documentation
 
 ---
 
