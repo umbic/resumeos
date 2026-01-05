@@ -156,3 +156,26 @@ Content selection uses a 3-level scoring system based on JD analysis:
 - P3-P6: Uses base overviews (no variants)
 
 **CH/Bullet Selection**: Uses existing variant scoring system with theme tags.
+
+## Diagnostics System
+
+The app includes a comprehensive diagnostics system for debugging resume generation:
+
+### Viewing Diagnostics
+- **In-app panel**: Visible in the right panel after generation
+- **Dedicated page**: Navigate to `/diagnostics/[sessionId]` for full-page view
+- **Export**: Download full diagnostics as JSON
+
+### What Gets Logged
+- **JD Analysis**: Full prompt/response from Claude, extracted keywords/themes
+- **Content Selection**: Every item scored with industry/function/theme breakdown
+- **Variant Comparison**: All variants scored for each base item
+- **Conflict Blocking**: Which items blocked due to metric conflicts
+- **Rewrite**: Full prompt/response with token counts and cost
+- **Final Assembly**: Selected content IDs and keyword coverage
+
+### Key Files
+- `src/lib/diagnostics.ts` - DiagnosticLogger class
+- `src/components/diagnostics/DiagnosticsPanel.tsx` - In-app panel
+- `src/app/diagnostics/[sessionId]/page.tsx` - Dedicated diagnostics page
+- `src/app/api/diagnostics/[sessionId]/route.ts` - API endpoint

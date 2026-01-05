@@ -113,3 +113,70 @@ To verify the implementation:
 2. Fine-tune tag mappings based on real JD testing
 3. Add more summaries for edge cases (healthcare, media, etc.)
 4. Consider weighting industry vs function vs theme differently
+
+---
+
+# Session 7b: Enhanced Diagnostics
+
+## Summary
+
+Added comprehensive diagnostics logging and a dedicated diagnostics page for viewing resume generation details.
+
+## Changes Made
+
+### 1. Dedicated Diagnostics Page (`/diagnostics/[sessionId]`)
+
+Created a full-page diagnostics view at `src/app/diagnostics/[sessionId]/page.tsx`:
+- Full-width layout for better readability
+- Collapsible sections for each generation step
+- Copy buttons on all prompts/responses/data
+- Expand/collapse all controls
+- Summary stats (duration, tokens, cost, status)
+- Export to JSON functionality
+
+### 2. DiagnosticsPanel Link
+
+Added "Full Page" link to `DiagnosticsPanel.tsx` that opens diagnostics in a new tab.
+
+### 3. Enhanced Claude.ts Logging
+
+Updated `analyzeJobDescription()` to log:
+- Full JD analysis prompt (verbatim)
+- Full Claude response (verbatim)
+- Actual token counts from API
+- Parsed output summary (keywords, themes, etc.)
+
+### 4. Enhanced Content-Selector Logging
+
+Updated `selectBestVariant()` to log:
+- All variant scores for each base item
+- Winner selection with comparison
+- Theme tag matching details
+
+## Files Changed
+
+| File | Changes |
+|------|---------|
+| `src/app/diagnostics/[sessionId]/page.tsx` | New dedicated page |
+| `src/components/diagnostics/DiagnosticsPanel.tsx` | Added "Full Page" link |
+| `src/lib/claude.ts` | Added JD analysis diagnostics |
+| `src/lib/content-selector.ts` | Enhanced variant logging |
+| `CLAUDE.md` | Added diagnostics documentation |
+
+## What Gets Logged
+
+| Step | Logged Data |
+|------|-------------|
+| JD Analysis | Prompt, response, keywords, themes, company lookup |
+| Content Selection | Every item scored with industry/function/theme breakdown |
+| Variant Comparison | All variants scored for each base item |
+| Conflict Blocking | Which items blocked due to metric conflicts |
+| Rewrite | Full prompt/response with token counts and cost |
+| Final Assembly | Selected content IDs and keyword coverage |
+
+## Usage
+
+1. Generate a resume for any session
+2. View diagnostics in the panel (right side)
+3. Click "Full Page" to open dedicated view at `/diagnostics/{sessionId}`
+4. Click "Export" to download full JSON
