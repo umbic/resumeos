@@ -11,6 +11,7 @@ interface SectionEditorProps {
   sessionId: string;
   sectionKey: string;
   currentContent: string;
+  currentContentId?: string; // ID of the content item being edited (for variant filtering)
   usedContentIds?: string[]; // Content IDs already used in the resume
   onClose: () => void;
   onSave: (newContent: string) => void;
@@ -22,6 +23,33 @@ type EditorTab = 'edit' | 'refine' | 'bank';
 interface BankQueryParams {
   type: 'summary' | 'career_highlight' | 'bullet' | 'overview';
   position?: number;
+}
+
+// Infer content ID from section key and used content IDs
+// This is a heuristic to find which content ID corresponds to a section
+function inferContentIdFromSection(sectionKey: string, usedContentIds: string[]): string | null {
+  if (sectionKey.startsWith('highlight_')) {
+    // highlight_1, highlight_2, etc. -> Find CH- IDs
+    const index = parseInt(sectionKey.split('_')[1]) - 1;
+    const chIds = usedContentIds.filter(id => id.startsWith('CH-'));
+    return chIds[index] || null;
+  }
+
+  if (sectionKey.startsWith('position_')) {
+    const parts = sectionKey.split('_');
+    const posNum = parseInt(parts[1]);
+    const field = parts[2];
+
+    if (field === 'bullet') {
+      const bulletIndex = parseInt(parts[3]) - 1;
+      // P1-Bxx, P2-Bxx patterns
+      const prefix = `P${posNum}-B`;
+      const bulletIds = usedContentIds.filter(id => id.startsWith(prefix));
+      return bulletIds[bulletIndex] || null;
+    }
+  }
+
+  return null;
 }
 
 // Parse section key to get bank query params
@@ -99,6 +127,7 @@ export function SectionEditor({
   sessionId,
   sectionKey,
   currentContent,
+  currentContentId,
   usedContentIds = [],
   onClose,
   onSave,
@@ -163,8 +192,17 @@ export function SectionEditor({
         queryParams.set('position', params.position.toString());
       }
 
-      if (usedContentIds.length > 0) {
-        queryParams.set('exclude', usedContentIds.join(','));
+      // Pass currentContentId for variant filtering (shows only variants of same base)
+      if (currentContentId) {
+        queryParams.set('currentId', currentContentId);
+      } else if (usedContentIds.length > 0) {
+        // Fallback: try to infer the content ID from usedContentIds based on section type
+        const inferredId = inferContentIdFromSection(sectionKey, usedContentIds);
+        if (inferredId) {
+          queryParams.set('currentId', inferredId);
+        } else {
+          queryParams.set('exclude', usedContentIds.join(','));
+        }
       }
 
       const response = await fetch(`/api/content-bank?${queryParams.toString()}`);
@@ -179,7 +217,7 @@ export function SectionEditor({
     } finally {
       setLoadingBank(false);
     }
-  }, [sectionKey, usedContentIds, bankFetched]);
+  }, [sectionKey, currentContentId, usedContentIds, bankFetched]);
 
   // Fetch when Bank tab is activated
   useEffect(() => {
