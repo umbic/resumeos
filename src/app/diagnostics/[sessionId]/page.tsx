@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ChevronDown,
   ChevronRight,
@@ -134,8 +134,8 @@ function CollapsibleSection({
   );
 }
 
-export default function DiagnosticsPage({ params }: { params: Promise<{ sessionId: string }> }) {
-  const { sessionId } = use(params);
+export default function DiagnosticsPage({ params }: { params: { sessionId: string } }) {
+  const { sessionId } = params;
   const [data, setData] = useState<DiagnosticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
