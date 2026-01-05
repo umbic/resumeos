@@ -84,6 +84,22 @@ ${b.content}
 
 ---
 
+### POSITION OVERVIEWS (6)
+These are overview paragraphs for each position. Rewrite to match JD language while preserving the narrative.
+
+${selection.overviews.map((ov) => `
+#### Position ${ov.position} Overview [${ov.id}]
+Original:
+${ov.content}
+`).join('\n')}
+
+For each overview:
+- Maintain the narrative arc
+- Incorporate relevant keywords naturally
+- Target: 35-50 words each
+
+---
+
 ## QUALITY RULES
 1. **Metrics are sacred** — Never change numbers, percentages, or dollar amounts
 2. **No verb repetition** — Don't use the same action verb twice in the resume
@@ -116,6 +132,32 @@ Return JSON in this exact structure:
     {
       "id": "P2-BXX",
       "content": "Rewritten bullet text"
+    }
+  ],
+  "overviews": [
+    {
+      "position": 1,
+      "content": "Rewritten overview for position 1"
+    },
+    {
+      "position": 2,
+      "content": "Rewritten overview for position 2"
+    },
+    {
+      "position": 3,
+      "content": "Rewritten overview for position 3"
+    },
+    {
+      "position": 4,
+      "content": "Rewritten overview for position 4"
+    },
+    {
+      "position": 5,
+      "content": "Rewritten overview for position 5"
+    },
+    {
+      "position": 6,
+      "content": "Rewritten overview for position 6"
     }
   ],
   "keywords_used": ["keyword1", "keyword2"],

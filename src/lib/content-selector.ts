@@ -26,11 +26,21 @@ export interface ScoredItem {
   contentLong: string | null;
 }
 
+export interface OverviewItem {
+  id: string;
+  position: number;
+  content: string;
+  contentShort: string | null;
+  contentMedium: string | null;
+  contentLong: string | null;
+}
+
 export interface SelectionResult {
   summary: ScoredItem | null;
   careerHighlights: ScoredItem[];
   position1Bullets: ScoredItem[];
   position2Bullets: ScoredItem[];
+  overviews: OverviewItem[];  // All 6 position overviews
   debug: {
     jdRequirements: JDRequirements;
     allScores: { id: string; industry: number; function: number; theme: number; total: number }[];
@@ -436,11 +446,30 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
     }
   }
 
+  // Select all 6 position overviews (they're not scored, just fetched by position)
+  const overviewItems = baseItems.filter(item => item.id.startsWith('OV-P'));
+  const overviews: OverviewItem[] = [];
+
+  for (let pos = 1; pos <= 6; pos++) {
+    const overview = overviewItems.find(item => item.position === pos);
+    if (overview) {
+      overviews.push({
+        id: overview.id,
+        position: pos,
+        content: overview.contentLong || overview.contentMedium || overview.contentShort || '',
+        contentShort: overview.contentShort,
+        contentMedium: overview.contentMedium,
+        contentLong: overview.contentLong,
+      });
+    }
+  }
+
   return {
     summary: bestSummary,
     careerHighlights: selectedCH,
     position1Bullets: selectedP1,
     position2Bullets: selectedP2,
+    overviews,
     debug,
   };
 }

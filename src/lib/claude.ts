@@ -1092,6 +1092,21 @@ export async function generateResumeV2(jdAnalysis: any): Promise<{
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const themesAddressed = priorityThemes.map((t: any) => t.theme);
 
+  // Extract overviews from rewritten response (array of {position, content})
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const overviewMap = new Map<number, string>();
+  if (rewritten.overviews && Array.isArray(rewritten.overviews)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rewritten.overviews.forEach((ov: any) => {
+      overviewMap.set(ov.position, ov.content);
+    });
+  }
+
+  // Helper to get overview for a position
+  const getOverview = (pos: number): string => {
+    return overviewMap.get(pos) || selection.overviews.find(o => o.position === pos)?.content || '';
+  };
+
   const resume: GeneratedResume = {
     summary: rewritten.summary,
     career_highlights: careerHighlights,
@@ -1102,7 +1117,7 @@ export async function generateResumeV2(jdAnalysis: any): Promise<{
         company: POSITIONS[0].company,
         location: POSITIONS[0].location,
         dates: POSITIONS[0].dates,
-        overview: '', // Will be filled by existing logic or kept empty
+        overview: getOverview(1),
         bullets: p1Bullets,
       },
       {
@@ -1111,8 +1126,40 @@ export async function generateResumeV2(jdAnalysis: any): Promise<{
         company: POSITIONS[1].company,
         location: POSITIONS[1].location,
         dates: POSITIONS[1].dates,
-        overview: '',
+        overview: getOverview(2),
         bullets: p2Bullets,
+      },
+      {
+        number: 3,
+        title: POSITIONS[2].titleDefault,
+        company: POSITIONS[2].company,
+        location: POSITIONS[2].location,
+        dates: POSITIONS[2].dates,
+        overview: getOverview(3),
+      },
+      {
+        number: 4,
+        title: POSITIONS[3].titleDefault,
+        company: POSITIONS[3].company,
+        location: POSITIONS[3].location,
+        dates: POSITIONS[3].dates,
+        overview: getOverview(4),
+      },
+      {
+        number: 5,
+        title: POSITIONS[4].titleDefault,
+        company: POSITIONS[4].company,
+        location: POSITIONS[4].location,
+        dates: POSITIONS[4].dates,
+        overview: getOverview(5),
+      },
+      {
+        number: 6,
+        title: POSITIONS[5].titleDefault,
+        company: POSITIONS[5].company,
+        location: POSITIONS[5].location,
+        dates: POSITIONS[5].dates,
+        overview: getOverview(6),
       },
     ],
     content_ids_used: [
@@ -1120,6 +1167,7 @@ export async function generateResumeV2(jdAnalysis: any): Promise<{
       ...selection.careerHighlights.map(c => c.id),
       ...selection.position1Bullets.map(p => p.id),
       ...selection.position2Bullets.map(p => p.id),
+      ...selection.overviews.map(o => o.id),
     ].filter(Boolean) as string[],
     keywords_used: rewritten.keywords_used || [],
     verbs_used: rewritten.verbs_used || [],
