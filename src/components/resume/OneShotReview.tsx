@@ -9,6 +9,7 @@ import { ChatRefinement } from './ChatRefinement';
 import { KeywordGaps } from './KeywordGaps';
 import { Download, RefreshCw, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import { SectionEditor } from '@/components/editor/SectionEditor';
+import { ContentPicker } from '@/components/editor/ContentPicker';
 
 interface OneShotReviewProps {
   sessionId: string;
@@ -51,6 +52,10 @@ export function OneShotReview({
     key: string;
     content: string;
   } | null>(null);
+  const [showContentPicker, setShowContentPicker] = useState<{
+    type: 'career_highlight' | 'bullet';
+    position?: number;
+  } | null>(null);
 
   // Ref for preserving scroll position
   const previewContainerRef = useRef<HTMLDivElement>(null);
@@ -82,16 +87,31 @@ export function OneShotReview({
     setEditingSection({ key: sectionKey, content });
   };
 
+  // Show content picker when "+" is clicked
   const handleAddItem = async (type: 'highlight' | 'bullet', positionNumber?: number) => {
+    setShowContentPicker({
+      type: type === 'highlight' ? 'career_highlight' : 'bullet',
+      position: positionNumber,
+    });
+  };
+
+  // Handle content selection from picker
+  const handleContentSelected = async (content: string, contentId: string) => {
+    if (!showContentPicker) return;
+
     saveScrollPosition();
+    setShowContentPicker(null);
+
     try {
       const response = await fetch(`/api/sessions/${sessionId}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'add',
-          type,
-          positionNumber,
+          type: showContentPicker.type === 'career_highlight' ? 'highlight' : 'bullet',
+          positionNumber: showContentPicker.position,
+          content,
+          contentId,
         }),
       });
 
@@ -99,26 +119,6 @@ export function OneShotReview({
       if (data.success && data.resume) {
         onResumeUpdate(data.resume);
         restoreScrollPosition();
-
-        // Open editor for the new item
-        if (type === 'highlight') {
-          const newIndex = data.resume.career_highlights.length;
-          setEditingSection({
-            key: `highlight_${newIndex}`,
-            content: data.resume.career_highlights[newIndex - 1],
-          });
-          setActiveSection(`highlight_${newIndex}`);
-        } else if (type === 'bullet' && positionNumber) {
-          const position = data.resume.positions.find((p: { number: number }) => p.number === positionNumber);
-          if (position?.bullets) {
-            const newIndex = position.bullets.length;
-            setEditingSection({
-              key: `position_${positionNumber}_bullet_${newIndex}`,
-              content: position.bullets[newIndex - 1],
-            });
-            setActiveSection(`position_${positionNumber}_bullet_${newIndex}`);
-          }
-        }
       }
     } catch (error) {
       console.error('Failed to add item:', error);
@@ -334,6 +334,17 @@ export function OneShotReview({
             setActiveSection(null);
           }}
           onSave={handleSectionSave}
+        />
+      )}
+
+      {/* Content Picker Modal for adding new items */}
+      {showContentPicker && (
+        <ContentPicker
+          type={showContentPicker.type}
+          position={showContentPicker.position}
+          usedContentIds={resume.content_ids_used || []}
+          onSelect={handleContentSelected}
+          onClose={() => setShowContentPicker(null)}
         />
       )}
     </div>

@@ -8,7 +8,7 @@ export async function POST(
 ) {
   try {
     const { id } = params;
-    const { action, type, index, positionNumber, content } = await request.json();
+    const { action, type, index, positionNumber, content, contentId } = await request.json();
 
     // Get current resume
     const result = await sql`
@@ -23,9 +23,13 @@ export async function POST(
 
     if (action === 'add') {
       if (type === 'highlight') {
-        // Add new highlight with placeholder
+        // Add new highlight with content
         const newHighlight = content || '[New highlight - click to edit]';
         resume.career_highlights = [...resume.career_highlights, newHighlight];
+        // Track content ID if provided
+        if (contentId) {
+          resume.content_ids_used = [...(resume.content_ids_used || []), contentId];
+        }
       } else if (type === 'bullet' && positionNumber) {
         // Add bullet to specific position
         const newBullet = content || '[New bullet - click to edit]';
@@ -38,6 +42,10 @@ export async function POST(
           }
           return p;
         });
+        // Track content ID if provided
+        if (contentId) {
+          resume.content_ids_used = [...(resume.content_ids_used || []), contentId];
+        }
       }
     } else if (action === 'remove') {
       if (type === 'highlight' && typeof index === 'number') {

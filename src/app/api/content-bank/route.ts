@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { contentItems } from '@/drizzle/schema';
-import { eq, and, notInArray, or } from 'drizzle-orm';
+import { eq, and, notInArray, or, isNull } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -17,11 +17,12 @@ export async function GET(request: NextRequest) {
   try {
     // If currentId is provided, find variants of the same base
     if (currentId && (type === 'career_highlight' || type === 'bullet')) {
-      // First, get the current item to determine its base_id
+      // First, get the current item to determine its base_id and position
       const currentItem = await db
         .select({
           id: contentItems.id,
           baseId: contentItems.baseId,
+          position: contentItems.position,
         })
         .from(contentItems)
         .where(eq(contentItems.id, currentId))
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
 
         // Find all items that share this base (the base itself + all its variants)
         // Exclude the current item being edited
-        const items = await db
+        const variantItems = await db
           .select({
             id: contentItems.id,
             type: contentItems.type,
@@ -63,7 +64,44 @@ export async function GET(request: NextRequest) {
             )
           );
 
-        return NextResponse.json({ items });
+        // If variants found, return them
+        if (variantItems.length > 0) {
+          return NextResponse.json({ items: variantItems, hasVariants: true });
+        }
+
+        // No variants - fall back to showing all OTHER base items (different achievements)
+        // For bullets, filter by position
+        const fallbackConditions = [
+          eq(contentItems.type, type),
+          isNull(contentItems.baseId), // Only base items, not variants
+          notInArray(contentItems.id, [currentId]), // Exclude current
+        ];
+
+        if (type === 'bullet' && current.position) {
+          fallbackConditions.push(eq(contentItems.position, current.position));
+        }
+
+        const fallbackItems = await db
+          .select({
+            id: contentItems.id,
+            type: contentItems.type,
+            position: contentItems.position,
+            contentShort: contentItems.contentShort,
+            contentMedium: contentItems.contentMedium,
+            contentLong: contentItems.contentLong,
+            contentGeneric: contentItems.contentGeneric,
+            categoryTags: contentItems.categoryTags,
+            outcomeTags: contentItems.outcomeTags,
+            functionTags: contentItems.functionTags,
+            brandTags: contentItems.brandTags,
+            baseId: contentItems.baseId,
+            variantLabel: contentItems.variantLabel,
+            themeTags: contentItems.themeTags,
+          })
+          .from(contentItems)
+          .where(and(...fallbackConditions));
+
+        return NextResponse.json({ items: fallbackItems, hasVariants: false });
       }
     }
 

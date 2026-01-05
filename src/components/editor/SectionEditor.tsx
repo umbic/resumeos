@@ -121,6 +121,9 @@ interface ContentBankItem {
   outcomeTags: string[] | null;
   functionTags: string[] | null;
   brandTags: string[] | null;
+  baseId: string | null;
+  variantLabel: string | null;
+  themeTags: string[] | null;
 }
 
 export function SectionEditor({
