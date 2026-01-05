@@ -2,6 +2,10 @@ import { db } from './db';
 import { contentItems } from '@/drizzle/schema';
 import { CONFLICT_MAP } from './rules';
 import { DiagnosticLogger } from './diagnostics';
+import { lookupCompanyIndustry, CompanyIndustryInfo } from './company-lookup';
+
+// Re-export for consumers
+export type { CompanyIndustryInfo };
 
 // Types
 export interface JDRequirements {
@@ -10,6 +14,7 @@ export interface JDRequirements {
   functions: string[];       // e.g., ["product-marketing", "demand-generation"]
   themes: string[];          // e.g., ["revenue-growth", "GTM", "team-leadership"]
   keywords: string[];        // e.g., ["funnel", "pipeline", "enablement"]
+  companyInfo?: CompanyIndustryInfo;  // Industry info from company lookup
 }
 
 export interface ScoredItem {
@@ -50,13 +55,57 @@ export interface SelectionResult {
 }
 
 /**
- * Extract JD requirements from EnhancedJDAnalysis
+ * Infer industries from ATS keywords
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function extractJDRequirements(jdAnalysis: any): JDRequirements {
+function inferIndustriesFromKeywords(keywords: any[]): string[] {
+  const industries: string[] = [];
+
+  const keywordMap: Record<string, string[]> = {
+    'technology': ['technology'],
+    'software': ['technology', 'software'],
+    'saas': ['technology', 'SaaS', 'B2B'],
+    'enterprise': ['B2B', 'enterprise-software'],
+    'fintech': ['financial-services', 'fintech', 'technology'],
+    'banking': ['financial-services', 'banking'],
+    'payments': ['financial-services', 'payments'],
+    'healthcare': ['healthcare'],
+    'pharma': ['healthcare', 'pharma'],
+    'retail': ['retail', 'consumer'],
+    'e-commerce': ['e-commerce', 'retail', 'technology'],
+    'cpg': ['CPG', 'consumer'],
+    'consumer': ['consumer'],
+    'b2b': ['B2B'],
+    'b2c': ['B2C', 'consumer'],
+  };
+
+  for (const kw of keywords) {
+    const keyword = (typeof kw === 'string' ? kw : kw.keyword || '').toLowerCase();
+
+    for (const [term, tags] of Object.entries(keywordMap)) {
+      if (keyword.includes(term)) {
+        industries.push(...tags);
+      }
+    }
+  }
+
+  return industries;
+}
+
+/**
+ * Extract JD requirements from EnhancedJDAnalysis
+ * Now includes company lookup for industry detection
+ */
+export async function extractJDRequirements(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  jdAnalysis: any,
+  diagnostics?: DiagnosticLogger
+): Promise<JDRequirements> {
+  const eventId = diagnostics?.startEvent('content_selection', 'extract_requirements');
+
   // Normalize industry to array of tags
   const industryStr = (jdAnalysis.industry || '').toLowerCase();
-  const industries: string[] = [];
+  let industries: string[] = [];
 
   // Map common industry terms to tags
   if (industryStr.includes('financial') || industryStr.includes('banking') || industryStr.includes('payment')) {
@@ -82,6 +131,60 @@ export function extractJDRequirements(jdAnalysis: any): JDRequirements {
   if (industryStr.includes('b2c') || industryStr.includes('consumer')) {
     industries.push('B2C', 'consumer');
   }
+
+  // If industries still empty, look up the company
+  let companyInfo: CompanyIndustryInfo | undefined;
+
+  if (industries.length === 0 && jdAnalysis.target_company) {
+    diagnostics?.logDecision(eventId!,
+      'Industry empty, looking up company',
+      `Searching for: ${jdAnalysis.target_company}`,
+      { company: jdAnalysis.target_company }
+    );
+
+    try {
+      companyInfo = await lookupCompanyIndustry(jdAnalysis.target_company);
+
+      diagnostics?.logDecision(eventId!,
+        'Company lookup complete',
+        `Found: ${companyInfo.industryCategory} (${companyInfo.confidence} confidence)`,
+        companyInfo
+      );
+
+      // Add industries from company lookup
+      if (companyInfo.industries.length > 0) {
+        industries.push(...companyInfo.industries);
+      }
+
+      // Add B2B/B2C if detected
+      if (companyInfo.isB2B && !industries.includes('B2B')) {
+        industries.push('B2B');
+      }
+      if (companyInfo.isB2C && !industries.includes('B2C')) {
+        industries.push('B2C');
+      }
+
+    } catch (error) {
+      diagnostics?.logDecision(eventId!,
+        'Company lookup failed',
+        error instanceof Error ? error.message : 'Unknown error',
+        { error }
+      );
+    }
+  }
+
+  // Also check keywords for industry signals
+  const keywordIndustries = inferIndustriesFromKeywords(jdAnalysis.ats_keywords || []);
+  industries.push(...keywordIndustries);
+
+  // Deduplicate
+  industries = Array.from(new Set(industries));
+
+  diagnostics?.logDecision(eventId!,
+    'Final industries extracted',
+    `Found ${industries.length} industries: ${industries.join(', ')}`,
+    { industries }
+  );
 
   // Extract functions from role_functions or target_title
   const functions: string[] = jdAnalysis.role_functions || [];
@@ -128,12 +231,15 @@ export function extractJDRequirements(jdAnalysis: any): JDRequirements {
     typeof k === 'string' ? k.toLowerCase() : (k.keyword || '').toLowerCase()
   );
 
+  diagnostics?.completeEvent(eventId!);
+
   return {
-    industry: jdAnalysis.industry || '',
-    industries: Array.from(new Set(industries)),
+    industry: jdAnalysis.industry || companyInfo?.industryCategory || '',
+    industries,
     functions: Array.from(new Set(functions.map(f => f.toLowerCase()))),
     themes: Array.from(new Set(themes)),
     keywords: Array.from(new Set(keywords)),
+    companyInfo,
   };
 }
 
@@ -260,7 +366,7 @@ function selectBestVariant(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function selectContent(jdAnalysis: any, diagnostics?: DiagnosticLogger): Promise<SelectionResult> {
-  const jd = extractJDRequirements(jdAnalysis);
+  const jd = await extractJDRequirements(jdAnalysis, diagnostics);
   const debug = {
     jdRequirements: jd,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

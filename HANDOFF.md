@@ -1,7 +1,94 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-05
-> **Last Session**: Session 10 - Comprehensive Diagnostics Tab
+> **Last Session**: Session 11 - Enhanced Industry Detection
+
+---
+
+## Session 11 Completed: Enhanced Industry Detection
+
+### Problem Solved
+
+The `extractJDRequirements()` function was returning empty `industries[]` when `jdAnalysis.industry` was blank or generic. This happened with JDs like Salesforce where the industry field was empty, meaning Level 1 (Industry) scoring contributed nothing to content selection, even though Salesforce is clearly a technology/enterprise software company.
+
+### Solution
+
+Added a company lookup step that:
+1. First checks a database of 60+ known companies (instant, no API call)
+2. Falls back to Claude web search for unknown companies
+3. Enriches JD analysis with industry tags, B2B/B2C flags, and competitor info
+
+### Files Created
+
+| File | Description |
+|------|-------------|
+| `src/lib/company-lookup.ts` | Company industry lookup with web search fallback |
+
+#### company-lookup.ts Functions
+- `lookupCompanyIndustry()` — Looks up company industry, returns `CompanyIndustryInfo`
+- `inferFromKnownCompanies()` — Instant lookup for 60+ known companies (Salesforce, Microsoft, Google, etc.)
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/lib/content-selector.ts` | Made `extractJDRequirements()` async, added company lookup when industries empty |
+| `src/lib/claude.ts` | Reuse `selection.debug.jdRequirements` instead of calling `extractJDRequirements()` again |
+
+### Key Changes to content-selector.ts
+
+1. **New interface field**: `JDRequirements.companyInfo` — Optional `CompanyIndustryInfo` from lookup
+2. **Async function**: `extractJDRequirements()` is now async and accepts optional `DiagnosticLogger`
+3. **Company lookup trigger**: When `industries[]` is empty but `target_company` exists
+4. **Keyword inference**: Added `inferIndustriesFromKeywords()` to extract industry signals from ATS keywords
+5. **Diagnostic logging**: Company lookup decisions logged for debugging
+
+### Expected Behavior
+
+**Before (Salesforce JD with empty industry):**
+```json
+{
+  "industries": [],
+  "industryScore": 0  // No industry scoring
+}
+```
+
+**After (Salesforce JD with empty industry):**
+```json
+{
+  "industries": ["technology", "enterprise-software", "SaaS", "B2B"],
+  "companyInfo": {
+    "company": "Salesforce",
+    "industryCategory": "Enterprise Software",
+    "isB2B": true,
+    "competitors": ["Microsoft", "Oracle", "SAP"],
+    "confidence": "high"
+  }
+}
+```
+
+### Known Companies Database (60+)
+
+Instant lookup (no API call) for:
+- **Tech**: Salesforce, Microsoft, Google, Apple, Amazon, Meta, Adobe, SAP, Oracle, Snowflake, Databricks, NVIDIA, etc.
+- **Finance**: Goldman Sachs, JPMorgan, Visa, Mastercard, PayPal, Stripe, etc.
+- **Consulting**: McKinsey, BCG, Bain, Deloitte, Accenture, PwC, EY, KPMG
+- **Consumer**: Nike, P&G, Unilever, Coca-Cola, PepsiCo, Netflix, Disney
+- **Healthcare**: Pfizer, J&J, Merck
+- **Retail/E-commerce**: Walmart, Target, Shopify, Instacart
+- **Social/Transport**: Uber, Lyft, Airbnb, LinkedIn, TikTok, OpenAI, Anthropic
+
+### Cost Considerations
+
+- **Known companies**: No API call, instant lookup
+- **Unknown companies**: One Claude web search call (~$0.01-0.02)
+
+### Diagnostics
+
+Company lookup results appear in diagnostics under "extract_requirements" with decisions like:
+- "Industry empty, looking up company" — Triggered when industries array is empty
+- "Company lookup complete" — Shows found industry category and confidence
+- "Final industries extracted" — Shows all industries after lookup and keyword inference
 
 ---
 

@@ -14,7 +14,7 @@ import {
   type PromptVariant,
 } from './prompts/master-generation';
 import { buildRewritePrompt, parseRewriteResponse } from './prompts/rewrite-only';
-import { selectContent, SelectionResult, extractJDRequirements } from './content-selector';
+import { selectContent, SelectionResult } from './content-selector';
 import { isNotNull, isNull, and } from 'drizzle-orm';
 import { createDiagnosticLogger, clearSessionDiagnostics, estimateTokens, DiagnosticLogger } from './diagnostics';
 
@@ -1059,7 +1059,8 @@ export async function generateResumeV2(jdAnalysis: any, sessionId?: string): Pro
   });
 
   // Step 2: Claude rewriting (creative)
-  const jdRequirements = extractJDRequirements(jdAnalysis);
+  // Reuse the already-extracted requirements from selectContent
+  const jdRequirements = selection.debug.jdRequirements;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const priorityThemes = (jdAnalysis.priority_themes || []).map((t: any) => ({
