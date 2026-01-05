@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { generateFullResume } from '@/lib/claude';
+import { generateResumeV2 } from '@/lib/claude';
 import { detectGaps, detectKeywordGaps } from '@/lib/gap-detection';
 import { runQualityCheck } from '@/lib/quality-check';
 import { autoFixIssues } from '@/lib/quality-fix';
@@ -184,16 +184,16 @@ export async function POST(request: NextRequest) {
       session.target_company
     );
 
-    const format = (session.format || 'long') as 'long' | 'short';
-    const brandingMode = (session.branding_mode || 'branded') as 'branded' | 'generic';
+    // Note: format and brandingMode are preserved for future V2 enhancements
+    const _format = (session.format || 'long') as 'long' | 'short';
+    const _brandingMode = (session.branding_mode || 'branded') as 'branded' | 'generic';
+    void _format;
+    void _brandingMode;
 
-    // Generate complete resume
-    const generatedResume = await generateFullResume({
-      jdAnalysis,
-      format,
-      brandingMode,
-      targetCompany: session.target_company || '',
-    });
+    // Generate complete resume using V2 (code-based selection + LLM rewrite)
+    const { resume: generatedResume, selection } = await generateResumeV2(jdAnalysis);
+
+    console.log('[generate-resume] V2 selection debug:', selection.debug);
 
     // Validate no conflict pairs were used together
     const conflictViolations = validateNoConflicts(generatedResume);
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
         keyword_gaps = ${JSON.stringify(keywordGaps)}::jsonb,
         quality_score = ${JSON.stringify(qualityScore)}::jsonb,
         used_verbs = ${verbsLiteral}::text[],
-        generation_version = 'v1.5',
+        generation_version = 'v2',
         updated_at = NOW()
       WHERE id = ${sessionId}
     `;
@@ -259,6 +259,7 @@ export async function POST(request: NextRequest) {
       themes_addressed: finalResume.themes_addressed,
       themes_not_addressed: finalResume.themes_not_addressed,
       conflict_violations: conflictViolations, // Include any conflict violations
+      selection_debug: selection.debug, // V2: Include selection scoring debug info
     });
 
   } catch (error) {

@@ -13,6 +13,8 @@ import {
   type PromptContentItem,
   type PromptVariant,
 } from './prompts/master-generation';
+import { buildRewritePrompt, parseRewriteResponse } from './prompts/rewrite-only';
+import { selectContent, SelectionResult, extractJDRequirements } from './content-selector';
 import { isNotNull, isNull, and } from 'drizzle-orm';
 
 const anthropic = new Anthropic({
@@ -1019,5 +1021,114 @@ export async function generateFullResume(input: {
 
 // Re-export for convenience
 export { buildMasterGenerationPrompt, parseGenerationResponse };
+
+// ============================================
+// V2 Two-Step Generation: Code Selection + LLM Rewrite
+// ============================================
+
+/**
+ * NEW: Two-step generation with code-based selection
+ * Step 1: Deterministic scoring selects content (code, no LLM)
+ * Step 2: Claude rewrites selected content (LLM, no selection)
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function generateResumeV2(jdAnalysis: any): Promise<{
+  resume: GeneratedResume;
+  selection: SelectionResult;
+}> {
+  // Step 1: Code-based selection (deterministic)
+  console.log('[V2] Starting content selection...');
+  const selection = await selectContent(jdAnalysis);
+  console.log('[V2] Selection complete:', {
+    ch: selection.careerHighlights.map(c => c.id),
+    p1: selection.position1Bullets.map(p => p.id),
+    p2: selection.position2Bullets.map(p => p.id),
+  });
+
+  // Step 2: Claude rewriting (creative)
+  const jdRequirements = extractJDRequirements(jdAnalysis);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const priorityThemes = (jdAnalysis.priority_themes || []).map((t: any) => ({
+    theme: typeof t === 'string' ? t : t.theme,
+    evidence: typeof t === 'object' ? t.jd_evidence : undefined,
+  }));
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const atsKeywords = (jdAnalysis.ats_keywords || []).map((k: any) =>
+    typeof k === 'string' ? k : k.keyword
+  );
+
+  const prompt = buildRewritePrompt({
+    jdRequirements,
+    priorityThemes,
+    atsKeywords,
+    selection,
+    targetTitle: jdAnalysis.target_title || '',
+    targetCompany: jdAnalysis.target_company || '',
+  });
+
+  console.log('[V2] Sending rewrite prompt to Claude...');
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 4000,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const responseText = response.content[0].type === 'text'
+    ? response.content[0].text
+    : '';
+
+  const rewritten = parseRewriteResponse(responseText);
+
+  // Build final resume structure matching GeneratedResume type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const careerHighlights = rewritten.career_highlights.map((ch: any) => ch.content);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const p1Bullets = rewritten.position1_bullets.map((b: any) => b.content);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const p2Bullets = rewritten.position2_bullets.map((b: any) => b.content);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const themesAddressed = priorityThemes.map((t: any) => t.theme);
+
+  const resume: GeneratedResume = {
+    summary: rewritten.summary,
+    career_highlights: careerHighlights,
+    positions: [
+      {
+        number: 1,
+        title: POSITIONS[0].titleDefault,
+        company: POSITIONS[0].company,
+        location: POSITIONS[0].location,
+        dates: POSITIONS[0].dates,
+        overview: '', // Will be filled by existing logic or kept empty
+        bullets: p1Bullets,
+      },
+      {
+        number: 2,
+        title: POSITIONS[1].titleDefault,
+        company: POSITIONS[1].company,
+        location: POSITIONS[1].location,
+        dates: POSITIONS[1].dates,
+        overview: '',
+        bullets: p2Bullets,
+      },
+    ],
+    content_ids_used: [
+      selection.summary?.id,
+      ...selection.careerHighlights.map(c => c.id),
+      ...selection.position1Bullets.map(p => p.id),
+      ...selection.position2Bullets.map(p => p.id),
+    ].filter(Boolean) as string[],
+    keywords_used: rewritten.keywords_used || [],
+    verbs_used: rewritten.verbs_used || [],
+    themes_addressed: themesAddressed,
+    themes_not_addressed: [],
+    generated_at: new Date().toISOString(),
+  };
+
+  return { resume, selection };
+}
 
 export default anthropic;

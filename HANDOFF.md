@@ -1,7 +1,100 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: Session 8 - JD Evidence Preservation Fix
+> **Last Session**: Session 9 - V2 Deterministic Scoring Engine
+
+---
+
+## Session 9 Completed: V2 Deterministic Scoring Engine
+
+### What Was Done
+
+Replaced the one-shot Claude generation with a two-step pipeline:
+1. **Code-based selection** (deterministic) — Scoring engine selects content
+2. **Claude rewriting** (creative) — LLM only reshapes language, doesn't select
+
+This separates "what to include" (deterministic, debuggable) from "how to say it" (creative).
+
+### Architecture
+
+```
+Step 1: JD Analysis (Claude) — NO CHANGE
+         ↓
+Step 2: Content Selection (NEW — Code, not LLM)
+  - Score all items by industry_tags overlap
+  - Score by function_tags overlap
+  - Pick top 5 CH, top 4 P1, top 3 P2
+  - For each selected base, score variants by theme_tags
+  - Pick best variant for each
+  - Enforce CONFLICT_MAP
+  Output: 12 selected content items with variant IDs
+         ↓
+Step 3: Rewrite Only (Claude — SIMPLIFIED)
+  - Input: JD keywords + 12 pre-selected items + quality rules
+  - Claude reshapes language to match JD terminology
+  - Claude does NOT select content — already done
+```
+
+### Files Created
+
+| File | Description |
+|------|-------------|
+| `src/lib/content-selector.ts` | Core deterministic scoring engine |
+| `src/lib/prompts/rewrite-only.ts` | Simplified Claude prompt for rewriting only |
+
+#### content-selector.ts Functions
+- `extractJDRequirements()` — Extracts industries, functions, themes, keywords from JD
+- `scoreIndustry()` / `scoreFunction()` / `scoreTheme()` — Three-level scoring (direct match=3, partial=1)
+- `selectBestVariant()` — Picks optimal variant for each base item
+- `selectContent()` — Main orchestrator returning ranked content with debug info
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/lib/claude.ts` | Added `generateResumeV2()` function |
+| `src/app/api/generate-resume/route.ts` | Now uses V2 pipeline, includes `selection_debug` in response |
+| `src/types/index.ts` | Extended `GeneratedResume` with `keywords_used` and `selection_debug` |
+
+### Key Benefits
+
+1. **Deterministic selection** — Same JD always produces same content selection
+2. **Debuggable** — Full scoring breakdown in `selection.debug`:
+   - `jdRequirements`: Extracted industries, functions, themes, keywords
+   - `allScores`: Industry/function/theme scores for each item
+   - `blockedByConflict`: Which items were blocked by CONFLICT_MAP
+3. **Conflict-aware** — Automatically blocks conflicting items (e.g., CH-01 blocks P1-B02)
+4. **Variant matching** — Selects best variant based on theme alignment
+5. **Rollback ready** — Original `generateFullResume()` still available
+
+### Debug Output Example
+
+```json
+{
+  "selection_debug": {
+    "jdRequirements": {
+      "industries": ["financial-services", "B2B", "payments"],
+      "functions": ["product-marketing", "demand-generation"],
+      "themes": ["revenue-growth", "gtm", "team-leadership"]
+    },
+    "allScores": [
+      { "id": "CH-04", "selectedVariant": "CH-04-V3", "industry": 6, "function": 3, "theme": 4, "total": 13 }
+    ],
+    "blockedByConflict": ["CH-01 blocks P1-B02"]
+  }
+}
+```
+
+### Testing Notes
+
+Test with a JD to verify:
+- Selection debug output in Vercel logs shows correct scoring
+- Variant IDs selected (e.g., CH-04-V3 instead of CH-04)
+- No conflict violations (blocked items not appearing)
+- Keyword coverage should improve with deterministic selection
+
+### Commits
+- `[pending]` - feat: implement V2 deterministic scoring engine
 
 ---
 

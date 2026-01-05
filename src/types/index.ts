@@ -67,8 +67,11 @@ export interface GeneratedResume {
   themes_addressed: string[];
   themes_not_addressed: string[];
   verbs_used: string[];
+  keywords_used?: string[]; // V2: Keywords incorporated by rewrite
   content_ids_used: string[];
   generated_at: string; // ISO date
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  selection_debug?: Record<string, any>; // V2: Debug info from deterministic selection
 }
 
 export interface GeneratedPosition {

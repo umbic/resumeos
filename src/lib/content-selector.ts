@@ -1,0 +1,446 @@
+import { db } from './db';
+import { contentItems } from '@/drizzle/schema';
+import { CONFLICT_MAP } from './rules';
+
+// Types
+export interface JDRequirements {
+  industry: string;
+  industries: string[];      // e.g., ["financial-services", "B2B", "payments"]
+  functions: string[];       // e.g., ["product-marketing", "demand-generation"]
+  themes: string[];          // e.g., ["revenue-growth", "GTM", "team-leadership"]
+  keywords: string[];        // e.g., ["funnel", "pipeline", "enablement"]
+}
+
+export interface ScoredItem {
+  id: string;
+  baseId: string;
+  variantId: string | null;
+  variantLabel: string | null;
+  industryScore: number;
+  functionScore: number;
+  themeScore: number;
+  totalScore: number;
+  content: string;
+  contentShort: string | null;
+  contentMedium: string | null;
+  contentLong: string | null;
+}
+
+export interface SelectionResult {
+  summary: ScoredItem | null;
+  careerHighlights: ScoredItem[];
+  position1Bullets: ScoredItem[];
+  position2Bullets: ScoredItem[];
+  debug: {
+    jdRequirements: JDRequirements;
+    allScores: { id: string; industry: number; function: number; theme: number; total: number }[];
+    blockedByConflict: string[];
+  };
+}
+
+/**
+ * Extract JD requirements from EnhancedJDAnalysis
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function extractJDRequirements(jdAnalysis: any): JDRequirements {
+  // Normalize industry to array of tags
+  const industryStr = (jdAnalysis.industry || '').toLowerCase();
+  const industries: string[] = [];
+
+  // Map common industry terms to tags
+  if (industryStr.includes('financial') || industryStr.includes('banking') || industryStr.includes('payment')) {
+    industries.push('financial-services', 'banking', 'payments');
+  }
+  if (industryStr.includes('health') || industryStr.includes('pharma')) {
+    industries.push('healthcare', 'pharma');
+  }
+  if (industryStr.includes('tech') || industryStr.includes('software') || industryStr.includes('saas')) {
+    industries.push('technology', 'enterprise-software');
+  }
+  if (industryStr.includes('consumer') || industryStr.includes('retail') || industryStr.includes('cpg')) {
+    industries.push('consumer', 'retail', 'CPG');
+  }
+  if (industryStr.includes('consulting') || industryStr.includes('professional')) {
+    industries.push('professional-services', 'consulting');
+  }
+
+  // Always check for B2B/B2C signals
+  if (industryStr.includes('b2b') || industryStr.includes('enterprise')) {
+    industries.push('B2B');
+  }
+  if (industryStr.includes('b2c') || industryStr.includes('consumer')) {
+    industries.push('B2C', 'consumer');
+  }
+
+  // Extract functions from role_functions or target_title
+  const functions: string[] = jdAnalysis.role_functions || [];
+  const title = (jdAnalysis.target_title || '').toLowerCase();
+
+  // Infer functions from title if not provided
+  if (title.includes('product marketing') || title.includes('product marketer')) {
+    if (!functions.includes('product-marketing')) functions.push('product-marketing');
+  }
+  if (title.includes('brand')) {
+    if (!functions.includes('brand-strategy')) functions.push('brand-strategy');
+  }
+  if (title.includes('growth') || title.includes('demand')) {
+    if (!functions.includes('demand-generation')) functions.push('demand-generation');
+    if (!functions.includes('growth-strategy')) functions.push('growth-strategy');
+  }
+  if (title.includes('gtm') || title.includes('go-to-market')) {
+    if (!functions.includes('go-to-market')) functions.push('go-to-market');
+  }
+
+  // Extract themes from priority_themes
+  const themes: string[] = [];
+  const priorityThemes = jdAnalysis.priority_themes || [];
+  for (const t of priorityThemes) {
+    const themeName = typeof t === 'string' ? t : t.theme;
+    if (themeName) {
+      // Normalize theme to tag format
+      const normalized = themeName.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+      themes.push(normalized);
+
+      // Also add component words for partial matching
+      const words = themeName.toLowerCase().split(/\s+/);
+      words.forEach((w: string) => {
+        if (w.length > 3 && !themes.includes(w)) themes.push(w);
+      });
+    }
+  }
+
+  // Extract keywords
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const keywords: string[] = (jdAnalysis.ats_keywords || []).map((k: any) =>
+    typeof k === 'string' ? k.toLowerCase() : (k.keyword || '').toLowerCase()
+  );
+
+  return {
+    industry: jdAnalysis.industry || '',
+    industries: Array.from(new Set(industries)),
+    functions: Array.from(new Set(functions.map(f => f.toLowerCase()))),
+    themes: Array.from(new Set(themes)),
+    keywords: Array.from(new Set(keywords)),
+  };
+}
+
+/**
+ * Score industry match (Level 1)
+ * Direct match = 3, Related match = 1
+ */
+function scoreIndustry(itemTags: string[], jdIndustries: string[]): number {
+  if (!itemTags || itemTags.length === 0) return 0;
+
+  const normalizedItem = itemTags.map(t => t.toLowerCase());
+  const normalizedJD = jdIndustries.map(t => t.toLowerCase());
+
+  let score = 0;
+  for (const jdTag of normalizedJD) {
+    if (normalizedItem.includes(jdTag)) {
+      score += 3; // Direct match
+    } else {
+      // Check for partial/related matches
+      for (const itemTag of normalizedItem) {
+        if (itemTag.includes(jdTag) || jdTag.includes(itemTag)) {
+          score += 1;
+          break;
+        }
+      }
+    }
+  }
+
+  return Math.min(score, 9); // Cap at 9 to prevent runaway scores
+}
+
+/**
+ * Score function match (Level 2)
+ * Direct match = 3, Related match = 1
+ */
+function scoreFunction(itemTags: string[], jdFunctions: string[]): number {
+  if (!itemTags || itemTags.length === 0) return 0;
+
+  const normalizedItem = itemTags.map(t => t.toLowerCase());
+  const normalizedJD = jdFunctions.map(t => t.toLowerCase());
+
+  let score = 0;
+  for (const jdFunc of normalizedJD) {
+    if (normalizedItem.includes(jdFunc)) {
+      score += 3; // Direct match
+    } else {
+      // Check for related functions
+      for (const itemFunc of normalizedItem) {
+        if (itemFunc.includes(jdFunc) || jdFunc.includes(itemFunc)) {
+          score += 1;
+          break;
+        }
+      }
+    }
+  }
+
+  return Math.min(score, 9); // Cap at 9
+}
+
+/**
+ * Score theme match (Level 3) — for variant selection
+ * Direct match = 2, Partial match = 1
+ */
+function scoreTheme(itemTags: string[], jdThemes: string[]): number {
+  if (!itemTags || itemTags.length === 0) return 0;
+
+  const normalizedItem = itemTags.map(t => t.toLowerCase());
+  const normalizedJD = jdThemes.map(t => t.toLowerCase());
+
+  let score = 0;
+  for (const jdTheme of normalizedJD) {
+    if (normalizedItem.includes(jdTheme)) {
+      score += 2; // Direct match
+    } else {
+      // Check for partial matches
+      for (const itemTheme of normalizedItem) {
+        if (itemTheme.includes(jdTheme) || jdTheme.includes(itemTheme)) {
+          score += 1;
+          break;
+        }
+      }
+    }
+  }
+
+  return score;
+}
+
+/**
+ * Select best variant for a base item
+ */
+function selectBestVariant(
+  _baseId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  variants: any[],
+  jdThemes: string[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): { variantId: string | null; variantLabel: string | null; themeScore: number; content: any } {
+
+  if (!variants || variants.length === 0) {
+    return { variantId: null, variantLabel: null, themeScore: 0, content: null };
+  }
+
+  let bestVariant = variants[0];
+  let bestScore = scoreTheme(variants[0].themeTags || [], jdThemes);
+
+  for (const variant of variants.slice(1)) {
+    const score = scoreTheme(variant.themeTags || [], jdThemes);
+    if (score > bestScore) {
+      bestScore = score;
+      bestVariant = variant;
+    }
+  }
+
+  return {
+    variantId: bestVariant.id,
+    variantLabel: bestVariant.variantLabel,
+    themeScore: bestScore,
+    content: bestVariant,
+  };
+}
+
+/**
+ * Main selection function
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
+  const jd = extractJDRequirements(jdAnalysis);
+  const debug = {
+    jdRequirements: jd,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    allScores: [] as any[],
+    blockedByConflict: [] as string[],
+  };
+
+  // Fetch all content
+  const allContent = await db.select().from(contentItems);
+
+  // Separate base items and variants
+  const baseItems = allContent.filter(item => !item.baseId);
+  const variants = allContent.filter(item => item.baseId);
+
+  // Group variants by base_id
+  const variantsByBase = new Map<string, typeof variants>();
+  for (const variant of variants) {
+    const existing = variantsByBase.get(variant.baseId!) || [];
+    existing.push(variant);
+    variantsByBase.set(variant.baseId!, existing);
+  }
+
+  // Score all Career Highlight base items
+  const chBases = baseItems.filter(item => item.id.startsWith('CH-'));
+  const scoredCH: ScoredItem[] = [];
+
+  for (const ch of chBases) {
+    const industryScore = scoreIndustry(ch.industryTags as string[] || [], jd.industries);
+    const functionScore = scoreFunction(ch.functionTags as string[] || [], jd.functions);
+
+    // Get best variant
+    const chVariants = variantsByBase.get(ch.id) || [];
+    const { variantId, variantLabel, themeScore, content: variantContent } = selectBestVariant(
+      ch.id,
+      chVariants,
+      jd.themes
+    );
+
+    const totalScore = industryScore + functionScore + themeScore;
+    const finalContent = variantContent || ch;
+
+    scoredCH.push({
+      id: variantId || ch.id,
+      baseId: ch.id,
+      variantId,
+      variantLabel,
+      industryScore,
+      functionScore,
+      themeScore,
+      totalScore,
+      content: finalContent.contentLong || finalContent.contentMedium || '',
+      contentShort: finalContent.contentShort,
+      contentMedium: finalContent.contentMedium,
+      contentLong: finalContent.contentLong,
+    });
+
+    debug.allScores.push({
+      id: ch.id,
+      selectedVariant: variantId,
+      industry: industryScore,
+      function: functionScore,
+      theme: themeScore,
+      total: totalScore,
+    });
+  }
+
+  // Sort by total score (descending) and select top 5
+  scoredCH.sort((a, b) => b.totalScore - a.totalScore);
+  const selectedCH = scoredCH.slice(0, 5);
+
+  // Track used base IDs and get blocked IDs from conflicts
+  const usedBaseIds = Array.from(new Set(selectedCH.map(ch => ch.baseId)));
+  const blockedIds = new Set<string>();
+
+  for (const baseId of usedBaseIds) {
+    const conflicts = CONFLICT_MAP[baseId as keyof typeof CONFLICT_MAP] || [];
+    conflicts.forEach((id: string) => {
+      blockedIds.add(id);
+      debug.blockedByConflict.push(`${baseId} blocks ${id}`);
+    });
+  }
+
+  // Score P1 bullets (excluding blocked)
+  const p1Bases = baseItems.filter(item =>
+    item.id.startsWith('P1-B') && !blockedIds.has(item.id)
+  );
+  const scoredP1: ScoredItem[] = [];
+
+  for (const p1 of p1Bases) {
+    const industryScore = scoreIndustry(p1.industryTags as string[] || [], jd.industries);
+    const functionScore = scoreFunction(p1.functionTags as string[] || [], jd.functions);
+
+    const p1Variants = variantsByBase.get(p1.id) || [];
+    const { variantId, variantLabel, themeScore, content: variantContent } = selectBestVariant(
+      p1.id,
+      p1Variants,
+      jd.themes
+    );
+
+    const totalScore = industryScore + functionScore + themeScore;
+    const finalContent = variantContent || p1;
+
+    scoredP1.push({
+      id: variantId || p1.id,
+      baseId: p1.id,
+      variantId,
+      variantLabel,
+      industryScore,
+      functionScore,
+      themeScore,
+      totalScore,
+      content: finalContent.contentLong || finalContent.contentMedium || '',
+      contentShort: finalContent.contentShort,
+      contentMedium: finalContent.contentMedium,
+      contentLong: finalContent.contentLong,
+    });
+  }
+
+  scoredP1.sort((a, b) => b.totalScore - a.totalScore);
+  const selectedP1 = scoredP1.slice(0, 4);
+
+  // Score P2 bullets (excluding blocked)
+  const p2Bases = baseItems.filter(item =>
+    item.id.startsWith('P2-B') && !blockedIds.has(item.id)
+  );
+  const scoredP2: ScoredItem[] = [];
+
+  for (const p2 of p2Bases) {
+    const industryScore = scoreIndustry(p2.industryTags as string[] || [], jd.industries);
+    const functionScore = scoreFunction(p2.functionTags as string[] || [], jd.functions);
+
+    const p2Variants = variantsByBase.get(p2.id) || [];
+    const { variantId, variantLabel, themeScore, content: variantContent } = selectBestVariant(
+      p2.id,
+      p2Variants,
+      jd.themes
+    );
+
+    const totalScore = industryScore + functionScore + themeScore;
+    const finalContent = variantContent || p2;
+
+    scoredP2.push({
+      id: variantId || p2.id,
+      baseId: p2.id,
+      variantId,
+      variantLabel,
+      industryScore,
+      functionScore,
+      themeScore,
+      totalScore,
+      content: finalContent.contentLong || finalContent.contentMedium || '',
+      contentShort: finalContent.contentShort,
+      contentMedium: finalContent.contentMedium,
+      contentLong: finalContent.contentLong,
+    });
+  }
+
+  scoredP2.sort((a, b) => b.totalScore - a.totalScore);
+  const selectedP2 = scoredP2.slice(0, 3);
+
+  // Select best summary (score by function match)
+  const summaries = baseItems.filter(item => item.id.startsWith('SUM-'));
+  let bestSummary: ScoredItem | null = null;
+  let bestSummaryScore = -1;
+
+  for (const sum of summaries) {
+    const functionScore = scoreFunction(sum.functionTags as string[] || [], jd.functions);
+    if (functionScore > bestSummaryScore) {
+      bestSummaryScore = functionScore;
+      bestSummary = {
+        id: sum.id,
+        baseId: sum.id,
+        variantId: null,
+        variantLabel: null,
+        industryScore: 0,
+        functionScore,
+        themeScore: 0,
+        totalScore: functionScore,
+        content: sum.contentLong || sum.contentMedium || '',
+        contentShort: sum.contentShort,
+        contentMedium: sum.contentMedium,
+        contentLong: sum.contentLong,
+      };
+    }
+  }
+
+  return {
+    summary: bestSummary,
+    careerHighlights: selectedCH,
+    position1Bullets: selectedP1,
+    position2Bullets: selectedP2,
+    debug,
+  };
+}
