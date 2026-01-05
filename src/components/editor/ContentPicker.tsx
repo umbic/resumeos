@@ -201,9 +201,13 @@ export function ContentPicker({
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm font-medium text-gray-900">
-                      {variant.variantLabel || 'Base Version'}
+                      {/* Use brand name from selected base, show theme focus for variants */}
+                      {variant.baseId
+                        ? (variant.themeTags?.[0] || 'Alternative Version')
+                        : 'Base Version'
+                      }
                     </span>
-                    {variant.variantLabel && (
+                    {variant.baseId && (
                       <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
                         Variant
                       </span>
@@ -212,7 +216,21 @@ export function ContentPicker({
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {getContent(variant)}
                   </p>
-                  {variant.themeTags && variant.themeTags.length > 0 && (
+                  {/* Show remaining theme tags (skip first one if it's shown in header) */}
+                  {variant.themeTags && variant.themeTags.length > 1 && variant.baseId && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {variant.themeTags.slice(1, 5).map((tag, i) => (
+                        <span
+                          key={i}
+                          className="px-2 py-0.5 text-xs bg-purple-50 text-purple-600 rounded"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* For base items, show all theme tags */}
+                  {variant.themeTags && variant.themeTags.length > 0 && !variant.baseId && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {variant.themeTags.slice(0, 4).map((tag, i) => (
                         <span

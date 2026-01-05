@@ -33,6 +33,18 @@ export async function GET(request: NextRequest) {
         // Determine the base ID: if current has a baseId, use it; otherwise current IS the base
         const baseId = current.baseId || current.id;
 
+        // Get the base item to get its brandTags (for variants that don't have them)
+        const baseItem = await db
+          .select({
+            id: contentItems.id,
+            brandTags: contentItems.brandTags,
+          })
+          .from(contentItems)
+          .where(eq(contentItems.id, baseId))
+          .limit(1);
+
+        const baseBrandTags = baseItem[0]?.brandTags || null;
+
         // Find all items that share this base (the base itself + all its variants)
         // Exclude the current item being edited
         const variantItems = await db
@@ -64,9 +76,13 @@ export async function GET(request: NextRequest) {
             )
           );
 
-        // If variants found, return them
+        // If variants found, add base's brandTags to variants that don't have them
         if (variantItems.length > 0) {
-          return NextResponse.json({ items: variantItems, hasVariants: true });
+          const itemsWithBrandTags = variantItems.map(item => ({
+            ...item,
+            brandTags: item.brandTags || baseBrandTags,
+          }));
+          return NextResponse.json({ items: itemsWithBrandTags, hasVariants: true });
         }
 
         // No variants - fall back to showing all OTHER base items (different achievements)

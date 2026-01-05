@@ -25,7 +25,7 @@ interface ContentBankItem {
 interface DisplayItem {
   id: string;
   brandName: string;  // Primary label (e.g., "NYU Langone", "SAP")
-  variantLabel?: string;  // For variants (e.g., "Team Leadership")
+  isVariant: boolean;  // True if this is a variant of a base item
   label?: string;  // For overviews: "Short Version", "Medium Version", etc.
   content: string;
   categoryTags: string[];
@@ -63,6 +63,7 @@ function transformItemsForDisplay(items: ContentBankItem[], sectionKey: string):
         displayItems.push({
           id: `${item.id}-short`,
           brandName,
+          isVariant: false,
           label: 'Short Version',
           content: item.contentShort,
           categoryTags: item.categoryTags || [],
@@ -74,6 +75,7 @@ function transformItemsForDisplay(items: ContentBankItem[], sectionKey: string):
         displayItems.push({
           id: `${item.id}-medium`,
           brandName,
+          isVariant: false,
           label: 'Medium Version',
           content: item.contentMedium,
           categoryTags: item.categoryTags || [],
@@ -85,6 +87,7 @@ function transformItemsForDisplay(items: ContentBankItem[], sectionKey: string):
         displayItems.push({
           id: `${item.id}-long`,
           brandName,
+          isVariant: false,
           label: 'Long Version',
           content: item.contentLong,
           categoryTags: item.categoryTags || [],
@@ -99,7 +102,7 @@ function transformItemsForDisplay(items: ContentBankItem[], sectionKey: string):
         displayItems.push({
           id: item.id,
           brandName,
-          variantLabel: item.variantLabel || undefined,
+          isVariant: !!item.baseId,  // True if this item has a parent base
           content,
           categoryTags: item.categoryTags || [],
           outcomeTags: item.outcomeTags || [],
@@ -154,15 +157,16 @@ export function ContentBank({
             key={item.id}
             className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
           >
-            {/* Header with brand name and variant label */}
+            {/* Header with brand name and variant indicator */}
             <div className="flex items-start justify-between mb-2">
               <div>
                 <span className="text-sm font-semibold text-gray-900">
                   {item.brandName}
                 </span>
-                {item.variantLabel && (
+                {/* Show first theme tag as variant indicator, or "Variant" badge */}
+                {item.isVariant && (
                   <span className="ml-2 text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                    {item.variantLabel}
+                    {item.themeTags[0] || 'Variant'}
                   </span>
                 )}
                 {item.label && (
@@ -178,8 +182,21 @@ export function ContentBank({
               {item.content}
             </p>
 
-            {/* Theme tags (for variants) */}
-            {item.themeTags.length > 0 && (
+            {/* Theme tags (show remaining after the first one used in header) */}
+            {item.themeTags.length > 1 && item.isVariant && (
+              <div className="flex flex-wrap gap-1 mb-3">
+                {item.themeTags.slice(1, 5).map((tag, i) => (
+                  <span
+                    key={`theme-${i}`}
+                    className="px-2 py-0.5 text-xs bg-purple-50 text-purple-600 rounded"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* For base items, show all theme tags */}
+            {item.themeTags.length > 0 && !item.isVariant && (
               <div className="flex flex-wrap gap-1 mb-3">
                 {item.themeTags.slice(0, 4).map((tag, i) => (
                   <span
