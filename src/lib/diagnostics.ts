@@ -235,24 +235,37 @@ export function createDiagnosticLogger(sessionId: string): DiagnosticLogger {
 
 /**
  * Fetch all diagnostics for a session from the database
+ * Returns empty array if table doesn't exist yet
  */
 export async function getSessionDiagnostics(sessionId: string) {
-  const events = await db
-    .select()
-    .from(sessionDiagnostics)
-    .where(eq(sessionDiagnostics.sessionId, sessionId))
-    .orderBy(sessionDiagnostics.startedAt);
+  try {
+    const events = await db
+      .select()
+      .from(sessionDiagnostics)
+      .where(eq(sessionDiagnostics.sessionId, sessionId))
+      .orderBy(sessionDiagnostics.startedAt);
 
-  return events;
+    return events;
+  } catch (error) {
+    // Table might not exist yet - return empty array
+    console.warn('[Diagnostics] Could not fetch diagnostics (table may not exist):', error);
+    return [];
+  }
 }
 
 /**
  * Delete all diagnostics for a session (for re-generation)
+ * Fails silently if table doesn't exist yet
  */
 export async function clearSessionDiagnostics(sessionId: string): Promise<void> {
-  await db
-    .delete(sessionDiagnostics)
-    .where(eq(sessionDiagnostics.sessionId, sessionId));
+  try {
+    await db
+      .delete(sessionDiagnostics)
+      .where(eq(sessionDiagnostics.sessionId, sessionId));
+  } catch (error) {
+    // Table might not exist yet - that's ok, just log and continue
+    console.warn('[Diagnostics] Could not clear diagnostics (table may not exist):', error);
+  }
 }
 
 /**
