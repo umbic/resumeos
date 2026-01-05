@@ -27,11 +27,18 @@ export interface JDKeyword {
   dismissReason?: string;        // Why user dismissed it
 }
 
+// Theme with evidence for tailoring
+export interface PositioningTheme {
+  theme: string;
+  evidence: string;      // Why this theme matters based on JD language
+  jd_quotes: string[];   // 2-3 exact phrases from JD supporting this theme
+}
+
 export interface JDStrategic {
   targetTitle: string;
   targetCompany: string;
   industry: string;
-  positioningThemes: string[];
+  positioningThemes: PositioningTheme[];  // Now includes evidence
 }
 
 export interface JDAnalysis {
@@ -112,6 +119,7 @@ export interface ATSKeyword {
   frequency: number; // How many times it appears in JD
   priority: 'high' | 'medium' | 'low'; // high = 2+, medium = 1, low = nice-to-have
   category?: KeywordCategory;
+  placement?: string; // Where in JD: "title", "requirements", "responsibilities", "nice-to-have"
 }
 
 // Keyword Gap detection

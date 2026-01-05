@@ -1,7 +1,81 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: Session 7 - Bug Fixes & Codebase Cleanup
+> **Last Session**: Session 8 - JD Evidence Preservation Fix
+
+---
+
+## Session 8 Completed: JD Evidence Preservation Fix
+
+### Problem Diagnosed
+
+The `convertToEnhancedAnalysis()` function in `generate-resume/route.ts` was replacing actual JD evidence with placeholder text like "Strategic positioning theme for Head of Brand Strategy role". This meant Claude had no context about WHY themes mattered or what specific JD language to use for tailoring.
+
+### Root Cause
+
+1. **JD analysis prompt** extracted themes as plain strings, not objects with evidence
+2. **Conversion function** created generic placeholder evidence instead of preserving real data
+3. **Keyword placement** data was being stripped during conversion
+
+### Fixes Implemented
+
+#### 1. Updated Types (`src/types/index.ts`)
+- Added `PositioningTheme` interface with `theme`, `evidence`, and `jd_quotes` fields
+- Changed `JDStrategic.positioningThemes` from `string[]` to `PositioningTheme[]`
+- Added `placement` field to `ATSKeyword` interface
+
+#### 2. Enhanced JD Analysis Prompt (`src/lib/claude.ts`)
+- Updated prompt to request themes with evidence and JD quotes
+- New JSON output format includes:
+  ```json
+  {
+    "theme": "Enterprise transformation leader",
+    "evidence": "JD mentions 'enterprise-wide brand transformation' as primary responsibility",
+    "jd_quotes": ["drive brand evolution", "modernize legacy architecture"]
+  }
+  ```
+
+#### 3. Fixed `convertToEnhancedAnalysis()` (`src/app/api/generate-resume/route.ts`)
+- Now uses actual evidence from JD analysis instead of placeholder text
+- Handles both new format (objects) and legacy format (strings)
+- Preserves keyword `placement` data
+- Added `validateNoConflicts()` function for server-side conflict detection
+- Returns `conflict_violations` in API response
+
+#### 4. Updated Store (`src/lib/store.ts`)
+- `setJDAnalysis` now accepts both formats (strings or PositioningTheme objects)
+- Normalizes data to `PositioningTheme[]` when storing
+
+#### 5. Fixed Refine Route (`src/app/api/refine/route.ts`)
+- Handles both new and legacy theme formats
+
+### Before vs After
+
+**Before** (broken):
+```
+1. **Enterprise transformation leader**
+   - Why it matters: Strategic positioning theme for Head of Brand Strategy role
+```
+
+**After** (fixed):
+```
+1. **Enterprise transformation leader**
+   - Why it matters: JD mentions 'enterprise-wide brand transformation' as primary responsibility. Key phrases: "drive brand evolution", "modernize legacy architecture"
+```
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/types/index.ts` | Added PositioningTheme interface, updated JDStrategic, added placement to ATSKeyword |
+| `src/lib/claude.ts` | Enhanced JD analysis prompt for theme evidence |
+| `src/app/api/generate-resume/route.ts` | Fixed conversion function, added conflict validation |
+| `src/lib/store.ts` | Handle both theme formats in setJDAnalysis |
+| `src/app/api/refine/route.ts` | Handle both theme formats |
+
+### Testing Notes
+- New sessions will get full evidence in themes
+- Old sessions with string-only themes will still work (backwards compatible)
+- Conflict violations are logged and returned in API response
 
 ---
 

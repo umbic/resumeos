@@ -247,7 +247,10 @@ function buildRefinementPrompt(input: RefinementPromptInput): string {
       // JDAnalysis
       targetTitle = jdAnalysis.strategic.targetTitle;
       targetCompany = jdAnalysis.strategic.targetCompany;
-      priorityThemes = jdAnalysis.strategic.positioningThemes;
+      // Handle both new format (objects) and legacy format (strings)
+      priorityThemes = jdAnalysis.strategic.positioningThemes.map(t =>
+        typeof t === 'string' ? t : t.theme
+      );
     }
   }
 

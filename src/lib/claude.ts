@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { JDAnalysis, JDKeyword, JDStrategic, EnhancedJDAnalysis, GeneratedResume } from '../types';
+import type { JDAnalysis, JDKeyword, EnhancedJDAnalysis, GeneratedResume } from '../types';
 import { db } from './db';
 import { contentItems } from '@/drizzle/schema';
 import { eq } from 'drizzle-orm';
@@ -58,7 +58,16 @@ export interface LegacyJDAnalysis {
 
 // Raw response from Claude before processing
 interface RawJDAnalysisResponse {
-  strategic: JDStrategic;
+  strategic: {
+    targetTitle: string;
+    targetCompany: string;
+    industry: string;
+    positioningThemes: Array<{
+      theme: string;
+      evidence: string;
+      jd_quotes: string[];
+    }>;
+  };
   keywords: Array<{
     keyword: string;
     category: 'hard_skill' | 'soft_skill' | 'industry_term' | 'seniority_signal';
@@ -94,10 +103,19 @@ export async function analyzeJobDescription(jobDescription: string): Promise<{
 3. **Industry/Sector**: Primary industry (e.g., "Financial Services", "Healthcare", "Technology")
 4. **Positioning Themes**: 3-5 strategic angles to emphasize throughout the resume. These are the "story" the resume should tell — not keywords, but narrative directions.
 
-Example positioning themes:
-- "Transformation leader who modernizes legacy brands"
-- "Data-informed strategist who connects brand to revenue"
-- "Cross-functional executive who aligns marketing with business goals"
+**CRITICAL**: For each positioning theme, you MUST provide:
+- **theme**: The strategic angle (e.g., "Transformation leader who modernizes legacy brands")
+- **evidence**: WHY this theme matters for this specific JD — cite the language/requirements that make it important
+- **jd_quotes**: 2-3 EXACT phrases copied from the JD that support this theme
+
+Example positioning themes with evidence:
+- theme: "Transformation leader who modernizes legacy brands"
+  evidence: "JD emphasizes modernization across 5 mentions of 'transform', 'evolve', and 'reimagine'"
+  jd_quotes: ["transform legacy brand architecture", "evolve brand positioning", "reimagine customer experience"]
+
+- theme: "Data-informed strategist who connects brand to revenue"
+  evidence: "Role requires proving marketing ROI and aligning with business metrics"
+  jd_quotes: ["demonstrate marketing ROI", "data-driven decision making", "connect brand investment to revenue"]
 
 ---
 
@@ -153,9 +171,21 @@ Return as JSON:
     "targetCompany": "Morgan Stanley",
     "industry": "Financial Services - Wealth Management",
     "positioningThemes": [
-      "Enterprise brand transformation leader",
-      "Wealth/financial services domain expertise",
-      "Cross-functional executive who partners with business leaders"
+      {
+        "theme": "Enterprise brand transformation leader",
+        "evidence": "JD mentions 'enterprise-wide brand transformation' as primary responsibility and emphasizes 'modernizing legacy brand architecture'",
+        "jd_quotes": ["enterprise-wide brand transformation", "modernize legacy brand architecture", "drive brand evolution"]
+      },
+      {
+        "theme": "Wealth/financial services domain expertise",
+        "evidence": "Role requires deep understanding of wealth management clients and regulatory environment",
+        "jd_quotes": ["wealth management expertise required", "navigate regulatory requirements", "understand HNW client needs"]
+      },
+      {
+        "theme": "Cross-functional executive who partners with business leaders",
+        "evidence": "Multiple references to working across business units and presenting to C-suite",
+        "jd_quotes": ["partner with business unit heads", "present to executive leadership", "cross-functional collaboration"]
+      }
     ]
   },
   "keywords": [

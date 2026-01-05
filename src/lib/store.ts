@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { JDAnalysis, JDKeyword, KeywordStatus, VerbTracker, GeneratedResume, Gap, QualityScore } from '../types';
+import type { JDAnalysis, JDKeyword, KeywordStatus, VerbTracker, GeneratedResume, Gap, QualityScore, PositioningTheme } from '../types';
 
 export interface Message {
   id: string;
@@ -103,7 +103,7 @@ interface ResumeState {
       targetTitle: string;
       targetCompany: string;
       industry: string;
-      positioningThemes: string[];
+      positioningThemes: PositioningTheme[] | string[]; // Accept both formats
     };
     keywords?: JDKeyword[];
     // Legacy flat fields
@@ -182,9 +182,30 @@ export const useResumeStore = create<ResumeState>((set) => ({
     // Handle both new structured format and legacy flat format
     if (analysis.strategic && analysis.keywords) {
       // New format with strategic + keywords
+      // Normalize themes: convert strings to PositioningTheme objects if needed
+      const normalizedThemes: PositioningTheme[] = analysis.strategic.positioningThemes.map((t) => {
+        if (typeof t === 'string') {
+          // Legacy string format - convert to object
+          return {
+            theme: t,
+            evidence: `Strategic theme for ${analysis.strategic!.targetTitle}`,
+            jd_quotes: [],
+          };
+        }
+        return t as PositioningTheme;
+      });
+
+      // Extract theme strings for legacy compatibility
+      const themeStrings = normalizedThemes.map((t) => t.theme);
+
       set({
         jdAnalysis: {
-          strategic: analysis.strategic,
+          strategic: {
+            targetTitle: analysis.strategic.targetTitle,
+            targetCompany: analysis.strategic.targetCompany,
+            industry: analysis.strategic.industry,
+            positioningThemes: normalizedThemes,
+          },
           keywords: analysis.keywords,
         },
         // Also set legacy fields for backward compatibility
@@ -192,7 +213,7 @@ export const useResumeStore = create<ResumeState>((set) => ({
         targetCompany: analysis.strategic.targetCompany,
         industry: analysis.strategic.industry,
         keywords: analysis.keywords.map((k) => k.keyword),
-        themes: analysis.strategic.positioningThemes,
+        themes: themeStrings,
       });
     } else {
       // Legacy flat format

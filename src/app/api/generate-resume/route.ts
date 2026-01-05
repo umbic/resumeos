@@ -4,42 +4,79 @@ import { generateFullResume } from '@/lib/claude';
 import { detectGaps, detectKeywordGaps } from '@/lib/gap-detection';
 import { runQualityCheck } from '@/lib/quality-check';
 import { autoFixIssues } from '@/lib/quality-fix';
-import type { EnhancedJDAnalysis, JDAnalysis } from '@/types';
+import type { EnhancedJDAnalysis, JDAnalysis, PositioningTheme, GeneratedResume } from '@/types';
+import { CONFLICT_MAP, REVERSE_CONFLICT_MAP } from '@/lib/rules';
 
 // Increase timeout for Claude generation (Vercel Pro: 300s, Hobby: 60s)
 export const maxDuration = 60;
 
 /**
+ * Check if theme is in new format (object with evidence) or legacy format (string)
+ */
+function isThemeWithEvidence(theme: unknown): theme is PositioningTheme {
+  return typeof theme === 'object' && theme !== null && 'theme' in theme && 'evidence' in theme;
+}
+
+/**
  * Convert existing JDAnalysis format to EnhancedJDAnalysis format
- * This bridges V1 and V1.5 analysis formats
+ * Now properly preserves JD evidence instead of using placeholders
  */
 function convertToEnhancedAnalysis(
   jdAnalysis: JDAnalysis,
   targetTitle: string,
   targetCompany: string
 ): EnhancedJDAnalysis {
-  // Extract positioning themes as priority themes
-  const priorityThemes = jdAnalysis.strategic.positioningThemes.slice(0, 3).map((theme) => ({
-    theme,
-    importance: 'must_have' as const,
-    jd_evidence: `Strategic positioning theme for ${targetTitle} role`,
-  }));
+  const themes = jdAnalysis.strategic.positioningThemes;
+
+  // Handle both new format (with evidence) and legacy format (strings)
+  const priorityThemes = themes.slice(0, 3).map((theme) => {
+    if (isThemeWithEvidence(theme)) {
+      // New format: use actual evidence and quotes
+      const quotesText = theme.jd_quotes?.length > 0
+        ? ` Key phrases: "${theme.jd_quotes.join('", "')}"`
+        : '';
+      return {
+        theme: theme.theme,
+        importance: 'must_have' as const,
+        jd_evidence: `${theme.evidence}${quotesText}`,
+      };
+    }
+    // Legacy format: string only (fallback for old sessions)
+    return {
+      theme: theme as unknown as string,
+      importance: 'must_have' as const,
+      jd_evidence: `Strategic theme for ${targetTitle} at ${targetCompany}`,
+    };
+  });
 
   // Additional themes as secondary
-  const secondaryThemes = jdAnalysis.strategic.positioningThemes.slice(3).map((theme) => ({
-    theme,
-    importance: 'nice_to_have' as const,
-    jd_evidence: `Supporting theme for role`,
-  }));
+  const secondaryThemes = themes.slice(3).map((theme) => {
+    if (isThemeWithEvidence(theme)) {
+      const quotesText = theme.jd_quotes?.length > 0
+        ? ` Key phrases: "${theme.jd_quotes.join('", "')}"`
+        : '';
+      return {
+        theme: theme.theme,
+        importance: 'nice_to_have' as const,
+        jd_evidence: `${theme.evidence}${quotesText}`,
+      };
+    }
+    return {
+      theme: theme as unknown as string,
+      importance: 'nice_to_have' as const,
+      jd_evidence: `Supporting theme for role`,
+    };
+  });
 
-  // Extract ATS keywords with frequency tracking
+  // Extract ATS keywords with frequency tracking AND placement
   const atsKeywords = jdAnalysis.keywords
     .filter((k) => k.priority === 'high' || k.priority === 'medium')
     .map((k) => ({
       keyword: k.keyword,
-      frequency: k.frequency || 1, // Default to 1 if not provided
+      frequency: k.frequency || 1,
       priority: k.priority,
       category: k.category,
+      placement: k.placement || 'unknown', // Preserve placement data
     }));
 
   return {
@@ -48,8 +85,54 @@ function convertToEnhancedAnalysis(
     priority_themes: priorityThemes,
     secondary_themes: secondaryThemes,
     ats_keywords: atsKeywords,
-    content_mapping: [], // Will be populated by gap detection in Session 4
+    content_mapping: [],
   };
+}
+
+/**
+ * Validate that no conflict pairs were used together in the generated resume.
+ * Returns array of violation descriptions.
+ */
+function validateNoConflicts(resume: GeneratedResume): string[] {
+  const violations: string[] = [];
+  const usedIds = new Set<string>();
+
+  // Collect all used content IDs from content_ids_used
+  if (resume.content_ids_used) {
+    for (const id of resume.content_ids_used) {
+      usedIds.add(id);
+      // Also add base ID if this is a variant (e.g., CH-01-V1 -> CH-01)
+      const baseMatch = id.match(/^([A-Z]+-\d+)/);
+      if (baseMatch) {
+        usedIds.add(baseMatch[1]);
+      }
+    }
+  }
+
+  // Check for conflicts using CONFLICT_MAP
+  for (const [chId, conflictingBullets] of Object.entries(CONFLICT_MAP)) {
+    if (usedIds.has(chId)) {
+      for (const bulletId of conflictingBullets) {
+        if (usedIds.has(bulletId)) {
+          violations.push(`CONFLICT: ${chId} and ${bulletId} both used (same achievement/metric)`);
+        }
+      }
+    }
+  }
+
+  // Also check reverse direction
+  for (const [bulletId, conflictingCHs] of Object.entries(REVERSE_CONFLICT_MAP)) {
+    if (usedIds.has(bulletId)) {
+      for (const chId of conflictingCHs) {
+        // Only log if not already caught above
+        if (usedIds.has(chId) && !violations.some(v => v.includes(chId) && v.includes(bulletId))) {
+          violations.push(`CONFLICT: ${bulletId} and ${chId} both used (same achievement/metric)`);
+        }
+      }
+    }
+  }
+
+  return violations;
 }
 
 export async function POST(request: NextRequest) {
@@ -112,6 +195,13 @@ export async function POST(request: NextRequest) {
       targetCompany: session.target_company || '',
     });
 
+    // Validate no conflict pairs were used together
+    const conflictViolations = validateNoConflicts(generatedResume);
+    if (conflictViolations.length > 0) {
+      console.warn('Conflict violations detected in generated resume:', conflictViolations);
+      // Note: In future, could auto-fix by removing the position bullet
+    }
+
     // Run quality check with ATS keywords for accurate coverage
     let qualityScore = runQualityCheck(generatedResume, jdAnalysis.ats_keywords);
 
@@ -168,6 +258,7 @@ export async function POST(request: NextRequest) {
       quality_score: qualityScore,
       themes_addressed: finalResume.themes_addressed,
       themes_not_addressed: finalResume.themes_not_addressed,
+      conflict_violations: conflictViolations, // Include any conflict violations
     });
 
   } catch (error) {
