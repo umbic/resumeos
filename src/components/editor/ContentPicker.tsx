@@ -46,7 +46,6 @@ export function ContentPicker({
   const [loading, setLoading] = useState(true);
   const [baseGroups, setBaseGroups] = useState<BaseItemGroup[]>([]);
   const [selectedBase, setSelectedBase] = useState<BaseItemGroup | null>(null);
-  const [allItems, setAllItems] = useState<ContentItem[]>([]);
 
   // Fetch all available base items and their variants
   const fetchItems = useCallback(async () => {
@@ -61,8 +60,6 @@ export function ContentPicker({
       const data = await response.json();
 
       if (data.items) {
-        setAllItems(data.items);
-
         // Group items by base
         const groups = groupItemsByBase(data.items, usedContentIds);
         setBaseGroups(groups);
