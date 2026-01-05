@@ -104,40 +104,16 @@ export async function GET(request: NextRequest) {
       conditions.push(eq(contentItems.position, parseInt(position)));
     }
 
-    // Execute query with conditions
+    // Execute query with conditions - use full content fields for proper grouping
     let items;
     if (exclude.length > 0) {
       items = await db
-        .select({
-          id: contentItems.id,
-          type: contentItems.type,
-          position: contentItems.position,
-          contentShort: contentItems.contentShort,
-          contentMedium: contentItems.contentMedium,
-          contentLong: contentItems.contentLong,
-          contentGeneric: contentItems.contentGeneric,
-          categoryTags: contentItems.categoryTags,
-          outcomeTags: contentItems.outcomeTags,
-          functionTags: contentItems.functionTags,
-          brandTags: contentItems.brandTags,
-        })
+        .select(contentSelectFields)
         .from(contentItems)
         .where(and(...conditions, notInArray(contentItems.id, exclude)));
     } else {
       items = await db
-        .select({
-          id: contentItems.id,
-          type: contentItems.type,
-          position: contentItems.position,
-          contentShort: contentItems.contentShort,
-          contentMedium: contentItems.contentMedium,
-          contentLong: contentItems.contentLong,
-          contentGeneric: contentItems.contentGeneric,
-          categoryTags: contentItems.categoryTags,
-          outcomeTags: contentItems.outcomeTags,
-          functionTags: contentItems.functionTags,
-          brandTags: contentItems.brandTags,
-        })
+        .select(contentSelectFields)
         .from(contentItems)
         .where(and(...conditions));
     }
