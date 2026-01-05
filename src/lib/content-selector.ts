@@ -1,6 +1,7 @@
 import { db } from './db';
 import { contentItems } from '@/drizzle/schema';
 import { CONFLICT_MAP } from './rules';
+import { DiagnosticLogger } from './diagnostics';
 
 // Types
 export interface JDRequirements {
@@ -258,7 +259,7 @@ function selectBestVariant(
  * Main selection function
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
+export async function selectContent(jdAnalysis: any, diagnostics?: DiagnosticLogger): Promise<SelectionResult> {
   const jd = extractJDRequirements(jdAnalysis);
   const debug = {
     jdRequirements: jd,
@@ -266,6 +267,13 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
     allScores: [] as any[],
     blockedByConflict: [] as string[],
   };
+
+  // Start main content selection event
+  const mainEventId = diagnostics?.startEvent('content_selection', 'initialize');
+  diagnostics?.logInput(mainEventId!, {
+    rawAnalysis: jdAnalysis,
+    extractedRequirements: jd,
+  });
 
   // Fetch all content
   const allContent = await db.select().from(contentItems);
@@ -286,6 +294,9 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
   const chBases = baseItems.filter(item => item.id.startsWith('CH-'));
   const scoredCH: ScoredItem[] = [];
 
+  // Start CH scoring event
+  const chEventId = diagnostics?.startEvent('content_selection', 'scoring_career_highlights');
+
   for (const ch of chBases) {
     const industryScore = scoreIndustry(ch.industryTags as string[] || [], jd.industries);
     const functionScore = scoreFunction(ch.functionTags as string[] || [], jd.functions);
@@ -300,6 +311,21 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
 
     const totalScore = industryScore + functionScore + themeScore;
     const finalContent = variantContent || ch;
+
+    // Log each scoring decision
+    diagnostics?.logDecision(chEventId!,
+      `Score ${ch.id}`,
+      `Industry: ${industryScore} (tags: ${(ch.industryTags as string[] || []).join(', ') || 'none'}), Function: ${functionScore} (tags: ${(ch.functionTags as string[] || []).join(', ') || 'none'}), Theme: ${themeScore}`,
+      { industryScore, functionScore, themeScore, totalScore, itemTags: { industry: ch.industryTags, function: ch.functionTags } }
+    );
+
+    if (variantId) {
+      diagnostics?.logDecision(chEventId!,
+        `Select variant ${variantId} for ${ch.id}`,
+        `Theme score: ${themeScore}, Label: ${variantLabel}`,
+        { variantId, themeScore, variantLabel }
+      );
+    }
 
     scoredCH.push({
       id: variantId || ch.id,
@@ -330,23 +356,45 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
   scoredCH.sort((a, b) => b.totalScore - a.totalScore);
   const selectedCH = scoredCH.slice(0, 5);
 
+  // Log final CH selection
+  diagnostics?.logDecision(chEventId!,
+    'Final CH selection',
+    `Top 5 by score: ${selectedCH.map(c => `${c.id}(${c.totalScore})`).join(', ')}`,
+    { selected: selectedCH.map(c => ({ id: c.id, baseId: c.baseId, score: c.totalScore })) }
+  );
+  diagnostics?.completeEvent(chEventId!);
+
   // Track used base IDs and get blocked IDs from conflicts
   const usedBaseIds = Array.from(new Set(selectedCH.map(ch => ch.baseId)));
   const blockedIds = new Set<string>();
 
+  // Start conflict tracking event
+  const conflictEventId = diagnostics?.startEvent('content_selection', 'conflict_blocking');
+
   for (const baseId of usedBaseIds) {
     const conflicts = CONFLICT_MAP[baseId as keyof typeof CONFLICT_MAP] || [];
+    if (conflicts.length > 0) {
+      diagnostics?.logDecision(conflictEventId!,
+        `Block conflicts for ${baseId}`,
+        `Blocking: ${conflicts.join(', ')}`,
+        { baseId, blocked: conflicts }
+      );
+    }
     conflicts.forEach((id: string) => {
       blockedIds.add(id);
       debug.blockedByConflict.push(`${baseId} blocks ${id}`);
     });
   }
+  diagnostics?.completeEvent(conflictEventId!, { blockedIds: Array.from(blockedIds) });
 
   // Score P1 bullets (excluding blocked)
   const p1Bases = baseItems.filter(item =>
     item.id.startsWith('P1-B') && !blockedIds.has(item.id)
   );
   const scoredP1: ScoredItem[] = [];
+
+  // Start P1 scoring event
+  const p1EventId = diagnostics?.startEvent('content_selection', 'scoring_p1_bullets');
 
   for (const p1 of p1Bases) {
     const industryScore = scoreIndustry(p1.industryTags as string[] || [], jd.industries);
@@ -361,6 +409,12 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
 
     const totalScore = industryScore + functionScore + themeScore;
     const finalContent = variantContent || p1;
+
+    diagnostics?.logDecision(p1EventId!,
+      `Score ${p1.id}`,
+      `Industry: ${industryScore}, Function: ${functionScore}, Theme: ${themeScore}, Total: ${totalScore}`,
+      { industryScore, functionScore, themeScore, totalScore }
+    );
 
     scoredP1.push({
       id: variantId || p1.id,
@@ -381,11 +435,21 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
   scoredP1.sort((a, b) => b.totalScore - a.totalScore);
   const selectedP1 = scoredP1.slice(0, 4);
 
+  diagnostics?.logDecision(p1EventId!,
+    'Final P1 selection',
+    `Top 4: ${selectedP1.map(p => `${p.id}(${p.totalScore})`).join(', ')}`,
+    { selected: selectedP1.map(p => ({ id: p.id, score: p.totalScore })) }
+  );
+  diagnostics?.completeEvent(p1EventId!);
+
   // Score P2 bullets (excluding blocked)
   const p2Bases = baseItems.filter(item =>
     item.id.startsWith('P2-B') && !blockedIds.has(item.id)
   );
   const scoredP2: ScoredItem[] = [];
+
+  // Start P2 scoring event
+  const p2EventId = diagnostics?.startEvent('content_selection', 'scoring_p2_bullets');
 
   for (const p2 of p2Bases) {
     const industryScore = scoreIndustry(p2.industryTags as string[] || [], jd.industries);
@@ -400,6 +464,12 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
 
     const totalScore = industryScore + functionScore + themeScore;
     const finalContent = variantContent || p2;
+
+    diagnostics?.logDecision(p2EventId!,
+      `Score ${p2.id}`,
+      `Industry: ${industryScore}, Function: ${functionScore}, Theme: ${themeScore}, Total: ${totalScore}`,
+      { industryScore, functionScore, themeScore, totalScore }
+    );
 
     scoredP2.push({
       id: variantId || p2.id,
@@ -419,6 +489,13 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
 
   scoredP2.sort((a, b) => b.totalScore - a.totalScore);
   const selectedP2 = scoredP2.slice(0, 3);
+
+  diagnostics?.logDecision(p2EventId!,
+    'Final P2 selection',
+    `Top 3: ${selectedP2.map(p => `${p.id}(${p.totalScore})`).join(', ')}`,
+    { selected: selectedP2.map(p => ({ id: p.id, score: p.totalScore })) }
+  );
+  diagnostics?.completeEvent(p2EventId!);
 
   // Select best summary (score by function match)
   const summaries = baseItems.filter(item => item.id.startsWith('SUM-'));
@@ -463,6 +540,15 @@ export async function selectContent(jdAnalysis: any): Promise<SelectionResult> {
       });
     }
   }
+
+  // Complete main content selection event
+  diagnostics?.completeEvent(mainEventId!, {
+    summary: bestSummary?.id,
+    careerHighlights: selectedCH.map(c => c.id),
+    position1Bullets: selectedP1.map(p => p.id),
+    position2Bullets: selectedP2.map(p => p.id),
+    overviews: overviews.map(o => o.id),
+  });
 
   return {
     summary: bestSummary,

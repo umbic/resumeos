@@ -16,6 +16,7 @@ import {
 import { buildRewritePrompt, parseRewriteResponse } from './prompts/rewrite-only';
 import { selectContent, SelectionResult, extractJDRequirements } from './content-selector';
 import { isNotNull, isNull, and } from 'drizzle-orm';
+import { createDiagnosticLogger, clearSessionDiagnostics, estimateTokens, DiagnosticLogger } from './diagnostics';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -1030,15 +1031,27 @@ export { buildMasterGenerationPrompt, parseGenerationResponse };
  * NEW: Two-step generation with code-based selection
  * Step 1: Deterministic scoring selects content (code, no LLM)
  * Step 2: Claude rewrites selected content (LLM, no selection)
+ *
+ * @param jdAnalysis - The enhanced JD analysis
+ * @param sessionId - Optional session ID for diagnostics tracking
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function generateResumeV2(jdAnalysis: any): Promise<{
+export async function generateResumeV2(jdAnalysis: any, sessionId?: string): Promise<{
   resume: GeneratedResume;
   selection: SelectionResult;
+  diagnostics?: DiagnosticLogger;
 }> {
+  // Create diagnostics logger if sessionId provided
+  let diagnostics: DiagnosticLogger | undefined;
+  if (sessionId) {
+    // Clear any existing diagnostics for this session
+    await clearSessionDiagnostics(sessionId);
+    diagnostics = createDiagnosticLogger(sessionId);
+  }
+
   // Step 1: Code-based selection (deterministic)
   console.log('[V2] Starting content selection...');
-  const selection = await selectContent(jdAnalysis);
+  const selection = await selectContent(jdAnalysis, diagnostics);
   console.log('[V2] Selection complete:', {
     ch: selection.careerHighlights.map(c => c.id),
     p1: selection.position1Bullets.map(p => p.id),
@@ -1070,17 +1083,65 @@ export async function generateResumeV2(jdAnalysis: any): Promise<{
 
   console.log('[V2] Sending rewrite prompt to Claude...');
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 4000,
-    messages: [{ role: 'user', content: prompt }],
+  // Start rewrite event
+  const rewriteEventId = diagnostics?.startEvent('rewrite', 'claude_call');
+  diagnostics?.logPrompt(rewriteEventId!, prompt, estimateTokens(prompt));
+  diagnostics?.logInput(rewriteEventId!, {
+    targetTitle: jdAnalysis.target_title,
+    targetCompany: jdAnalysis.target_company,
+    priorityThemes: priorityThemes.map((t: { theme: string }) => t.theme),
+    atsKeywordsCount: atsKeywords.length,
   });
 
-  const responseText = response.content[0].type === 'text'
-    ? response.content[0].text
-    : '';
+  let responseText = '';
+  try {
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    responseText = response.content[0].type === 'text'
+      ? response.content[0].text
+      : '';
+
+    // Log response with actual token counts from API
+    diagnostics?.logResponse(
+      rewriteEventId!,
+      responseText,
+      response.usage?.output_tokens
+    );
+
+    // Update input tokens with actual count
+    if (response.usage?.input_tokens && diagnostics) {
+      const event = diagnostics.getEvents().find(e => e.id === rewriteEventId);
+      if (event) {
+        event.tokensSent = response.usage.input_tokens;
+      }
+    }
+
+    diagnostics?.logDecision(rewriteEventId!,
+      'API call complete',
+      `Input: ${response.usage?.input_tokens || 'unknown'} tokens, Output: ${response.usage?.output_tokens || 'unknown'} tokens`,
+      { usage: response.usage }
+    );
+
+  } catch (error) {
+    diagnostics?.failEvent(rewriteEventId!, error instanceof Error ? error.message : 'Unknown error');
+    await diagnostics?.saveAll();
+    throw error;
+  }
 
   const rewritten = parseRewriteResponse(responseText);
+
+  diagnostics?.completeEvent(rewriteEventId!, {
+    summaryLength: rewritten.summary?.length || 0,
+    careerHighlightsCount: rewritten.career_highlights?.length || 0,
+    p1BulletsCount: rewritten.position1_bullets?.length || 0,
+    p2BulletsCount: rewritten.position2_bullets?.length || 0,
+    keywordsUsed: rewritten.keywords_used?.length || 0,
+    verbsUsed: rewritten.verbs_used?.length || 0,
+  });
 
   // Build final resume structure matching GeneratedResume type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1176,7 +1237,31 @@ export async function generateResumeV2(jdAnalysis: any): Promise<{
     generated_at: new Date().toISOString(),
   };
 
-  return { resume, selection };
+  // Save all diagnostics to database
+  if (diagnostics) {
+    // Start build resume event to track the assembly
+    const buildEventId = diagnostics.startEvent('build_resume', 'assemble');
+    diagnostics.logOutput(buildEventId, {
+      contentIdsUsed: resume.content_ids_used.length,
+      keywordsUsed: resume.keywords_used?.length || 0,
+      verbsUsed: resume.verbs_used?.length || 0,
+      themesAddressed: resume.themes_addressed?.length || 0,
+    });
+    diagnostics.completeEvent(buildEventId);
+
+    // Log diagnostics summary
+    const summary = diagnostics.getSummary();
+    console.log('[V2] Diagnostics summary:', {
+      totalEvents: summary.totalEvents,
+      totalDurationMs: summary.totalDurationMs,
+      totalTokens: summary.totalTokens,
+      estimatedCost: `$${summary.totalCost.toFixed(4)}`,
+    });
+
+    await diagnostics.saveAll();
+  }
+
+  return { resume, selection, diagnostics };
 }
 
 export default anthropic;

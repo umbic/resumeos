@@ -7,9 +7,10 @@ import { QualityIndicator } from './QualityIndicator';
 import { ResumePreview } from './ResumePreview';
 import { ChatRefinement } from './ChatRefinement';
 import { KeywordGaps } from './KeywordGaps';
-import { Download, RefreshCw, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
+import { Download, RefreshCw, ChevronDown, ChevronUp, ArrowLeft, Settings2 } from 'lucide-react';
 import { SectionEditor } from '@/components/editor/SectionEditor';
 import { ContentPicker } from '@/components/editor/ContentPicker';
+import { DiagnosticsPanel } from '@/components/diagnostics/DiagnosticsPanel';
 
 interface OneShotReviewProps {
   sessionId: string;
@@ -47,6 +48,7 @@ export function OneShotReview({
   sessionName,
 }: OneShotReviewProps) {
   const [showQualityDetails, setShowQualityDetails] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [editingSection, setEditingSection] = useState<{
     key: string;
@@ -316,6 +318,29 @@ export function OneShotReview({
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Diagnostics Panel */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <button
+                onClick={() => setShowDiagnostics(!showDiagnostics)}
+                className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
+              >
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-gray-400" />
+                  <h3 className="font-medium text-gray-900">Diagnostics</h3>
+                </div>
+                {showDiagnostics ? (
+                  <ChevronUp className="h-4 w-4 text-gray-400" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                )}
+              </button>
+              {showDiagnostics && (
+                <div className="border-t border-gray-200">
+                  <DiagnosticsPanel sessionId={sessionId} />
+                </div>
+              )}
             </div>
 
           </div>

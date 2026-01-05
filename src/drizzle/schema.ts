@@ -135,6 +135,43 @@ export const learnedContent = pgTable('learned_content', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Diagnostics table for tracking all generation events
+export const sessionDiagnostics = pgTable('session_diagnostics', {
+  id: text('id').primaryKey(),
+  sessionId: uuid('session_id').notNull().references(() => sessions.id),
+
+  // Event identification
+  step: text('step').notNull(), // 'jd_analysis', 'content_selection', 'rewrite', 'quality_check'
+  substep: text('substep'), // Optional sub-step like 'scoring_ch', 'scoring_p1'
+
+  // Timing
+  startedAt: timestamp('started_at').notNull(),
+  completedAt: timestamp('completed_at'),
+  durationMs: integer('duration_ms'),
+
+  // Input/Output
+  promptSent: text('prompt_sent'), // Full prompt verbatim
+  responseReceived: text('response_received'), // Full response verbatim
+
+  // Structured data (for non-LLM steps)
+  inputData: jsonb('input_data'), // Input to this step
+  outputData: jsonb('output_data'), // Output from this step
+
+  // Decisions and reasoning
+  decisions: jsonb('decisions').$type<{ decision: string; reason: string; data?: unknown }[]>(),
+
+  // Metrics
+  tokensSent: integer('tokens_sent'),
+  tokensReceived: integer('tokens_received'),
+  estimatedCost: integer('estimated_cost'), // Stored as microdollars (cost * 1_000_000)
+
+  // Status
+  status: text('status').notNull().default('pending'), // 'pending', 'success', 'error'
+  errorMessage: text('error_message'),
+
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // Types
 export type ContentItem = typeof contentItems.$inferSelect;
 export type NewContentItem = typeof contentItems.$inferInsert;
@@ -142,3 +179,5 @@ export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type ConflictRule = typeof conflictRules.$inferSelect;
 export type LearnedContent = typeof learnedContent.$inferSelect;
+export type SessionDiagnostic = typeof sessionDiagnostics.$inferSelect;
+export type NewSessionDiagnostic = typeof sessionDiagnostics.$inferInsert;

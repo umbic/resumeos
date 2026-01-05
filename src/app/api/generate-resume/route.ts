@@ -191,7 +191,8 @@ export async function POST(request: NextRequest) {
     void _brandingMode;
 
     // Generate complete resume using V2 (code-based selection + LLM rewrite)
-    const { resume: generatedResume, selection } = await generateResumeV2(jdAnalysis);
+    // Pass sessionId to enable diagnostics tracking
+    const { resume: generatedResume, selection } = await generateResumeV2(jdAnalysis, sessionId);
 
     console.log('[generate-resume] V2 selection debug:', selection.debug);
 

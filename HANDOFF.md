@@ -1,7 +1,127 @@
 # ResumeOS - Session Handoff
 
-> **Last Updated**: 2026-01-04
-> **Last Session**: Session 9 - V2 Deterministic Scoring Engine
+> **Last Updated**: 2026-01-05
+> **Last Session**: Session 10 - Comprehensive Diagnostics Tab
+
+---
+
+## Session 10 Completed: Comprehensive Diagnostics Tab
+
+### What Was Done
+
+Added a comprehensive diagnostics tab that shows everything that happened behind the scenes during resume generation:
+- Every prompt sent (verbatim)
+- Every response received (verbatim)
+- All scoring decisions with explanations
+- Content selection reasoning
+- Timing data and token counts
+- Estimated costs
+- Errors and warnings
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  DiagnosticLogger (per session)             │
+├─────────────────────────────────────────────────────────────┤
+│  startEvent()    → Creates event with ID and timestamp      │
+│  logPrompt()     → Records LLM prompt + token count         │
+│  logResponse()   → Records LLM response + token count       │
+│  logDecision()   → Records scoring decision with reasoning  │
+│  completeEvent() → Marks event complete, calculates cost    │
+│  saveAll()       → Persists all events to database          │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│              session_diagnostics table                       │
+├─────────────────────────────────────────────────────────────┤
+│  step, substep     → Event identification                   │
+│  startedAt, durationMs → Timing data                        │
+│  promptSent, responseReceived → Full LLM text               │
+│  inputData, outputData → Structured JSON                    │
+│  decisions → Array of {decision, reason, data}              │
+│  tokensSent, tokensReceived, estimatedCost → Metrics        │
+│  status, errorMessage → Status tracking                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Files Created
+
+| File | Description |
+|------|-------------|
+| `src/drizzle/schema.ts` | Added `session_diagnostics` table with all diagnostic fields |
+| `src/lib/diagnostics.ts` | `DiagnosticLogger` class with event tracking methods |
+| `src/app/api/diagnostics/[sessionId]/route.ts` | GET endpoint for fetching diagnostics |
+| `src/components/diagnostics/DiagnosticsPanel.tsx` | Collapsible UI panel showing all events |
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/lib/content-selector.ts` | Added diagnostic logging throughout scoring |
+| `src/lib/claude.ts` | Added sessionId parameter, diagnostics for rewrite step |
+| `src/app/api/generate-resume/route.ts` | Passes sessionId to enable diagnostics |
+| `src/components/resume/OneShotReview.tsx` | Added Diagnostics panel to UI |
+
+### Diagnostic Events Logged
+
+| Step | Substep | What's Logged |
+|------|---------|---------------|
+| `content_selection` | `initialize` | JD requirements extraction |
+| `content_selection` | `scoring_career_highlights` | Each CH score + variant selection |
+| `content_selection` | `conflict_blocking` | Blocked items by CONFLICT_MAP |
+| `content_selection` | `scoring_p1_bullets` | P1 bullet scores |
+| `content_selection` | `scoring_p2_bullets` | P2 bullet scores |
+| `rewrite` | `claude_call` | Full prompt + response + token counts |
+| `build_resume` | `assemble` | Final assembly metrics |
+
+### What You'll See in UI
+
+```
+Generation Diagnostics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Duration: 12.34s | Tokens: 2,340 in / 1,890 out | Cost: $0.0312 | ✓ Success
+
+▼ 2. Content Selection (5 events) — 45ms
+  ├─ ✓ scoring_career_highlights — 23ms
+  │    Decisions:
+  │    • Score CH-01: Industry: 6, Function: 3, Theme: 2
+  │    • Score CH-04: Industry: 6, Function: 9, Theme: 4
+  │    • Final CH selection: CH-04(19), CH-09(17), CH-05(15)...
+  │
+  ├─ ✓ conflict_blocking — 2ms
+  │    • Block conflicts for CH-01: Blocking P1-B02
+  │
+  └─ ✓ scoring_p1_bullets — 20ms
+
+▼ 3. Rewrite (Claude) (1 event) — 11,234ms
+  └─ ✓ claude_call — 11,234ms
+       Prompt Sent (2,340 tokens):
+       ┌────────────────────────────────────────────┐
+       │ # Resume Rewriting Task                    │
+       │ You are rewriting pre-selected resume...   │
+       └────────────────────────────────────────────┘
+
+       Response (1,890 tokens):
+       ┌────────────────────────────────────────────┐
+       │ {                                          │
+       │   "summary": "Portfolio transformation...",│
+       │   "career_highlights": [...]               │
+       │ }                                          │
+       └────────────────────────────────────────────┘
+```
+
+### Database Migration Required
+
+After deployment, run:
+```bash
+npx drizzle-kit push
+```
+
+This creates the `session_diagnostics` table.
+
+### Commit
+`TBD` - feat: add comprehensive diagnostics tab
 
 ---
 
