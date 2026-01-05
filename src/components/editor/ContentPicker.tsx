@@ -83,7 +83,23 @@ export function ContentPicker({
     for (const item of items) {
       if (!item.baseId) {
         // This is a base item
-        const brandName = item.brandTags?.[0] || item.id;
+        // Use brand tag if available, otherwise use the ID
+        const brandTag = item.brandTags?.[0] || '';
+        const shortDesc = item.contentShort || '';
+
+        // Create a display name: "Brand - Short Description" or just short description
+        // This ensures each CH item has a unique, descriptive name
+        let brandName: string;
+        if (brandTag && shortDesc) {
+          // Extract key achievement from short description (first ~50 chars)
+          const achievement = shortDesc.length > 60 ? shortDesc.substring(0, 57) + '...' : shortDesc;
+          brandName = `${brandTag}: ${achievement}`;
+        } else if (shortDesc) {
+          brandName = shortDesc.length > 70 ? shortDesc.substring(0, 67) + '...' : shortDesc;
+        } else {
+          brandName = brandTag || item.id;
+        }
+
         const preview = item.contentShort || item.contentMedium || item.contentLong || '';
 
         baseMap.set(item.id, {
