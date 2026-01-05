@@ -1,0 +1,696 @@
+{
+  "base_items": [
+    {
+      "id": "CH-01",
+      "client": "Deloitte Digital",
+      "generic_terms": [],
+      "branded_by_default": true,
+      "industry_tags": ["professional-services", "consulting", "B2B", "financial-services", "healthcare", "technology", "consumer"],
+      "function_tags": ["brand-strategy", "practice-building", "business-development", "team-leadership", "executive-advisory", "AI"],
+      "exclusive_metrics": ["$40M revenue", "35+ strategists", "3x growth", "10+ AI accelerators", "23% speed-to-market", "17% margin increase"],
+      "conflicts_with": ["P1-B02"]
+    },
+    {
+      "id": "CH-02",
+      "client": "NWSL",
+      "generic_terms": ["professional sports league", "women's sports league", "national sports league"],
+      "branded_by_default": false,
+      "industry_tags": ["sports-entertainment", "media", "consumer", "B2B2C"],
+      "function_tags": ["brand-strategy", "growth-strategy", "integrated-campaign", "partnerships", "commercial-strategy"],
+      "exclusive_metrics": ["50% YoY attendance", "26% year 2 growth", "$60M media rights deal", "40x increase"],
+      "conflicts_with": ["P2-B08"]
+    },
+    {
+      "id": "CH-03",
+      "client": "OOFOS",
+      "generic_terms": ["recovery footwear brand", "DTC footwear company", "athletic recovery brand"],
+      "branded_by_default": false,
+      "industry_tags": ["consumer", "retail", "DTC", "e-commerce"],
+      "function_tags": ["brand-repositioning", "DTC", "e-commerce", "segmentation", "integrated-campaign"],
+      "exclusive_metrics": ["191% sales increase", "54% new customer acquisition", "47% traffic growth", "82% YoY revenue"],
+      "conflicts_with": ["P1-B04"]
+    },
+    {
+      "id": "CH-04",
+      "client": "Deloitte",
+      "generic_terms": [],
+      "branded_by_default": true,
+      "industry_tags": ["professional-services", "consulting", "B2B"],
+      "function_tags": ["corporate-repositioning", "brand-architecture", "demand-generation", "integrated-campaign"],
+      "exclusive_metrics": ["43% lead generation increase", "33% brand relevancy lift", "20% awareness increase"],
+      "conflicts_with": ["P1-B09"]
+    },
+    {
+      "id": "CH-05",
+      "client": "Pfizer / PfizerForAll",
+      "generic_terms": ["pharmaceutical company", "healthcare company", "global pharma"],
+      "branded_by_default": false,
+      "industry_tags": ["healthcare", "pharma", "DTC", "digital-health"],
+      "function_tags": ["product-marketing", "platform-strategy", "go-to-market", "DTC", "customer-experience"],
+      "exclusive_metrics": ["$727M revenue", "20% above forecast"],
+      "conflicts_with": ["P2-B09"]
+    },
+    {
+      "id": "CH-06",
+      "client": "LTK",
+      "generic_terms": ["creator commerce platform", "fashion technology company", "retail technology company"],
+      "branded_by_default": false,
+      "industry_tags": ["technology", "consumer", "retail", "e-commerce", "fashion"],
+      "function_tags": ["brand-strategy", "growth-strategy", "brand-repositioning", "brand-design", "integrated-campaign"],
+      "exclusive_metrics": ["$2.8B to $5B scaling", "8% customer acquisition", "67% awareness lift", "22% favorability", "12% engagement"],
+      "conflicts_with": ["P1-B08"]
+    },
+    {
+      "id": "CH-07",
+      "client": "NYU Langone",
+      "generic_terms": ["academic medical center", "major health system", "regional medical center"],
+      "branded_by_default": false,
+      "industry_tags": ["healthcare", "B2C"],
+      "function_tags": ["brand-strategy", "integrated-campaign", "digital-experience", "healthcare-marketing"],
+      "exclusive_metrics": ["1.6M appointments", "#1 ranking", "10% awareness", "300% social"],
+      "conflicts_with": ["P1-B05"]
+    },
+    {
+      "id": "CH-08",
+      "client": "Gateway Health / Highmark Wholecare",
+      "generic_terms": ["regional Medicaid provider", "healthcare insurer", "health plan"],
+      "branded_by_default": false,
+      "industry_tags": ["healthcare", "insurance", "B2C"],
+      "function_tags": ["brand-repositioning", "M&A", "growth-strategy", "healthcare-marketing"],
+      "exclusive_metrics": ["30K new members", "410K total", "35% traffic"],
+      "conflicts_with": ["P1-B07"]
+    },
+    {
+      "id": "CH-09",
+      "client": "American Express",
+      "generic_terms": ["financial services company", "credit card issuer", "global payments company"],
+      "branded_by_default": false,
+      "industry_tags": ["financial-services", "B2B", "payments"],
+      "function_tags": ["CRM", "personalization", "AI", "customer-retention", "revenue-growth"],
+      "exclusive_metrics": ["5% retention lift", "12% cross-sell improvement"],
+      "conflicts_with": ["P1-B03"]
+    },
+    {
+      "id": "CH-10",
+      "client": "GE / General Electric",
+      "generic_terms": [],
+      "branded_by_default": true,
+      "industry_tags": ["B2B", "industrial", "technology", "media"],
+      "function_tags": ["brand-storytelling", "emerging-media", "creative-strategy", "partnerships"],
+      "exclusive_metrics": ["Cannes Grand Prix", "#1 iTunes", "4x engagement increase", "1M VR headsets distributed"],
+      "conflicts_with": ["P4-B01", "P4-B02"]
+    },
+    {
+      "id": "CH-11",
+      "client": "Deloitte",
+      "generic_terms": ["AI-powered solutions", "generative AI tools", "automation workflows"],
+      "branded_by_default": true,
+      "industry_tags": ["professional-services", "consulting", "technology", "AI"],
+      "function_tags": ["AI", "automation", "operational-efficiency", "innovation"],
+      "exclusive_metrics": ["32% cost reduction", "increased speed-to-market"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P1-B01",
+      "client": "Synovus",
+      "generic_terms": ["regional bank", "financial institution", "community bank"],
+      "branded_by_default": false,
+      "industry_tags": ["financial-services", "B2B", "banking"],
+      "function_tags": ["brand-repositioning", "integrated-campaign", "revenue-growth"],
+      "exclusive_metrics": ["64.3% revenue growth", "9% acquisition", "12% favorability", "11% engagement"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P1-B06",
+      "client": "Johnson & Johnson",
+      "generic_terms": ["pharmaceutical company", "global pharma", "biopharma company"],
+      "branded_by_default": false,
+      "industry_tags": ["healthcare", "pharma", "B2B"],
+      "function_tags": ["product-marketing", "corporate-communications", "stakeholder-alignment"],
+      "exclusive_metrics": ["20% sales overperformance"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P1-B10",
+      "client": "New York Life",
+      "generic_terms": ["Fortune 500 insurer", "financial services company", "wealth management firm"],
+      "branded_by_default": false,
+      "industry_tags": ["financial-services", "wealth-management", "B2B"],
+      "function_tags": ["brand-launch", "brand-design", "integrated-campaign"],
+      "exclusive_metrics": ["23% awareness", "37% favorability"],
+      "conflicts_with": []
+    }
+  ],
+  "variants": [
+    {
+      "id": "CH-01-V1",
+      "base_id": "CH-01",
+      "variant_label": "Practice Building",
+      "context": "Consulting firm seeking to launch new brand strategy capability from scratch",
+      "method": "Recruited to build practice integrating business consulting with creative brand marketing; now leading AI-powered delivery transformation",
+      "outcome": "$40M revenue, 35+ strategists, 3x growth, 10+ AI accelerators, 17% margin increase",
+      "content": "**Built brand strategy practice from ground up to $40M**: Recruited to launch Deloitte Digital's brand strategy capability, assembling 35+ strategists and establishing methodologies bridging consulting rigor with creative excellence. Now leading delivery transformation through 10+ AI accelerators that have increased profitability margin by 17%.",
+      "theme_tags": ["practice-building", "entrepreneurial", "startup-mindset", "consulting", "AI", "innovation"]
+    },
+    {
+      "id": "CH-01-V2",
+      "base_id": "CH-01",
+      "variant_label": "Team Leadership",
+      "context": "Enterprise consulting firm needing cross-disciplinary brand team",
+      "method": "Assembled and led diverse team while building AI workflows to elevate team capabilities",
+      "outcome": "$40M revenue, 35+ strategists, 3x growth, 10+ AI accelerators, 17% margin increase",
+      "content": "**Assembled cross-disciplinary team of 35+ brand strategists**: Built and led diverse team of strategists, designers, and storytellers while developing 10+ AI accelerators that increased profitability margin by 17%, growing practice to $40M serving Fortune 500 clients.",
+      "theme_tags": ["team-leadership", "talent-development", "cross-functional", "people-management", "AI-enablement"]
+    },
+    {
+      "id": "CH-01-V3",
+      "base_id": "CH-01",
+      "variant_label": "Business Development",
+      "context": "New practice needing to establish market position against agencies and consultancies",
+      "method": "Developed differentiated positioning and AI-powered solutions for clients",
+      "outcome": "$40M revenue, 35+ strategists, 3x growth, 10+ AI accelerators, 23% speed-to-market",
+      "content": "**Scaled brand practice to $40M in competitive landscape**: Developed Deloitte Digital's differentiated approach to brand strategy, including 10+ AI accelerators that improve client speed-to-market by 23%, driving 3x growth in Fortune 500 engagements.",
+      "theme_tags": ["business-development", "competitive-positioning", "sales", "client-acquisition", "AI-solutions"]
+    },
+    {
+      "id": "CH-01-V4",
+      "base_id": "CH-01",
+      "variant_label": "Executive Advisory",
+      "context": "Fortune 500 clients needing strategic brand partner with C-suite credibility",
+      "method": "Built offering with C-suite credibility while pioneering AI-enabled delivery models",
+      "outcome": "$40M revenue, 35+ strategists, 3x growth, 10+ AI accelerators, 23% speed-to-market, 17% margin increase",
+      "content": "**Established Fortune 500 brand advisory practice**: Built $40M brand strategy offering with C-suite credibility, pioneering AI-enabled delivery through 10+ accelerators that improve client speed-to-market by 23% and internal margin by 17%.",
+      "theme_tags": ["executive-advisory", "C-suite", "stakeholder-management", "strategic-consulting", "AI-transformation"]
+    },
+    {
+      "id": "CH-01-V5",
+      "base_id": "CH-01",
+      "variant_label": "Transformation & Scale",
+      "context": "Consulting firm transforming brand from service line to strategic growth driver",
+      "method": "Created scalable systems and AI-powered solutions for brand transformation at enterprise scale",
+      "outcome": "$40M revenue, 35+ strategists, 3x growth, 10+ AI accelerators, 23% speed-to-market",
+      "content": "**Transformed brand consulting into $40M growth engine**: Led strategic engagements repositioning legacy brands and expanding omnichannel growth, developing 10+ AI accelerators for clients that improve speed-to-market by 23% at enterprise scale.",
+      "theme_tags": ["transformation", "scale", "growth", "platform-strategy", "AI-solutions", "client-delivery"]
+    },
+    {
+      "id": "CH-02-V1",
+      "base_id": "CH-02",
+      "variant_label": "Brand Strategy",
+      "context": "Professional sports league at pivotal growth moment needing first long-term brand strategy",
+      "method": "Developed market positioning, brand platform, and fan engagement roadmap",
+      "outcome": "50% YoY attendance, 26% year 2 growth, $60M media rights deal (40x increase)",
+      "content": "**Defined brand strategy for professional sports league at inflection point**: Developed market positioning, brand platform, and fan engagement roadmap, driving 50% YoY attendance increase, 26% growth in year two, and securing $60M media rights deal—a 40x value increase.",
+      "theme_tags": ["brand-strategy", "positioning", "sports-entertainment", "brand-platform"]
+    },
+    {
+      "id": "CH-02-V2",
+      "base_id": "CH-02",
+      "variant_label": "Growth Strategy",
+      "context": "National sports league seeking accelerated fan and commercial growth",
+      "method": "Established 5-year growth path with fan acquisition strategy and go-to-market efforts",
+      "outcome": "50% YoY attendance, 26% year 2 growth, $60M media rights deal (40x increase)",
+      "content": "**Established 5-year growth path for national sports league**: Led fan acquisition strategy and go-to-market efforts, driving 50% attendance increase in year one, 26% in year two, and securing $60M media rights deal representing 40x value increase.",
+      "theme_tags": ["growth-strategy", "fan-acquisition", "go-to-market", "business-development"]
+    },
+    {
+      "id": "CH-02-V3",
+      "base_id": "CH-02",
+      "variant_label": "Integrated Campaign",
+      "context": "Women's sports league launching nationwide brand campaign",
+      "method": "Created brand positioning and creative strategy in collaboration with franchise marketing and merchandising teams",
+      "outcome": "50% YoY attendance, 26% year 2 growth, $60M media rights deal (40x increase)",
+      "content": "**Launched nationwide campaign for women's sports league**: Created brand positioning and creative strategy collaborating with franchise marketing and merchandising, driving 50% attendance growth and securing $60M media rights deal.",
+      "theme_tags": ["integrated-campaign", "creative-strategy", "advertising", "sports-marketing"]
+    },
+    {
+      "id": "CH-02-V4",
+      "base_id": "CH-02",
+      "variant_label": "Commercial & Partnerships",
+      "context": "Sports league increasing commercial value to attract sponsors and media investment",
+      "method": "Built brand and business strategy focused on increasing league commercial value",
+      "outcome": "50% YoY attendance, 26% year 2 growth, $60M media rights deal (40x increase)",
+      "content": "**Increased commercial value of professional sports league by 40x**: Built brand and business strategy attracting new sponsors and media investment, driving 50% attendance growth and securing $60M media rights deal—up from $1.5M.",
+      "theme_tags": ["commercial-strategy", "partnerships", "media-rights", "sponsorship", "revenue-growth"]
+    },
+    {
+      "id": "CH-02-V5",
+      "base_id": "CH-02",
+      "variant_label": "Cultural Impact",
+      "context": "Professional sports league transforming from regional interest to national cultural phenomenon",
+      "method": "Innovative brand strategy and content-driven fan engagement platform",
+      "outcome": "50% YoY attendance, 26% year 2 growth, $60M media rights deal (40x increase)",
+      "content": "**Elevated sports league from regional interest to national phenomenon**: Developed innovative brand strategy and content-driven fan engagement, driving 50% YoY attendance growth and securing $60M media rights deal representing 40x increase.",
+      "theme_tags": ["cultural-impact", "content-strategy", "fan-engagement", "brand-transformation"]
+    },
+    {
+      "id": "CH-03-V1",
+      "base_id": "CH-03",
+      "variant_label": "Brand Repositioning",
+      "context": "Niche footwear brand seeking to transform into category leader",
+      "method": "Brand strategy and repositioning around performance recovery positioning",
+      "outcome": "191% sales increase, 54% acquisition, 82% YoY revenue",
+      "content": "**Repositioned recovery footwear brand from niche to category leader**: Developed brand strategy repositioning around performance recovery, driving 191% sales increase, 54% new customer acquisition, and 82% year-over-year revenue growth.",
+      "theme_tags": ["brand-repositioning", "brand-strategy", "category-leadership", "consumer"]
+    },
+    {
+      "id": "CH-03-V2",
+      "base_id": "CH-03",
+      "variant_label": "DTC & E-commerce",
+      "context": "Footwear brand expanding direct-to-consumer channel",
+      "method": "DTC expansion strategy with revamped e-commerce experience and acquisition campaign",
+      "outcome": "191% sales increase, 54% acquisition, 47% traffic growth",
+      "content": "**Scaled DTC footwear brand through e-commerce transformation**: Led DTC expansion with revamped e-commerce experience and acquisition campaign, driving 191% sales increase, 54% new customer acquisition, and 47% web traffic growth.",
+      "theme_tags": ["DTC", "e-commerce", "digital-marketing", "customer-acquisition", "retail"]
+    },
+    {
+      "id": "CH-03-V3",
+      "base_id": "CH-03",
+      "variant_label": "Segmentation & Growth",
+      "context": "Athletic recovery brand identifying new customer segments for growth",
+      "method": "Segmentation-led growth strategy identifying key audiences and need states",
+      "outcome": "191% sales increase, 54% acquisition, 82% YoY revenue",
+      "content": "**Drove 54% customer acquisition through segmentation strategy**: Led segmentation-led growth strategy identifying key audiences and need states for recovery footwear brand, delivering 191% sales increase and 82% year-over-year revenue growth.",
+      "theme_tags": ["segmentation", "growth-strategy", "customer-acquisition", "consumer-insights"]
+    },
+    {
+      "id": "CH-03-V4",
+      "base_id": "CH-03",
+      "variant_label": "Integrated Campaign",
+      "context": "Footwear brand launching omnichannel campaign to drive awareness and acquisition",
+      "method": "Integrated advertising campaign capitalizing on cultural moments and customer need states",
+      "outcome": "191% sales increase, 54% acquisition, 47% traffic growth",
+      "content": "**Launched integrated campaign for recovery footwear brand**: Developed omnichannel campaign capitalizing on cultural moments and customer need states, driving 191% sales increase, 54% new customer acquisition, and 47% traffic growth.",
+      "theme_tags": ["integrated-campaign", "omnichannel", "advertising", "creative-strategy", "consumer"]
+    },
+    {
+      "id": "CH-04-V1",
+      "base_id": "CH-04",
+      "variant_label": "Corporate Repositioning",
+      "context": "Global consulting firm needing to expand market perception beyond tax and audit",
+      "method": "End-to-end repositioning with new brand architecture and narrative strategy centered on business outcomes",
+      "outcome": "43% lead generation, 33% brand relevancy, 20% awareness",
+      "content": "**Repositioned Deloitte beyond audit to strategic advisor**: Led end-to-end corporate repositioning with new brand architecture and narrative strategy centered on business outcomes, driving 43% lead generation increase, 33% relevancy lift, and 20% awareness growth across five industries.",
+      "theme_tags": ["corporate-repositioning", "brand-architecture", "brand-transformation", "B2B", "consulting"]
+    },
+    {
+      "id": "CH-04-V2",
+      "base_id": "CH-04",
+      "variant_label": "Integrated Campaign",
+      "context": "Enterprise consulting firm launching corporate campaign across owned, earned, and paid",
+      "method": "Integrated corporate campaign strategy across full media ecosystem",
+      "outcome": "43% lead generation, 33% brand relevancy, 20% awareness",
+      "content": "**Launched Deloitte's integrated corporate campaign**: Developed campaign strategy across owned, earned, and paid ecosystem, increasing awareness of products and services by 20% and driving 43% lift in lead generation across five priority industries.",
+      "theme_tags": ["integrated-campaign", "omnichannel", "corporate-marketing", "demand-generation", "brand-transformation", "B2B"]
+    },
+    {
+      "id": "CH-04-V3",
+      "base_id": "CH-04",
+      "variant_label": "Demand Generation",
+      "context": "Professional services firm seeking measurable pipeline growth from brand investment",
+      "method": "Brand strategy with clear attribution to qualified opportunity generation",
+      "outcome": "43% lead generation, 33% brand relevancy, 20% awareness",
+      "content": "**Drove 43% lead generation increase through brand repositioning**: Built brand strategy with clear pipeline attribution, generating 43% increase in qualified opportunities and 33% improvement in brand relevance among target decision-makers.",
+      "theme_tags": ["demand-generation", "pipeline", "lead-generation", "performance-marketing", "brand-transformation", "B2B"]
+    },
+    {
+      "id": "CH-04-V4",
+      "base_id": "CH-04",
+      "variant_label": "Global/Local Activation",
+      "context": "Global consulting firm activating brand strategy through regional marketing efforts",
+      "method": "Global brand strategy activated through local marketing teams and agency partners",
+      "outcome": "43% lead generation, 33% brand relevancy, 20% awareness",
+      "content": "**Activated global brand strategy through local markets**: Led brand architecture and campaign management with global teams, activating brand strategy through local marketing efforts to drive 43% lead lift, 33% relevancy gain, and 20% awareness increase.",
+      "theme_tags": ["global-local", "brand-activation", "agency-management", "regional-marketing", "brand-transformation", "B2B"]
+    },
+    {
+      "id": "CH-04-V5",
+      "base_id": "CH-04",
+      "variant_label": "Executive Perception",
+      "context": "Consulting firm elevating market perception among C-suite executives",
+      "method": "Comprehensive brand architecture transformation targeting senior decision-makers",
+      "outcome": "43% lead generation, 33% brand relevancy, 20% awareness",
+      "content": "**Elevated Deloitte's perception among C-suite executives**: Led comprehensive brand architecture transformation targeting senior decision-makers, generating 43% increase in qualified opportunities and 33% relevancy improvement across five industries.",
+      "theme_tags": ["executive-perception", "C-suite", "thought-leadership", "brand-transformation", "B2B"]
+    },
+    {
+      "id": "CH-05-V1",
+      "base_id": "CH-05",
+      "variant_label": "Digital Health Innovation",
+      "context": "Pharmaceutical company launching first direct-to-consumer digital health platform",
+      "method": "End-to-end platform strategy from brand positioning to customer experience design",
+      "outcome": "$727M revenue, 20% above forecast",
+      "content": "**Launched pharmaceutical company's first DTC platform**: Led end-to-end platform strategy from brand positioning to customer experience design, generating $727M in revenue and exceeding forecasts by 20%.",
+      "theme_tags": ["digital-health", "platform-launch", "DTC", "innovation"]
+    },
+    {
+      "id": "CH-05-V2",
+      "base_id": "CH-05",
+      "variant_label": "Product Marketing",
+      "context": "Pharmaceutical company launching new healthcare product line into consumer market",
+      "method": "Product positioning strategy defining value proposition, messaging, and launch activation",
+      "outcome": "$727M revenue, 20% above forecast",
+      "content": "**Launched new healthcare product line into consumer market**: Developed product positioning strategy defining value proposition, messaging, and launch activation for DTC platform, generating $727M revenue and exceeding forecasts by 20%.",
+      "theme_tags": ["product-marketing", "product-launch", "positioning", "messaging"]
+    },
+    {
+      "id": "CH-05-V3",
+      "base_id": "CH-05",
+      "variant_label": "Go-to-Market Excellence",
+      "context": "Global pharma expanding beyond traditional B2B model into consumer health",
+      "method": "Consumer-centric brand strategy and digital engagement model",
+      "outcome": "$727M revenue, 20% above forecast",
+      "content": "**Expanded pharma giant into consumer health**: Built consumer-centric brand strategy and digital engagement model for first-of-kind DTC platform, delivering $727M revenue and outperforming forecasts by 20%.",
+      "theme_tags": ["go-to-market", "B2C-expansion", "brand-strategy", "performance"]
+    },
+    {
+      "id": "CH-05-V4",
+      "base_id": "CH-05",
+      "variant_label": "Customer Experience",
+      "context": "Healthcare company reimagining patient engagement through digital channels",
+      "method": "First-of-kind customer experience and digital engagement model",
+      "outcome": "$727M revenue, 20% above forecast",
+      "content": "**Reimagined patient engagement for pharmaceutical leader**: Designed first-of-kind customer experience and digital engagement model for DTC healthcare platform, generating $727M in revenue and exceeding Q1 forecasts by 20%.",
+      "theme_tags": ["customer-experience", "patient-engagement", "digital-transformation"]
+    },
+    {
+      "id": "CH-06-V1",
+      "base_id": "CH-06",
+      "variant_label": "Growth & Scale",
+      "context": "Technology platform scaling from $2.8B to $5B following $300M investment",
+      "method": "First global brand strategy positioning platform for accelerated growth",
+      "outcome": "$2.8B to $5B, 8% acquisition, 67% awareness, 22% favorability",
+      "content": "**Scaled creator commerce platform from $2.8B to $5B**: Developed first global brand strategy post-$300M investment, establishing platform positioning that drove 8% customer acquisition increase and 67% awareness lift.",
+      "theme_tags": ["growth-strategy", "scale", "platform", "brand-strategy"]
+    },
+    {
+      "id": "CH-06-V2",
+      "base_id": "CH-06",
+      "variant_label": "Brand Repositioning",
+      "context": "Technology company needing to reframe perception from transactional tool to trusted destination",
+      "method": "Brand platform that elevated company from utility to content-commerce destination",
+      "outcome": "$2.8B to $5B, 8% acquisition, 67% awareness, 22% favorability",
+      "content": "**Repositioned technology platform from tool to trusted destination**: Built brand platform reframing creator commerce company from transactional utility to content-commerce destination, driving 67% awareness lift and 22% favorability increase.",
+      "theme_tags": ["brand-repositioning", "brand-platform", "perception-shift"]
+    },
+    {
+      "id": "CH-06-V3",
+      "base_id": "CH-06",
+      "variant_label": "Customer Acquisition",
+      "context": "Retail technology company focused on user growth post-funding",
+      "method": "Segmentation strategy identifying growth areas and integrated campaign for acquisition",
+      "outcome": "$2.8B to $5B, 8% acquisition, 67% awareness, 12% engagement",
+      "content": "**Drove 8% customer acquisition for retail technology platform**: Led segmentation strategy identifying key growth areas, launching integrated campaign that increased acquisition by 8% YoY and platform engagement by 12%.",
+      "theme_tags": ["customer-acquisition", "segmentation", "growth-marketing", "integrated-campaign"]
+    },
+    {
+      "id": "CH-06-V4",
+      "base_id": "CH-06",
+      "variant_label": "Brand Design",
+      "context": "Fashion technology platform needing distinctive visual identity and brand system",
+      "method": "Developed design system, brand guidelines, and visual identity elevating brand expression",
+      "outcome": "$2.8B to $5B, 8% acquisition, 67% awareness, 22% favorability",
+      "content": "**Created distinctive design system for fashion technology platform**: Developed brand guidelines and visual identity system elevating brand from transactional tool to luxury lifestyle destination, driving 67% awareness lift and 22% favorability increase.",
+      "theme_tags": ["brand-design", "design-system", "brand-guidelines", "visual-identity", "creative"]
+    },
+    {
+      "id": "CH-06-V5",
+      "base_id": "CH-06",
+      "variant_label": "Communications & Campaign",
+      "context": "Creator commerce platform launching first global brand campaign",
+      "method": "End-to-end integrated campaign including communications strategy, messaging architecture, and media activation",
+      "outcome": "$2.8B to $5B, 8% acquisition, 67% awareness, 12% engagement",
+      "content": "**Launched global campaign and communications strategy for creator commerce platform**: Led integrated campaign including communications strategy, messaging architecture, and media activation, delivering 8% acquisition increase, 67% awareness lift, and 12% engagement growth.",
+      "theme_tags": ["integrated-campaign", "communications-strategy", "messaging", "global-campaign", "creative-strategy"]
+    },
+    {
+      "id": "CH-07-V1",
+      "base_id": "CH-07",
+      "variant_label": "Brand Strategy",
+      "context": "Major health system needing unified brand positioning to drive growth",
+      "method": "Brand platform development aligning narrative, patient experience, and communications",
+      "outcome": "10% awareness lift, 300% social engagement, 1.6M appointments, #1 ranking",
+      "content": "**Built brand platform for major health system**: Developed unified brand positioning aligning narrative, patient experience, and communications, driving 10% awareness lift, 300% social engagement increase, and 1.6M net-new appointments.",
+      "theme_tags": ["brand-strategy", "brand-platform", "positioning", "healthcare"]
+    },
+    {
+      "id": "CH-07-V2",
+      "base_id": "CH-07",
+      "variant_label": "Digital Experience",
+      "context": "Academic medical center transforming patient engagement through digital channels",
+      "method": "Digital experience strategy integrating Salesforce CRM to unify patient touchpoints",
+      "outcome": "10% awareness lift, 300% social engagement, 1.6M appointments, #1 ranking",
+      "content": "**Transformed patient engagement through digital experience**: Led digital experience strategy integrating Salesforce CRM to unify patient touchpoints, driving 300% social engagement increase, 1.6M net-new appointments, and #1 hospital ranking.",
+      "theme_tags": ["digital-experience", "CRM", "salesforce", "patient-engagement", "digital-transformation"]
+    },
+    {
+      "id": "CH-07-V3",
+      "base_id": "CH-07",
+      "variant_label": "Integrated Campaign",
+      "context": "Regional medical center launching brand campaign to drive patient acquisition",
+      "method": "Omnichannel campaign spanning digital, social, and traditional with clear performance attribution",
+      "outcome": "10% awareness lift, 300% social engagement, 1.6M appointments, #1 ranking",
+      "content": "**Launched integrated campaign driving 1.6M new patient appointments**: Built omnichannel campaign spanning digital, social, and traditional touchpoints with performance attribution, delivering 10% awareness lift, 300% social growth, and #1 hospital ranking.",
+      "theme_tags": ["integrated-campaign", "omnichannel", "creative-campaign", "advertising", "performance-marketing"]
+    },
+    {
+      "id": "CH-08-V1",
+      "base_id": "CH-08",
+      "variant_label": "M&A Integration",
+      "context": "Health system integrating acquired Medicaid provider into parent brand",
+      "method": "Post-acquisition rebrand signaling strategic shift toward whole-person care",
+      "outcome": "30K new members, 410K total membership, 35% traffic increase",
+      "content": "**Integrated acquired health plan into unified brand**: Led post-acquisition rebrand signaling shift toward whole-person care, driving 30K-member enrollment increase and growing total membership to 410K within 18 months.",
+      "theme_tags": ["M&A", "acquisition-integration", "rebrand", "healthcare"]
+    },
+    {
+      "id": "CH-08-V2",
+      "base_id": "CH-08",
+      "variant_label": "Human-Centered Brand",
+      "context": "Medicaid provider seeking to differentiate through member empathy",
+      "method": "Brand platform rooted in insight that members want to feel genuinely cared for",
+      "outcome": "30K new members, 410K total membership, 35% traffic increase",
+      "content": "**Humanized regional health plan's member experience**: Developed brand platform rooted in insight that members want to feel genuinely cared for, driving 30K enrollment increase and 35% web traffic growth.",
+      "theme_tags": ["human-centered", "brand-platform", "consumer-insights", "healthcare-marketing"]
+    },
+    {
+      "id": "CH-08-V3",
+      "base_id": "CH-08",
+      "variant_label": "Growth & Acquisition",
+      "context": "Regional health plan seeking accelerated membership growth",
+      "method": "Insight-driven rebrand and integrated member acquisition campaign",
+      "outcome": "30K new members, 410K total membership, 35% traffic increase",
+      "content": "**Accelerated health plan membership through strategic rebrand**: Led insight-driven rebrand and member acquisition campaign, driving 30K enrollment increase, 35% web traffic growth, and scaling to 410K total members.",
+      "theme_tags": ["growth-strategy", "customer-acquisition", "enrollment", "scale", "performance"]
+    },
+    {
+      "id": "CH-09-V1",
+      "base_id": "CH-09",
+      "variant_label": "CRM Transformation",
+      "context": "Financial services company with plateauing corporate card performance",
+      "method": "Shifted CRM from transactional promotions-driven approach to customer-centric personalization",
+      "outcome": "5% retention lift, 12% cross-sell improvement",
+      "content": "**Transformed CRM strategy for global payments company**: Shifted corporate card program from promotions-driven approach to customer-centric personalization, delivering 5% retention lift and 12% cross-sell improvement.",
+      "theme_tags": ["CRM", "customer-experience", "personalization", "financial-services", "B2B"]
+    },
+    {
+      "id": "CH-09-V2",
+      "base_id": "CH-09",
+      "variant_label": "AI & Personalization",
+      "context": "Credit card issuer seeking to modernize customer engagement through data and AI",
+      "method": "Segmentation frameworks using behavioral data and AI-powered personalization",
+      "outcome": "5% retention lift, 12% cross-sell improvement",
+      "content": "**Modernized financial services CRM through AI personalization**: Developed segmentation frameworks using behavioral data and AI-powered personalization for corporate card portfolio, driving 5% retention lift and 12% cross-sell growth.",
+      "theme_tags": ["AI", "personalization", "segmentation", "data-driven", "martech", "financial-services"]
+    },
+    {
+      "id": "CH-09-V3",
+      "base_id": "CH-09",
+      "variant_label": "Customer Retention",
+      "context": "Financial services company focused on reducing churn and increasing loyalty",
+      "method": "Behavioral frameworks treating every interaction as value creation opportunity",
+      "outcome": "5% retention lift, 12% cross-sell improvement",
+      "content": "**Increased customer retention for financial services leader**: Developed behavioral frameworks treating every interaction as value creation opportunity, delivering 5% retention lift and 12% cross-sell growth across corporate card portfolio.",
+      "theme_tags": ["customer-retention", "loyalty", "lifecycle-marketing", "financial-services", "B2B"]
+    },
+    {
+      "id": "CH-09-V4",
+      "base_id": "CH-09",
+      "variant_label": "Revenue Growth",
+      "context": "Global payments company seeking to drive portfolio revenue through cross-sell",
+      "method": "Brand strategy and targeted activation to boost cross-sell conversion",
+      "outcome": "5% retention lift, 12% cross-sell improvement",
+      "content": "**Drove 12% cross-sell growth for corporate card portfolio**: Built brand strategy and targeted marketing activation for financial services leader, delivering 5% retention lift and 12% cross-sell improvement across portfolio.",
+      "theme_tags": ["revenue-growth", "cross-sell", "portfolio-marketing", "performance", "financial-services", "B2B"]
+    },
+    {
+      "id": "CH-10-V1",
+      "base_id": "CH-10",
+      "variant_label": "Brand Storytelling",
+      "context": "Industrial manufacturer seeking to transform brand perception through innovative content",
+      "method": "Breakthrough storytelling platforms including science fiction podcast and immersive VR experience",
+      "outcome": "Cannes Grand Prix, #1 iTunes, 4x engagement, 1M VR headsets",
+      "content": "**Transformed industrial brand into cultural storyteller**: Developed breakthrough storytelling platforms including science fiction podcast reaching #1 on iTunes and VR experience distributed to 1M consumers, earning Cannes Grand Prix and driving 4x engagement increase.",
+      "theme_tags": ["brand-storytelling", "content-strategy", "cultural-impact", "creative-innovation"]
+    },
+    {
+      "id": "CH-10-V2",
+      "base_id": "CH-10",
+      "variant_label": "Emerging Media",
+      "context": "Fortune 50 manufacturer pioneering new media formats for brand engagement",
+      "method": "First-to-market branded entertainment across podcast and virtual reality platforms",
+      "outcome": "Cannes Grand Prix, #1 iTunes, 4x engagement, 1M VR headsets",
+      "content": "**Pioneered emerging media for Fortune 50 manufacturer**: Led first-to-market branded entertainment across podcast and VR platforms, achieving #1 iTunes ranking, distributing 1M VR headsets, and earning Cannes Grand Prix.",
+      "theme_tags": ["emerging-media", "innovation", "branded-entertainment", "media-strategy"]
+    },
+    {
+      "id": "CH-10-V3",
+      "base_id": "CH-10",
+      "variant_label": "Award-Winning Creative",
+      "context": "Industrial brand seeking creative excellence and industry recognition",
+      "method": "Award-winning creative platforms that redefined category expectations",
+      "outcome": "Cannes Grand Prix, #1 iTunes, 4x engagement, 1M VR headsets",
+      "content": "**Delivered award-winning creative for industrial brand**: Built creative platforms that redefined category expectations, earning Cannes Grand Prix, Clio, and Webby recognition while driving 4x engagement increase.",
+      "theme_tags": ["creative-excellence", "awards", "advertising", "creative-strategy", "brand-campaign"]
+    },
+    {
+      "id": "CH-10-V4",
+      "base_id": "CH-10",
+      "variant_label": "Partnerships & Scale",
+      "context": "Global brand seeking scaled distribution through strategic media partnerships",
+      "method": "Strategic partnership with The New York Times to deliver immersive content at scale",
+      "outcome": "Cannes Grand Prix, #1 iTunes, 4x engagement, 1M VR headsets",
+      "content": "**Scaled branded content through strategic media partnership**: Partnered with The New York Times to deliver immersive VR experience to 1M consumers, earning Cannes Grand Prix and driving 4x engagement increase for GE.",
+      "theme_tags": ["partnerships", "media-partnerships", "scale", "distribution", "B2B"]
+    },
+    {
+      "id": "CH-11-V1",
+      "base_id": "CH-11",
+      "variant_label": "AI Innovation",
+      "context": "Consulting firm developing AI-powered tools to transform brand strategy delivery",
+      "method": "Built generative AI solutions and automation workflows for strategic production",
+      "outcome": "32% cost reduction, increased speed-to-market",
+      "content": "**Pioneered AI-powered brand strategy tools**: Developed generative AI solutions and automation workflows that streamlined production processes, reducing costs by 32% and significantly accelerating speed-to-market for Fortune 500 clients.",
+      "theme_tags": ["AI", "innovation", "generative-AI", "automation", "martech"]
+    },
+    {
+      "id": "CH-11-V2",
+      "base_id": "CH-11",
+      "variant_label": "Operational Efficiency",
+      "context": "Enterprise seeking to reduce production costs while maintaining strategic quality",
+      "method": "Automation workflows that streamlined processes and elevated output quality",
+      "outcome": "32% cost reduction, increased speed-to-market",
+      "content": "**Reduced production costs 32% through AI automation**: Built automation workflows that streamlined brand strategy processes while elevating strategic quality, significantly increasing speed-to-market for Fortune 500 clients.",
+      "theme_tags": ["operational-efficiency", "cost-reduction", "process-improvement", "automation"]
+    },
+    {
+      "id": "CH-11-V3",
+      "base_id": "CH-11",
+      "variant_label": "Personalization at Scale",
+      "context": "Fortune 500 clients needing data-informed personalization across global markets",
+      "method": "AI-powered creative automation enabling personalization at enterprise scale",
+      "outcome": "32% cost reduction, increased speed-to-market",
+      "content": "**Enabled personalization at scale through AI tools**: Developed AI-powered creative automation for Fortune 500 clients enabling data-informed personalization across global markets, reducing production costs by 32% while accelerating delivery.",
+      "theme_tags": ["personalization", "scale", "AI", "global-marketing", "creative-automation"]
+    },
+    {
+      "id": "CH-11-V4",
+      "base_id": "CH-11",
+      "variant_label": "Speed-to-Market",
+      "context": "Clients needing faster campaign development and delivery cycles",
+      "method": "Generative agents and automation workflows accelerating intelligence gathering and creative output",
+      "outcome": "32% cost reduction, increased speed-to-market",
+      "content": "**Accelerated campaign delivery through AI tools**: Built generative agents and automation workflows that streamlined intelligence gathering and creative output, reducing costs by 32% and significantly increasing speed-to-market.",
+      "theme_tags": ["speed-to-market", "agility", "campaign-development", "AI", "automation"]
+    },
+    {
+      "id": "P1-B01-V1",
+      "base_id": "P1-B01",
+      "variant_label": "Brand Repositioning",
+      "context": "Regional bank with stagnant market performance",
+      "method": "Distinctive brand platform, refreshed messaging, and full creative campaign system",
+      "outcome": "64.3% revenue growth, 9% acquisition, 12% favorability",
+      "content": "Repositioned regional bank during stagnant market performance, developing distinctive brand platform and creative campaign system that drove 64.3% revenue growth, 9% customer acquisition, and 12% favorability lift.",
+      "theme_tags": ["brand-repositioning", "brand-platform", "financial-services", "B2B"]
+    },
+    {
+      "id": "P1-B01-V2",
+      "base_id": "P1-B01",
+      "variant_label": "Revenue Growth",
+      "context": "Financial institution seeking measurable business impact from brand investment",
+      "method": "Brand strategy with clear attribution to revenue and acquisition metrics",
+      "outcome": "64.3% revenue growth, 9% acquisition, 12% favorability",
+      "content": "Drove 64.3% revenue growth for regional bank through brand repositioning, developing platform and campaign system that delivered 9% customer acquisition increase and 12% favorability improvement.",
+      "theme_tags": ["revenue-growth", "performance", "brand-strategy", "financial-services", "B2B"]
+    },
+    {
+      "id": "P1-B01-V3",
+      "base_id": "P1-B01",
+      "variant_label": "Integrated Campaign",
+      "context": "Community bank launching brand campaign to drive market share",
+      "method": "Full creative campaign system aligning internal teams and external communications",
+      "outcome": "64.3% revenue growth, 9% acquisition, 11% engagement",
+      "content": "Launched integrated brand campaign for regional bank, creating full creative system that aligned internal teams and drove 64.3% revenue growth, 9% acquisition increase, and 11% engagement lift.",
+      "theme_tags": ["integrated-campaign", "creative-strategy", "internal-alignment", "financial-services"]
+    },
+    {
+      "id": "P1-B06-V1",
+      "base_id": "P1-B06",
+      "variant_label": "B2B Healthcare Marketing",
+      "context": "Pharmaceutical company raising awareness of emerging therapy class",
+      "method": "First-of-kind brand strategy platform aligning corporate affairs, R&D, and biopharma leadership",
+      "outcome": "20% sales overperformance",
+      "content": "Developed first-of-kind brand platform for pharmaceutical company's emerging Cell & Gene Therapy class, aligning corporate affairs, R&D, and biopharma leadership to drive 20% sales overperformance.",
+      "theme_tags": ["B2B", "healthcare-marketing", "stakeholder-alignment", "pharma"]
+    },
+    {
+      "id": "P1-B06-V2",
+      "base_id": "P1-B06",
+      "variant_label": "Corporate Communications",
+      "context": "Global pharma communicating complex science to multiple stakeholder audiences",
+      "method": "Enterprise brand strategy with always-on integrated campaign across stakeholder groups",
+      "outcome": "20% sales overperformance",
+      "content": "Built enterprise brand strategy for global pharma's Cell & Gene Therapy platform, launching always-on integrated campaign that engaged key stakeholders and drove 20% sales overperformance.",
+      "theme_tags": ["corporate-communications", "enterprise-brand", "integrated-campaign", "pharma"]
+    },
+    {
+      "id": "P1-B06-V3",
+      "base_id": "P1-B06",
+      "variant_label": "Product Marketing",
+      "context": "Biopharma company launching new therapy category into market",
+      "method": "Brand strategy and provider education platform for emerging treatment class",
+      "outcome": "20% sales overperformance",
+      "content": "Launched brand strategy for pharmaceutical company's emerging therapy category, developing provider education platform and stakeholder engagement that delivered 20% sales overperformance.",
+      "theme_tags": ["product-marketing", "product-launch", "healthcare", "provider-engagement"]
+    },
+    {
+      "id": "P1-B10-V1",
+      "base_id": "P1-B10",
+      "variant_label": "Brand Launch",
+      "context": "Fortune 500 insurer launching new wealth management division brand",
+      "method": "Bold brand platform differentiating from traditional financial services through modern identity",
+      "outcome": "23% awareness, 37% favorability",
+      "content": "Launched brand platform for Fortune 500 insurer's wealth management division, developing modern visual identity and integrated storytelling that drove 23% awareness lift and 37% favorability increase.",
+      "theme_tags": ["brand-launch", "brand-platform", "financial-services", "wealth-management"]
+    },
+    {
+      "id": "P1-B10-V2",
+      "base_id": "P1-B10",
+      "variant_label": "Brand Design",
+      "context": "Wealth management firm needing distinctive visual identity",
+      "method": "Modern visual identity and design system differentiating from category",
+      "outcome": "23% awareness, 37% favorability",
+      "content": "Created distinctive brand identity for wealth management division, developing modern design system that differentiated from traditional financial services and drove 23% awareness and 37% favorability lift.",
+      "theme_tags": ["brand-design", "visual-identity", "design-system", "financial-services"]
+    },
+    {
+      "id": "P1-B10-V3",
+      "base_id": "P1-B10",
+      "variant_label": "Integrated Campaign",
+      "context": "Financial services company launching awareness campaign for new division",
+      "method": "Integrated storytelling campaign across channels",
+      "outcome": "23% awareness, 37% favorability",
+      "content": "Launched integrated campaign for financial services company's wealth management division, building storytelling platform that delivered 23% awareness increase and 37% favorability growth in first quarter.",
+      "theme_tags": ["integrated-campaign", "storytelling", "awareness", "financial-services"]
+    }
+  ]
+}

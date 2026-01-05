@@ -21,6 +21,14 @@ export const contentItems = pgTable('content_items', {
   functionTags: jsonb('function_tags').$type<string[]>().default([]),
   outcomeTags: jsonb('outcome_tags').$type<string[]>().default([]),
   exclusiveMetrics: jsonb('exclusive_metrics').$type<string[]>().default([]),
+  industryTags: jsonb('industry_tags').$type<string[]>().default([]),
+
+  // Variant system
+  baseId: text('base_id'),              // e.g., "CH-01" for variant "CH-01-V1"
+  variantLabel: text('variant_label'),  // e.g., "Team Leadership"
+  context: text('context'),             // The situation/challenge
+  method: text('method'),               // The approach taken
+  themeTags: jsonb('theme_tags').$type<string[]>().default([]),  // Variant-specific emphasis tags
 
   // Embedding stored as text, converted to vector in queries
   embedding: text('embedding'),
