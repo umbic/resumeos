@@ -80,7 +80,8 @@ export async function GET(request: NextRequest) {
         if (variantItems.length > 0) {
           const itemsWithBrandTags = variantItems.map(item => ({
             ...item,
-            brandTags: item.brandTags || baseBrandTags,
+            // Use base's brandTags if item has no brandTags (null or empty array)
+            brandTags: (item.brandTags && item.brandTags.length > 0) ? item.brandTags : baseBrandTags,
           }));
           return NextResponse.json({ items: itemsWithBrandTags, hasVariants: true });
         }
