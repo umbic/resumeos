@@ -972,5 +972,167 @@
       "content": "Launched national creative campaign for gaming beverage, developing culturally resonant creative with eSports partnerships and digital content that connected with gaming community, generating $25.7M revenue in 11 weeks—131% above forecast.",
       "theme_tags": ["creative-campaign", "esports", "digital-content", "gaming-culture", "advertising"]
     }
+  ],
+  "overview_variants": [
+    {
+      "id": "OV-P1-B2B",
+      "base_id": "OV-P1",
+      "variant_label": "B2B / Enterprise",
+      "position": 1,
+      "content": "Leads Deloitte's brand strategy practice, advising Fortune 500 executives on how to turn brand from a marketing function into a growth lever. Built a team that works at the intersection of business strategy and creative excellence - the kind of work that shows up in board decks, not just campaign briefs. Helps enterprise clients connect brand investment to outcomes that matter across the C-suite: customer acquisition, retention, and lifetime value.",
+      "industry_tags": ["B2B", "enterprise", "professional-services"],
+      "function_tags": ["brand-strategy", "executive-advisory"],
+      "theme_tags": ["complex-organizations", "stakeholder-management", "enterprise-scale"]
+    },
+    {
+      "id": "OV-P1-FS",
+      "base_id": "OV-P1",
+      "variant_label": "Financial Services",
+      "position": 1,
+      "content": "Leads brand strategy practice with deep expertise across banking, wealth management, and insurance. Partners with C-suite executives to develop brand strategies that navigate regulatory complexity while driving customer acquisition and retention. Built a team that understands how financial services brands compete - on trust, on clarity, and on the ability to make complex products feel simple and relevant to customers.",
+      "industry_tags": ["financial-services", "banking", "wealth-management", "insurance"],
+      "function_tags": ["brand-strategy", "client-advisory"],
+      "theme_tags": ["regulated-industries", "trust", "customer-acquisition"]
+    },
+    {
+      "id": "OV-P1-TECH",
+      "base_id": "OV-P1",
+      "variant_label": "Technology",
+      "position": 1,
+      "content": "Leads brand strategy for technology clients navigating category definition and market expansion. Built a team that develops brand platforms alongside AI-powered solutions - helping tech CMOs connect brand investment to growth metrics. Works with clients ranging from enterprise software companies to consumer platforms, helping them translate product capabilities into market narratives that drive adoption.",
+      "industry_tags": ["technology", "SaaS", "enterprise-software", "platforms"],
+      "function_tags": ["brand-strategy", "product-marketing", "growth-strategy"],
+      "theme_tags": ["category-definition", "innovation", "AI"]
+    },
+    {
+      "id": "OV-P1-CON",
+      "base_id": "OV-P1",
+      "variant_label": "Consumer",
+      "position": 1,
+      "content": "Leads brand strategy for consumer clients across CPG, retail, and lifestyle categories. Built a team that delivers culturally relevant brand platforms and integrated campaigns - work recognized by Cannes Lions and The Webby Awards. Partners with CMOs to create brands that break through in attention-scarce categories, connecting strategic clarity to creative work that resonates.",
+      "industry_tags": ["consumer", "CPG", "retail", "DTC"],
+      "function_tags": ["brand-strategy", "integrated-campaign", "creative-strategy"],
+      "theme_tags": ["cultural-relevance", "consumer-insight", "brand-building"]
+    },
+    {
+      "id": "OV-P1-CE",
+      "base_id": "OV-P1",
+      "variant_label": "Creative Excellence",
+      "position": 1,
+      "content": "Leads a brand strategy practice that consistently delivers award-winning work alongside business results. Partners with CMOs to create campaigns that break through category noise - from brand platforms that earned Cannes Lions recognition to storytelling innovations that reached #1 on iTunes. Proves that creative excellence and commercial outcomes reinforce each other.",
+      "industry_tags": ["consumer", "healthcare", "B2B"],
+      "function_tags": ["creative-strategy", "brand-storytelling", "integrated-campaign"],
+      "theme_tags": ["creative-excellence", "campaigns", "awards", "storytelling"]
+    },
+    {
+      "id": "OV-P1-PM",
+      "base_id": "OV-P1",
+      "variant_label": "Product Marketing",
+      "position": 1,
+      "content": "Leads brand strategy practice with deep expertise in positioning and go-to-market strategy. Partners with CMOs and product leaders to develop messaging frameworks, competitive positioning, and launch strategies that drive pipeline. Built a team that understands how to translate differentiation into demand - creating work that sales teams actually use and buyers actually respond to.",
+      "industry_tags": ["B2B", "technology", "SaaS"],
+      "function_tags": ["product-marketing", "positioning", "GTM", "sales-enablement"],
+      "theme_tags": ["go-to-market", "launches", "pipeline"]
+    },
+    {
+      "id": "OV-P1-BS",
+      "base_id": "OV-P1",
+      "variant_label": "Brand Strategy",
+      "position": 1,
+      "content": "Leads Deloitte's brand strategy practice, advising Fortune 500 executives on positioning, brand architecture, and identity systems. Built a team that develops brand platforms connecting strategic clarity to business outcomes. Partners with clients navigating complexity - post-merger integrations, portfolio rationalization, market repositioning - to build brand foundations that scale.",
+      "industry_tags": ["professional-services", "B2B", "consumer"],
+      "function_tags": ["brand-strategy", "brand-architecture", "positioning"],
+      "theme_tags": ["brand-architecture", "messaging", "identity-systems"]
+    },
+    {
+      "id": "OV-P1-PG",
+      "base_id": "OV-P1",
+      "variant_label": "Performance / Growth",
+      "position": 1,
+      "content": "Leads brand strategy practice with a focus on connecting brand investment to growth outcomes. Partners with CMOs and growth leaders to develop brand platforms that drive acquisition, conversion, and retention. Built a team that speaks the language of performance marketing - connecting positioning work to the metrics that matter and proving brand's impact on pipeline.",
+      "industry_tags": ["B2B", "technology", "consumer"],
+      "function_tags": ["growth-marketing", "performance-marketing", "demand-generation"],
+      "theme_tags": ["acquisition", "conversion", "metrics", "pipeline"]
+    },
+    {
+      "id": "OV-P2-B2B",
+      "base_id": "OV-P2",
+      "variant_label": "B2B / Enterprise",
+      "position": 2,
+      "content": "Recruited to build a brand practice inside a consultancy that could hold its own with product leaders, finance teams, and CMOs alike. Developed frameworks that helped enterprise clients cut through complexity - simplifying sprawling portfolios, aligning fragmented teams, and giving executives a story they could defend to their boards.",
+      "industry_tags": ["B2B", "enterprise", "professional-services"],
+      "function_tags": ["brand-strategy", "executive-advisory"],
+      "theme_tags": ["complex-organizations", "stakeholder-management", "enterprise-scale"]
+    },
+    {
+      "id": "OV-P2-FS",
+      "base_id": "OV-P2",
+      "variant_label": "Financial Services",
+      "position": 2,
+      "content": "Recruited to establish a brand practice with credibility in the C-suite. Led strategic planning across financial services clients including regional banks, wealth managers, and insurance companies - developing brand architectures that balanced regulatory requirements with market differentiation. Built frameworks that helped financial brands measure brand investment against acquisition and retention outcomes.",
+      "industry_tags": ["financial-services", "banking", "wealth-management", "insurance"],
+      "function_tags": ["brand-strategy", "brand-architecture"],
+      "theme_tags": ["regulated-industries", "trust", "customer-acquisition"]
+    },
+    {
+      "id": "OV-P2-TECH",
+      "base_id": "OV-P2",
+      "variant_label": "Technology",
+      "position": 2,
+      "content": "Recruited to build a brand practice that could speak the language of product teams and growth marketers. Developed proprietary frameworks that position brand as a growth lever, not a cost center - helping technology clients translate complex capabilities into compelling market narratives. Pioneered AI-powered solutions that became a model for technology-enabled brand transformation.",
+      "industry_tags": ["technology", "SaaS", "enterprise-software"],
+      "function_tags": ["brand-strategy", "product-marketing", "growth-strategy"],
+      "theme_tags": ["category-definition", "innovation", "AI"]
+    },
+    {
+      "id": "OV-P2-CON",
+      "base_id": "OV-P2",
+      "variant_label": "Consumer",
+      "position": 2,
+      "content": "Recruited to build a brand practice that could deliver both strategic rigor and creative excellence for consumer clients. Developed the team's signature approach: strategy rooted in genuine consumer insight, creative work that respects the audience, and measurement frameworks that connect brand investment to business outcomes.",
+      "industry_tags": ["consumer", "CPG", "retail", "DTC"],
+      "function_tags": ["brand-strategy", "integrated-campaign", "creative-strategy"],
+      "theme_tags": ["cultural-relevance", "consumer-insight", "brand-building"]
+    },
+    {
+      "id": "OV-P2-CE",
+      "base_id": "OV-P2",
+      "variant_label": "Creative Excellence",
+      "position": 2,
+      "content": "Recruited to build a brand practice that married consulting rigor with agency-caliber creative thinking. Developed the team's signature approach: strategy work that gives creative teams something to create from, and gives executives confidence in where the brand is headed. Built a portfolio that earned recognition from Cannes Lions, The Webby Awards, and Healthcare Marketing Awards.",
+      "industry_tags": ["consumer", "healthcare", "B2B"],
+      "function_tags": ["creative-strategy", "brand-storytelling", "integrated-campaign"],
+      "theme_tags": ["creative-excellence", "campaigns", "awards", "storytelling"]
+    },
+    {
+      "id": "OV-P2-PM",
+      "base_id": "OV-P2",
+      "variant_label": "Product Marketing",
+      "position": 2,
+      "content": "Recruited to build a brand practice that could deliver positioning work with teeth - frameworks that sales teams actually use and messaging that survives contact with real buyers. Developed proprietary approaches that connect brand positioning to pipeline performance, helping clients translate differentiation into demand. Built repeatable playbooks for product launches and go-to-market activation.",
+      "industry_tags": ["B2B", "technology", "SaaS"],
+      "function_tags": ["product-marketing", "positioning", "GTM", "sales-enablement"],
+      "theme_tags": ["go-to-market", "launches", "pipeline"]
+    },
+    {
+      "id": "OV-P2-BS",
+      "base_id": "OV-P2",
+      "variant_label": "Brand Strategy",
+      "position": 2,
+      "content": "Recruited to establish a brand strategy practice that could deliver positioning work with consulting rigor and creative ambition. Developed proprietary frameworks for brand architecture, messaging systems, and identity governance - helping clients build brand foundations that scale. Created methodologies that became Deloitte's differentiated approach to brand strategy.",
+      "industry_tags": ["professional-services", "B2B", "consumer"],
+      "function_tags": ["brand-strategy", "brand-architecture", "positioning"],
+      "theme_tags": ["brand-architecture", "messaging", "identity-systems"]
+    },
+    {
+      "id": "OV-P2-PG",
+      "base_id": "OV-P2",
+      "variant_label": "Performance / Growth",
+      "position": 2,
+      "content": "Recruited to build a brand practice that could prove ROI. Developed measurement frameworks that connect brand investment to growth metrics - helping clients see brand strategy reflected in acquisition costs, conversion rates, and customer lifetime value. Built AI-powered solutions that established new standards for performance-driven brand transformation.",
+      "industry_tags": ["B2B", "technology", "consumer"],
+      "function_tags": ["growth-marketing", "performance-marketing", "demand-generation"],
+      "theme_tags": ["acquisition", "conversion", "metrics", "pipeline"]
+    }
   ]
 }

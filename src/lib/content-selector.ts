@@ -603,24 +603,37 @@ export async function selectContent(jdAnalysis: any, diagnostics?: DiagnosticLog
   );
   diagnostics?.completeEvent(p2EventId!);
 
-  // Select best summary (score by function match)
-  const summaries = baseItems.filter(item => item.id.startsWith('SUM-'));
+  // Select best summary (full 3-level scoring: industry + function + theme)
+  const summaries = baseItems.filter(item => item.type === 'summary');
   let bestSummary: ScoredItem | null = null;
   let bestSummaryScore = -1;
 
+  // Start summary scoring event
+  const summaryEventId = diagnostics?.startEvent('content_selection', 'scoring_summaries');
+
   for (const sum of summaries) {
+    const industryScore = scoreIndustry(sum.industryTags as string[] || [], jd.industries);
     const functionScore = scoreFunction(sum.functionTags as string[] || [], jd.functions);
-    if (functionScore > bestSummaryScore) {
-      bestSummaryScore = functionScore;
+    const themeScore = scoreTheme(sum.themeTags as string[] || [], jd.themes);
+    const totalScore = industryScore + functionScore + themeScore;
+
+    diagnostics?.logDecision(summaryEventId!,
+      `Score ${sum.id}`,
+      `Industry: ${industryScore}, Function: ${functionScore}, Theme: ${themeScore}, Total: ${totalScore}`,
+      { industryScore, functionScore, themeScore, totalScore }
+    );
+
+    if (totalScore > bestSummaryScore) {
+      bestSummaryScore = totalScore;
       bestSummary = {
         id: sum.id,
         baseId: sum.id,
         variantId: null,
         variantLabel: null,
-        industryScore: 0,
+        industryScore,
         functionScore,
-        themeScore: 0,
-        totalScore: functionScore,
+        themeScore,
+        totalScore,
         content: sum.contentLong || sum.contentMedium || '',
         contentShort: sum.contentShort,
         contentMedium: sum.contentMedium,
@@ -629,23 +642,98 @@ export async function selectContent(jdAnalysis: any, diagnostics?: DiagnosticLog
     }
   }
 
-  // Select all 6 position overviews (they're not scored, just fetched by position)
-  const overviewItems = baseItems.filter(item => item.id.startsWith('OV-P'));
+  diagnostics?.logDecision(summaryEventId!,
+    'Final summary selection',
+    `Selected ${bestSummary?.id} with score ${bestSummaryScore}`,
+    { selected: bestSummary?.id, score: bestSummaryScore }
+  );
+  diagnostics?.completeEvent(summaryEventId!);
+
+  // Select position overviews (P1/P2 get full scoring with variants, P3-P6 use base)
+  const overviewBases = baseItems.filter(item => item.type === 'overview');
+  const overviewVariantsList = variants.filter(item => item.type === 'overview');
+
+  // Group overview variants by base_id
+  const overviewVariantsByBase = new Map<string, typeof variants>();
+  for (const variant of overviewVariantsList) {
+    const existing = overviewVariantsByBase.get(variant.baseId!) || [];
+    existing.push(variant);
+    overviewVariantsByBase.set(variant.baseId!, existing);
+  }
+
   const overviews: OverviewItem[] = [];
 
+  // Start overview scoring event
+  const overviewEventId = diagnostics?.startEvent('content_selection', 'scoring_overviews');
+
   for (let pos = 1; pos <= 6; pos++) {
-    const overview = overviewItems.find(item => item.position === pos);
-    if (overview) {
-      overviews.push({
-        id: overview.id,
-        position: pos,
-        content: overview.contentLong || overview.contentMedium || overview.contentShort || '',
-        contentShort: overview.contentShort,
-        contentMedium: overview.contentMedium,
-        contentLong: overview.contentLong,
-      });
+    const baseOverview = overviewBases.find(item => item.position === pos);
+    if (!baseOverview) continue;
+
+    // For P1 and P2, apply full scoring and variant selection
+    if (pos <= 2) {
+      const posVariants = overviewVariantsByBase.get(baseOverview.id) || [];
+
+      if (posVariants.length > 0) {
+        // Score each variant
+        let bestVariant = posVariants[0];
+        let bestScore = -1;
+
+        for (const variant of posVariants) {
+          const industryScore = scoreIndustry(variant.industryTags as string[] || [], jd.industries);
+          const functionScore = scoreFunction(variant.functionTags as string[] || [], jd.functions);
+          const themeScore = scoreTheme(variant.themeTags as string[] || [], jd.themes);
+          const totalScore = industryScore + functionScore + themeScore;
+
+          diagnostics?.logDecision(overviewEventId!,
+            `Score P${pos} variant ${variant.id}`,
+            `Industry: ${industryScore}, Function: ${functionScore}, Theme: ${themeScore}, Total: ${totalScore}`,
+            { industryScore, functionScore, themeScore, totalScore }
+          );
+
+          if (totalScore > bestScore) {
+            bestScore = totalScore;
+            bestVariant = variant;
+          }
+        }
+
+        overviews.push({
+          id: bestVariant.id,
+          position: pos,
+          content: bestVariant.contentLong || bestVariant.contentMedium || bestVariant.contentShort || '',
+          contentShort: bestVariant.contentShort,
+          contentMedium: bestVariant.contentMedium,
+          contentLong: bestVariant.contentLong,
+        });
+
+        diagnostics?.logDecision(overviewEventId!,
+          `Selected P${pos} overview`,
+          `Using variant ${bestVariant.id} (${bestVariant.variantLabel}) with score ${bestScore}`,
+          { variantId: bestVariant.id, score: bestScore }
+        );
+
+        continue;
+      }
     }
+
+    // For P3-P6 (or if no variants), use base overview
+    overviews.push({
+      id: baseOverview.id,
+      position: pos,
+      content: baseOverview.contentLong || baseOverview.contentMedium || baseOverview.contentShort || '',
+      contentShort: baseOverview.contentShort,
+      contentMedium: baseOverview.contentMedium,
+      contentLong: baseOverview.contentLong,
+    });
+
+    diagnostics?.logDecision(overviewEventId!,
+      `Selected P${pos} overview`,
+      `Using base ${baseOverview.id} (no variants available)`,
+      { baseId: baseOverview.id }
+    );
   }
+
+  diagnostics?.completeEvent(overviewEventId!);
 
   // Complete main content selection event
   diagnostics?.completeEvent(mainEventId!, {

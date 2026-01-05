@@ -18,6 +18,8 @@ interface ContentItem {
   brandTags: string[];
   categoryTags: string[];
   functionTags: string[];
+  industryTags?: string[];
+  themeTags?: string[];
   outcomeTags: string[];
   exclusiveMetrics: string[];
 }
@@ -33,7 +35,9 @@ async function generateEmbedding(text: string): Promise<number[]> {
 function createEmbeddingText(item: ContentItem): string {
   const parts = [
     item.contentLong || item.contentMedium || item.contentShort,
+    item.industryTags?.join(', '),
     item.functionTags?.join(', '),
+    item.themeTags?.join(', '),
     item.outcomeTags?.join(', '),
     item.categoryTags?.join(', '),
   ].filter(Boolean);
@@ -92,7 +96,7 @@ async function seedContentItems() {
       INSERT INTO content_items (
         id, type, position,
         content_short, content_medium, content_long, content_generic,
-        brand_tags, category_tags, function_tags, outcome_tags, exclusive_metrics,
+        brand_tags, category_tags, function_tags, industry_tags, theme_tags, outcome_tags, exclusive_metrics,
         embedding
       ) VALUES (
         ${item.id},
@@ -105,6 +109,8 @@ async function seedContentItems() {
         ${JSON.stringify(item.brandTags || [])},
         ${JSON.stringify(item.categoryTags || [])},
         ${JSON.stringify(item.functionTags || [])},
+        ${JSON.stringify(item.industryTags || [])},
+        ${JSON.stringify(item.themeTags || [])},
         ${JSON.stringify(item.outcomeTags || [])},
         ${JSON.stringify(item.exclusiveMetrics || [])},
         ${embeddingStr}::vector
@@ -162,6 +168,17 @@ interface Variant {
   method: string;
   outcome: string;
   content: string;
+  theme_tags: string[];
+}
+
+interface OverviewVariant {
+  id: string;
+  base_id: string;
+  variant_label: string;
+  position: number;
+  content: string;
+  industry_tags: string[];
+  function_tags: string[];
   theme_tags: string[];
 }
 
@@ -270,6 +287,56 @@ async function seedVariants() {
   console.log(`Seeded ${count} variants!`);
 }
 
+async function seedOverviewVariants() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const overviewVariants = (variantsDatabase as any).overview_variants as OverviewVariant[] | undefined;
+
+  if (!overviewVariants || overviewVariants.length === 0) {
+    console.log('\nNo overview_variants found, skipping...');
+    return;
+  }
+
+  console.log(`\nSeeding ${overviewVariants.length} overview variants...`);
+
+  let count = 0;
+  for (const variant of overviewVariants) {
+    const embeddingText = `${variant.content} | ${variant.industry_tags?.join(', ')} | ${variant.function_tags?.join(', ')} | ${variant.theme_tags?.join(', ')}`;
+    console.log(`Generating embedding for ${variant.id}...`);
+
+    const embedding = await generateEmbedding(embeddingText);
+    const embeddingStr = `[${embedding.join(',')}]`;
+
+    await sql`
+      INSERT INTO content_items (
+        id, type, position,
+        content_long,
+        base_id, variant_label,
+        industry_tags, function_tags, theme_tags,
+        embedding
+      ) VALUES (
+        ${variant.id},
+        'overview',
+        ${variant.position},
+        ${variant.content},
+        ${variant.base_id},
+        ${variant.variant_label},
+        ${JSON.stringify(variant.industry_tags || [])},
+        ${JSON.stringify(variant.function_tags || [])},
+        ${JSON.stringify(variant.theme_tags || [])},
+        ${embeddingStr}::vector
+      )
+    `;
+
+    count++;
+    console.log(`  Seeded overview variant ${variant.id}`);
+
+    // Rate limiting for OpenAI API
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+
+  console.log(`Seeded ${count} overview variants!`);
+}
+
 async function main() {
   console.log('Starting database seeding...\n');
 
@@ -279,12 +346,17 @@ async function main() {
     await seedConflictRules();
     await updateBaseItemsWithMetadata();
     await seedVariants();
+    await seedOverviewVariants();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const overviewVariantsCount = ((variantsDatabase as any).overview_variants || []).length;
 
     console.log('\n✅ Database seeding completed successfully!');
     console.log(`   - ${contentDatabase.items.length} content items`);
     console.log(`   - ${contentDatabase.conflictRules.length} conflict rules`);
     console.log(`   - ${variantsDatabase.base_items.length} base items updated`);
     console.log(`   - ${variantsDatabase.variants.length} variants seeded`);
+    console.log(`   - ${overviewVariantsCount} overview variants seeded`);
   } catch (error) {
     console.error('Error seeding database:', error);
     process.exit(1);
