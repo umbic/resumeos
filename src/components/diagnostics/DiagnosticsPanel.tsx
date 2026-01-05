@@ -11,6 +11,7 @@ import {
   CheckCircle,
   RefreshCw,
   Download,
+  ExternalLink,
 } from 'lucide-react';
 
 interface DiagnosticDecision {
@@ -243,6 +244,16 @@ export function DiagnosticsPanel({ sessionId }: { sessionId: string }) {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-gray-900">Generation Diagnostics</h2>
           <div className="flex items-center gap-2">
+            <a
+              href={`/diagnostics/${sessionId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 px-2 py-1 rounded hover:bg-purple-50"
+              title="Open full diagnostics page"
+            >
+              <ExternalLink className="w-3 h-3" />
+              Full Page
+            </a>
             <button
               onClick={handleExportJSON}
               className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50"

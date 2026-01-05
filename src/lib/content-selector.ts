@@ -328,29 +328,50 @@ function scoreTheme(itemTags: string[], jdThemes: string[]): number {
 }
 
 /**
- * Select best variant for a base item
+ * Select best variant for a base item with detailed scoring
  */
 function selectBestVariant(
-  _baseId: string,
+  baseId: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   variants: any[],
-  jdThemes: string[]
+  jdThemes: string[],
+  diagnostics?: DiagnosticLogger,
+  eventId?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): { variantId: string | null; variantLabel: string | null; themeScore: number; content: any } {
+): { variantId: string | null; variantLabel: string | null; themeScore: number; content: any; allVariantScores: { id: string; label: string; score: number; tags: string[] }[] } {
 
   if (!variants || variants.length === 0) {
-    return { variantId: null, variantLabel: null, themeScore: 0, content: null };
+    return { variantId: null, variantLabel: null, themeScore: 0, content: null, allVariantScores: [] };
   }
+
+  const allVariantScores: { id: string; label: string; score: number; tags: string[] }[] = [];
 
   let bestVariant = variants[0];
   let bestScore = scoreTheme(variants[0].themeTags || [], jdThemes);
 
-  for (const variant of variants.slice(1)) {
+  // Score all variants and track scores
+  for (const variant of variants) {
     const score = scoreTheme(variant.themeTags || [], jdThemes);
+    allVariantScores.push({
+      id: variant.id,
+      label: variant.variantLabel || 'unknown',
+      score,
+      tags: variant.themeTags || [],
+    });
+
     if (score > bestScore) {
       bestScore = score;
       bestVariant = variant;
     }
+  }
+
+  // Log all variant scores if diagnostics available
+  if (diagnostics && eventId && allVariantScores.length > 1) {
+    diagnostics.logDecision(eventId,
+      `Variant comparison for ${baseId}`,
+      `${allVariantScores.length} variants scored: ${allVariantScores.map(v => `${v.id}=${v.score}`).join(', ')}`,
+      { baseId, variants: allVariantScores, winner: bestVariant.id, jdThemes }
+    );
   }
 
   return {
@@ -358,6 +379,7 @@ function selectBestVariant(
     variantLabel: bestVariant.variantLabel,
     themeScore: bestScore,
     content: bestVariant,
+    allVariantScores,
   };
 }
 
@@ -412,7 +434,9 @@ export async function selectContent(jdAnalysis: any, diagnostics?: DiagnosticLog
     const { variantId, variantLabel, themeScore, content: variantContent } = selectBestVariant(
       ch.id,
       chVariants,
-      jd.themes
+      jd.themes,
+      diagnostics,
+      chEventId
     );
 
     const totalScore = industryScore + functionScore + themeScore;
@@ -510,7 +534,9 @@ export async function selectContent(jdAnalysis: any, diagnostics?: DiagnosticLog
     const { variantId, variantLabel, themeScore, content: variantContent } = selectBestVariant(
       p1.id,
       p1Variants,
-      jd.themes
+      jd.themes,
+      diagnostics,
+      p1EventId
     );
 
     const totalScore = industryScore + functionScore + themeScore;
@@ -565,7 +591,9 @@ export async function selectContent(jdAnalysis: any, diagnostics?: DiagnosticLog
     const { variantId, variantLabel, themeScore, content: variantContent } = selectBestVariant(
       p2.id,
       p2Variants,
-      jd.themes
+      jd.themes,
+      diagnostics,
+      p2EventId
     );
 
     const totalScore = industryScore + functionScore + themeScore;

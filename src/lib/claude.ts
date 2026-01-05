@@ -84,18 +84,15 @@ interface RawJDAnalysisResponse {
 
 export type { JDAnalysis, JDKeyword };
 
-export async function analyzeJobDescription(jobDescription: string): Promise<{
+export async function analyzeJobDescription(jobDescription: string, diagnostics?: DiagnosticLogger): Promise<{
   analysis: JDAnalysis;
   recommendedBrandingMode: 'branded' | 'generic';
   reasoning: string;
 }> {
-  const response = await anthropic.messages.create({
-    model: 'claude-opus-4-5-20251101',
-    max_tokens: 2048,
-    messages: [
-      {
-        role: 'user',
-        content: `Analyze this job description and extract TWO types of information:
+  // Start JD analysis event
+  const eventId = diagnostics?.startEvent('jd_analysis', 'claude_call');
+
+  const prompt = `Analyze this job description and extract TWO types of information:
 
 ---
 
@@ -216,15 +213,45 @@ Return as JSON:
 Job Description:
 ${jobDescription}
 
-Return ONLY the JSON object, no other text.`,
+Return ONLY the JSON object, no other text.`;
+
+  // Log input and prompt
+  diagnostics?.logInput(eventId!, { jobDescriptionLength: jobDescription.length });
+  diagnostics?.logPrompt(eventId!, prompt, estimateTokens(prompt));
+
+  const response = await anthropic.messages.create({
+    model: 'claude-opus-4-5-20251101',
+    max_tokens: 2048,
+    messages: [
+      {
+        role: 'user',
+        content: prompt,
       },
     ],
   });
 
   const content = response.content[0];
   if (content.type !== 'text') {
+    diagnostics?.failEvent(eventId!, 'Unexpected response type');
     throw new Error('Unexpected response type');
   }
+
+  // Log response
+  diagnostics?.logResponse(eventId!, content.text, response.usage?.output_tokens);
+
+  // Update input tokens with actual count
+  if (response.usage?.input_tokens && diagnostics && eventId) {
+    const event = diagnostics.getEvents().find(e => e.id === eventId);
+    if (event) {
+      event.tokensSent = response.usage.input_tokens;
+    }
+  }
+
+  diagnostics?.logDecision(eventId!,
+    'JD Analysis API call complete',
+    `Input: ${response.usage?.input_tokens || 'unknown'} tokens, Output: ${response.usage?.output_tokens || 'unknown'} tokens`,
+    { usage: response.usage, model: 'claude-opus-4-5-20251101' }
+  );
 
   // Helper to repair and parse JSON response
   const repairAndParseJSON = (text: string): RawJDAnalysisResponse => {
@@ -348,7 +375,8 @@ Return ONLY the JSON object, no other text.`,
 
   try {
     const parsed = repairAndParseJSON(content.text);
-    return {
+
+    const result = {
       analysis: {
         strategic: parsed.strategic,
         keywords: parsed.keywords.map((k, i) => ({
@@ -360,9 +388,35 @@ Return ONLY the JSON object, no other text.`,
       recommendedBrandingMode: parsed.recommendedBrandingMode,
       reasoning: parsed.reasoning,
     };
+
+    // Log parsed output
+    diagnostics?.logDecision(eventId!,
+      'JD parsed successfully',
+      `Extracted ${result.analysis.keywords.length} keywords, ${result.analysis.strategic.positioningThemes.length} themes`,
+      {
+        targetTitle: result.analysis.strategic.targetTitle,
+        targetCompany: result.analysis.strategic.targetCompany,
+        industry: result.analysis.strategic.industry,
+        keywordCount: result.analysis.keywords.length,
+        themeCount: result.analysis.strategic.positioningThemes.length,
+        brandingMode: result.recommendedBrandingMode,
+      }
+    );
+
+    diagnostics?.completeEvent(eventId!, {
+      targetTitle: result.analysis.strategic.targetTitle,
+      targetCompany: result.analysis.strategic.targetCompany,
+      industry: result.analysis.strategic.industry,
+      themes: result.analysis.strategic.positioningThemes.map(t => t.theme),
+      keywordCount: result.analysis.keywords.length,
+      highPriorityKeywords: result.analysis.keywords.filter(k => k.priority === 'high').map(k => k.keyword),
+    });
+
+    return result;
   } catch (parseError) {
     console.error('JSON parse error:', parseError);
     console.error('Response text (first 500 chars):', content.text.substring(0, 500));
+    diagnostics?.failEvent(eventId!, `Failed to parse JD analysis response: ${parseError}`);
     throw new Error(`Failed to parse JD analysis response: ${parseError}`);
   }
 }
