@@ -51,7 +51,37 @@ export default function Home() {
       setTargetCompany(session.target_company || '');
 
       if (session.generated_resume) {
-        setResume(session.generated_resume);
+        // Transform legacy resume format (objects -> strings)
+        const resume = session.generated_resume;
+
+        // Transform career_highlights from objects to strings if needed
+        if (Array.isArray(resume.career_highlights)) {
+          resume.career_highlights = resume.career_highlights.map((ch: unknown) => {
+            if (typeof ch === 'string') return ch;
+            if (ch && typeof ch === 'object' && 'content' in ch) {
+              return (ch as { content: string }).content;
+            }
+            return String(ch || '');
+          });
+        }
+
+        // Transform position bullets from objects to strings if needed
+        if (Array.isArray(resume.positions)) {
+          resume.positions = resume.positions.map((pos: { bullets?: unknown[] }) => {
+            if (pos.bullets && Array.isArray(pos.bullets)) {
+              pos.bullets = pos.bullets.map((b: unknown) => {
+                if (typeof b === 'string') return b;
+                if (b && typeof b === 'object' && 'content' in b) {
+                  return (b as { content: string }).content;
+                }
+                return String(b || '');
+              });
+            }
+            return pos;
+          });
+        }
+
+        setResume(resume);
         setGaps(session.gaps || []);
         setKeywordGaps(session.keyword_gaps || []);
         setQualityScore(session.quality_score);

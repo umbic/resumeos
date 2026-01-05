@@ -11,8 +11,15 @@ interface RenderContentProps {
 export function renderContent({ content, showHighlights = false }: RenderContentProps): React.ReactNode {
   if (!content) return null;
 
+  // Safety check: ensure content is a string (legacy data may have objects)
+  const contentStr = typeof content === 'string'
+    ? content
+    : (content && typeof content === 'object' && 'content' in content)
+      ? (content as { content: string }).content
+      : String(content);
+
   // First strip mark tags if not showing highlights
-  const processedContent = showHighlights ? content : content.replace(/<\/?mark>/g, '');
+  const processedContent = showHighlights ? contentStr : contentStr.replace(/<\/?mark>/g, '');
 
   // Parse both **bold** and <mark> tags
   const parts: React.ReactNode[] = [];
