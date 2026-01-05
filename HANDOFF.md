@@ -1,7 +1,71 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-05
-> **Last Session**: Session 12 - ContentPicker Modal Fixes
+> **Last Session**: Session 13 - Position Bullet Variants for Overlapping Categories
+
+---
+
+## Session 13 Completed: Position Bullet Variants for Overlapping Categories
+
+### Problem Solved
+
+The 10 overlapping CH↔Position categories (e.g., CH-01 ↔ P1-B02, CH-06 ↔ P1-B08) share the same achievement metrics. When a user doesn't use one of these as a Career Highlight, they should be able to use that achievement as a Position bullet. However, the Position bullet versions had **no variants** in the database—only the CH versions had variants.
+
+### Solution
+
+Added 42 Position bullet variants to the database by copying the CH variant structure for all 10 overlapping categories.
+
+### The 10 Overlapping Categories
+
+| CH ID | Position ID | Achievement | Variants Added |
+|-------|------------|-------------|----------------|
+| CH-01 | P1-B02 | Deloitte Practice ($40M) | 5 |
+| CH-02 | P2-B08 | NWSL (50% attendance) | 5 |
+| CH-03 | P1-B04 | OOFOS (191% sales) | 4 |
+| CH-04 | P1-B09 | Deloitte Rebrand (43% leads) | 5 |
+| CH-05 | P2-B09 | Pfizer DTC ($727M) | 4 |
+| CH-06 | P1-B08 | LTK ($2.8B→$5B) | 5 |
+| CH-07 | P1-B05 | NYU Langone (1.6M appts) | 3 |
+| CH-08 | P1-B07 | Gateway (30K members) | 3 |
+| CH-09 | P1-B03 | Amex CRM (5%/12%) | 4 |
+| CH-10 | P4-B01 | GE Innovation (Cannes) | 4 |
+
+### Files Created
+
+| File | Description |
+|------|-------------|
+| `position-bullet-variants.json` | Source file with all 42 Position bullet variants (pre-existing, user-provided) |
+| `scripts/insert-position-variants.ts` | Script to insert variants into database |
+| `scripts/backup-database.ts` | Script to backup database before changes |
+| `scripts/export-variants.ts` | Script to export CH/Position variants for analysis |
+| `database-backup-2026-01-05.json` | Backup of database before insertion |
+
+### Database Changes
+
+**Before:**
+- 140 total items
+- 57 bullets (base items + non-overlapping variants)
+- 30 bullet variants
+
+**After:**
+- 182 total items (+42)
+- 99 bullets (+42)
+- 72 bullet variants (+42)
+
+### How It Works
+
+1. User opens Position 1 bullet picker
+2. Clicks on an overlapping category (e.g., American Express/CRM)
+3. Now sees 4 variants with tags like `CRM`, `AI`, `Customer Retention`, `Revenue Growth`
+4. User can select the best-fit variant for their JD
+
+### Reversion Note
+
+Also reverted the runtime code change from Session 12 that was incorrectly adding CH categories to Position bullet pickers. The correct solution was to add Position variants to the database, not show CH items in Position pickers.
+
+### Key Insight
+
+The **CONFLICT_MAP** ensures that if a user selects CH-01 (Deloitte Practice), then P1-B02 and all its variants are blocked (and vice versa). This prevents the same achievement from appearing twice on the resume.
 
 ---
 
