@@ -1,14 +1,90 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-04
-> **Last Session**: Session 5 - Variant System
+> **Last Session**: Session 6 - Complete Variant System with Three-Level Matching
 
 ---
 
-## Session 5 Completed: Variant System for Career Highlights & Bullets
+## Session 6 Completed: Complete Variant System with P2 Bullets & Three-Level Matching
 
 ### What Was Done
-Added a variant system to ResumeOS. Variants are different framings of the same achievement — same facts/metrics, different angles depending on what the target JD emphasizes.
+Expanded the variant system to include all P2 bullet variants and implemented three-level matching in the master generation prompt. The system now supports intelligent content selection based on industry relevance, function relevance, and theme-based variant selection.
+
+### P2 Variants Added
+
+| Base ID | Client | Variants |
+|---------|--------|----------|
+| P2-B01 | SAP | 4 (Brand Strategy, Product Marketing, Sales Enablement, Customer Acquisition) |
+| P2-B02 | Wild Turkey | 3 (Brand Repositioning, Creative Campaign, Social & Creator Campaign) |
+| P2-B03 | Deloitte Consulting | 2 (Brand Strategy, Demand Generation) |
+| P2-B04 | WNBA | 4 (Brand Strategy, Digital Engagement, Creative Storytelling, Customer Growth) |
+| P2-B05 | Energizer Holdings | 3 (Portfolio Strategy, Rebranding, Integrated Campaign) |
+| P2-B06 | Aspen Dental | 3 (Brand Platform, Growth Strategy, Integrated Campaign) |
+| P2-B07 | MTN DEW GAME FUEL | 2 (Product Launch, Creative Campaign) |
+
+### Updated Totals
+- **21 base items** with industry/function tags (11 CH + 3 P1 + 7 P2)
+- **76 total variants** (46 CH + 9 P1 + 21 P2)
+- Database properly seeded with all variants and embeddings
+
+### Three-Level Matching System
+
+The master generation prompt now includes a three-level matching system:
+
+**Level 1: Industry Relevance**
+- Match base items' `industry_tags` to target company industry
+- Prioritize achievements from relevant industries
+
+**Level 2: Function Relevance**
+- Match base items' `function_tags` to role type
+- Prioritize items with matching functions (brand-strategy, product-marketing, etc.)
+
+**Level 3: Variant Selection**
+- For each selected base item, choose the variant whose `theme_tags` best match priority themes
+- Use variant content instead of base content for better JD alignment
+
+### Updated Output Format
+
+Career highlights and position bullets now return structured objects:
+```json
+{
+  "id": "CH-01-V2",
+  "base_id": "CH-01",
+  "variant_label": "Team Leadership",
+  "content": "**Bold hook phrase**: Achievement narrative..."
+}
+```
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `src/data/variants.json` | Renamed from career-highlight-variants.json, added P2 base items + 21 P2 variants |
+| `scripts/seed-database.ts` | Updated to reference variants.json |
+| `src/lib/prompts/master-generation.ts` | Added three-level matching, PromptVariant interface, variant formatting helpers |
+| `src/lib/claude.ts` | Added fetchCareerHighlightVariants(), fetchPositionVariants(), updated generateFullResume() |
+
+### Verification
+```sql
+-- Verified: 76 total variants seeded
+SELECT COUNT(*) FROM content_items WHERE base_id IS NOT NULL;
+-- Result: 76
+
+-- Verified: Variants per base
+SELECT base_id, COUNT(*) FROM content_items WHERE base_id IS NOT NULL GROUP BY base_id;
+-- Shows correct distribution: CH variants (46), P1 variants (9), P2 variants (21)
+```
+
+### Next Steps
+1. Test three-level matching with real JDs
+2. Verify variant selection improves theme alignment
+3. UI for displaying which variant was selected
+
+---
+
+## Session 5 Completed: Variant System for Career Highlights & P1 Bullets
+
+### What Was Done
+Added the initial variant system to ResumeOS. Variants are different framings of the same achievement — same facts/metrics, different angles depending on what the target JD emphasizes.
 
 ### Database Schema Changes
 
@@ -22,7 +98,7 @@ theme_tags: jsonb('theme_tags'),       // Variant-specific emphasis tags
 industry_tags: jsonb('industry_tags'), // Industries this content is relevant to
 ```
 
-### Variants Created
+### Variants Created (Session 5)
 
 | Base ID | Achievement | Variants |
 |---------|-------------|----------|
@@ -41,19 +117,7 @@ industry_tags: jsonb('industry_tags'), // Industries this content is relevant to
 | P1-B06 | J&J Cell & Gene (20% sales) | 3 |
 | P1-B10 | New York Life (23% awareness) | 3 |
 
-**Totals**: 14 base items updated, 55 variants seeded, 119 total content items
-
-### Files Created
-| File | Description |
-|------|-------------|
-| `src/data/career-highlight-variants.json` | 14 base items + 55 variants with metadata |
-| `src/drizzle/migrations/0005_brief_night_thrasher.sql` | Migration for new columns |
-
-### Files Modified
-| File | Change |
-|------|--------|
-| `src/drizzle/schema.ts` | Added 6 new columns for variant system |
-| `scripts/seed-database.ts` | Updated to seed variants with embeddings |
+**Session 5 Totals**: 14 base items updated, 55 variants seeded
 
 ### Variant Data Structure
 
@@ -68,11 +132,6 @@ Each variant includes:
 
 ### Commit
 `daf0863` - feat: add variant system schema and seed career highlight variants
-
-### Next Steps
-1. Update search-content API to leverage variants
-2. Add variant selection to generation prompt
-3. UI for displaying/selecting variants
 
 ---
 

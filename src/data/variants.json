@@ -139,6 +139,76 @@
       "function_tags": ["brand-launch", "brand-design", "integrated-campaign"],
       "exclusive_metrics": ["23% awareness", "37% favorability"],
       "conflicts_with": []
+    },
+    {
+      "id": "P2-B01",
+      "client": "SAP",
+      "generic_terms": ["enterprise software company", "B2B technology platform", "global tech company"],
+      "branded_by_default": false,
+      "industry_tags": ["technology", "B2B", "enterprise-software"],
+      "function_tags": ["brand-strategy", "messaging-architecture", "sales-enablement", "customer-acquisition"],
+      "exclusive_metrics": ["15% awareness increase", "12% YoY customer acquisition growth"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P2-B02",
+      "client": "Wild Turkey",
+      "generic_terms": ["premium spirits brand", "global bourbon brand", "luxury spirits company"],
+      "branded_by_default": false,
+      "industry_tags": ["consumer", "CPG", "spirits", "beverage"],
+      "function_tags": ["brand-repositioning", "creative-campaign", "social-media", "visual-identity"],
+      "exclusive_metrics": ["13% revenue increase"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P2-B03",
+      "client": "Deloitte Consulting",
+      "generic_terms": ["global consulting firm", "professional services company"],
+      "branded_by_default": true,
+      "industry_tags": ["professional-services", "consulting", "B2B"],
+      "function_tags": ["brand-architecture", "demand-generation", "B2B"],
+      "exclusive_metrics": ["3x pipeline growth"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P2-B04",
+      "client": "WNBA",
+      "generic_terms": ["professional sports league", "women's sports league"],
+      "branded_by_default": false,
+      "industry_tags": ["sports-entertainment", "media", "consumer"],
+      "function_tags": ["brand-strategy", "digital-engagement", "content-strategy", "fan-acquisition"],
+      "exclusive_metrics": ["100%+ digital engagement growth"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P2-B05",
+      "client": "Energizer Holdings",
+      "generic_terms": ["consumer goods company", "auto care brands", "CPG portfolio"],
+      "branded_by_default": false,
+      "industry_tags": ["consumer", "CPG", "auto-care", "retail"],
+      "function_tags": ["portfolio-strategy", "rebranding", "integrated-campaign"],
+      "exclusive_metrics": ["13% YoY sales", "$182.3M revenue"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P2-B06",
+      "client": "Aspen Dental",
+      "generic_terms": ["dental services provider", "national healthcare services company", "healthcare brand"],
+      "branded_by_default": false,
+      "industry_tags": ["healthcare", "services", "consumer"],
+      "function_tags": ["brand-platform", "growth-strategy", "integrated-campaign", "healthcare-marketing"],
+      "exclusive_metrics": ["16% demand increase", "14% revenue growth"],
+      "conflicts_with": []
+    },
+    {
+      "id": "P2-B07",
+      "client": "PepsiCo (MTN DEW GAME FUEL)",
+      "generic_terms": ["beverage company", "CPG brand", "gaming beverage"],
+      "branded_by_default": false,
+      "industry_tags": ["consumer", "CPG", "beverage", "gaming"],
+      "function_tags": ["product-launch", "creative-campaign", "go-to-market"],
+      "exclusive_metrics": ["131% above forecast", "$25.7M revenue in 11 weeks"],
+      "conflicts_with": []
     }
   ],
   "variants": [
@@ -691,6 +761,216 @@
       "outcome": "23% awareness, 37% favorability",
       "content": "Launched integrated campaign for financial services company's wealth management division, building storytelling platform that delivered 23% awareness increase and 37% favorability growth in first quarter.",
       "theme_tags": ["integrated-campaign", "storytelling", "awareness", "financial-services"]
+    },
+    {
+      "id": "P2-B01-V1",
+      "base_id": "P2-B01",
+      "variant_label": "Brand Strategy",
+      "context": "Enterprise software company with fragmented brand presence across product lines and sales channels",
+      "method": "Holistic brand strategy unifying positioning, narrative, and visual identity across portfolio",
+      "outcome": "15% awareness increase, 12% YoY acquisition growth",
+      "content": "Developed holistic brand strategy for enterprise software company, unifying fragmented positioning across product lines and sales channels into cohesive platform that drove 15% awareness increase and 12% YoY customer acquisition growth.",
+      "theme_tags": ["brand-strategy", "brand-platform", "B2B", "enterprise", "technology"]
+    },
+    {
+      "id": "P2-B01-V2",
+      "base_id": "P2-B01",
+      "variant_label": "Product Marketing (Messaging)",
+      "context": "B2B technology platform needing consistent messaging architecture across complex product portfolio",
+      "method": "Messaging architecture and value proposition framework aligning product and sales communications",
+      "outcome": "15% awareness increase, 12% YoY acquisition growth",
+      "content": "Built messaging architecture for B2B technology platform, creating value proposition framework that aligned product marketing and sales communications across portfolio, delivering 15% awareness lift and 12% YoY acquisition growth.",
+      "theme_tags": ["product-marketing", "messaging", "value-proposition", "B2B", "sales-enablement"]
+    },
+    {
+      "id": "P2-B01-V3",
+      "base_id": "P2-B01",
+      "variant_label": "Sales Enablement",
+      "context": "Global tech company seeking brand-led sales acceleration",
+      "method": "Unified brand and messaging system enabling consistent go-to-market across sales channels",
+      "outcome": "15% awareness increase, 12% YoY acquisition growth",
+      "content": "Created unified brand and messaging system for global tech company enabling consistent go-to-market across sales channels, aligning marketing and sales teams to drive 15% awareness increase and 12% YoY customer acquisition growth.",
+      "theme_tags": ["sales-enablement", "go-to-market", "B2B", "brand-alignment", "revenue"]
+    },
+    {
+      "id": "P2-B01-V4",
+      "base_id": "P2-B01",
+      "variant_label": "Customer Acquisition",
+      "context": "Enterprise software platform seeking accelerated customer growth through brand clarity",
+      "method": "Creative strategy and messaging architecture with clear attribution to pipeline and acquisition",
+      "outcome": "15% awareness increase, 12% YoY acquisition growth",
+      "content": "Drove 12% YoY customer acquisition growth for enterprise software platform through unified creative strategy and messaging architecture, consolidating fragmented brand presence to increase awareness by 15% and accelerate pipeline.",
+      "theme_tags": ["customer-acquisition", "growth-marketing", "B2B", "performance", "pipeline"]
+    },
+    {
+      "id": "P2-B02-V1",
+      "base_id": "P2-B02",
+      "variant_label": "Brand Repositioning",
+      "context": "Heritage bourbon brand facing category stagnation and declining consumer relevance",
+      "method": "Brand platform and positioning strategy elevating from value to premium tier",
+      "outcome": "13% revenue increase",
+      "content": "Repositioned heritage bourbon brand during category stagnation, developing culturally attuned brand platform and refreshed positioning that elevated perception from value to premium tier, driving 13% revenue increase within one year.",
+      "theme_tags": ["brand-repositioning", "premium-positioning", "consumer", "CPG", "brand-platform"]
+    },
+    {
+      "id": "P2-B02-V2",
+      "base_id": "P2-B02",
+      "variant_label": "Creative Campaign",
+      "context": "Global bourbon brand seeking to reengage target audiences through cultural relevance",
+      "method": "Refreshed visual identity and creative campaign reconnecting brand with premium spirits culture",
+      "outcome": "13% revenue increase",
+      "content": "Launched creative campaign for global bourbon brand, developing refreshed visual identity and culturally resonant creative that reengaged target audiences and clarified premium positioning, driving 13% revenue increase.",
+      "theme_tags": ["creative-campaign", "visual-identity", "advertising", "consumer", "brand-creative"]
+    },
+    {
+      "id": "P2-B02-V3",
+      "base_id": "P2-B02",
+      "variant_label": "Social & Creator Campaign",
+      "context": "Premium spirits brand rebuilding cultural relevance with younger, influential audiences",
+      "method": "Culturally attuned campaign strategy leveraging social platforms and creator partnerships",
+      "outcome": "13% revenue increase",
+      "content": "Rebuilt cultural relevance for premium spirits brand through social-first campaign strategy and creator partnerships, developing content that resonated with younger audiences and drove 13% revenue increase.",
+      "theme_tags": ["social-media", "creator-marketing", "influencer", "cultural-relevance", "consumer"]
+    },
+    {
+      "id": "P2-B03-V1",
+      "base_id": "P2-B03",
+      "variant_label": "Brand Strategy",
+      "context": "Global consulting firm needing unified positioning across fastest-growing industry sectors",
+      "method": "Data-driven brand architecture system ensuring consistency of narrative, value proposition, and differentiation",
+      "outcome": "3x pipeline growth",
+      "content": "Built brand architecture system for Deloitte Consulting, unifying positioning across industry sectors with consistent narrative and differentiation at enterprise and solution levels, contributing to 3x pipeline growth.",
+      "theme_tags": ["brand-strategy", "brand-architecture", "B2B", "consulting", "positioning"]
+    },
+    {
+      "id": "P2-B03-V2",
+      "base_id": "P2-B03",
+      "variant_label": "Demand Generation",
+      "context": "Professional services firm seeking measurable pipeline impact from brand investment",
+      "method": "Brand architecture framework with clear attribution to qualified opportunity generation",
+      "outcome": "3x pipeline growth",
+      "content": "Drove 3x pipeline growth for Deloitte Consulting through brand architecture framework, enabling go-to-market alignment across verticals and increasing brand-led qualified opportunities across priority service lines.",
+      "theme_tags": ["demand-generation", "pipeline", "B2B", "brand-transformation", "revenue"]
+    },
+    {
+      "id": "P2-B04-V1",
+      "base_id": "P2-B04",
+      "variant_label": "Brand Strategy",
+      "context": "Professional sports league experiencing stagnation in reach and relevance",
+      "method": "Refreshed brand narrative, messaging architecture, and platform strategy to reengage fans",
+      "outcome": "100%+ digital engagement growth",
+      "content": "Developed brand strategy for professional sports league during period of stagnation, creating refreshed narrative and messaging architecture that reengaged existing fans and connected with younger audiences, driving 100%+ digital engagement growth.",
+      "theme_tags": ["brand-strategy", "brand-platform", "sports-entertainment", "messaging"]
+    },
+    {
+      "id": "P2-B04-V2",
+      "base_id": "P2-B04",
+      "variant_label": "Digital Engagement",
+      "context": "Women's sports league building audience through digital-first channels",
+      "method": "Digital engagement model activating brand identity across social platforms",
+      "outcome": "100%+ digital engagement growth",
+      "content": "Built digital engagement model for women's sports league, activating refreshed brand identity across social platforms to connect with culturally attuned audience, driving 100%+ growth in digital fan engagement.",
+      "theme_tags": ["digital-engagement", "social-media", "fan-engagement", "content-strategy"]
+    },
+    {
+      "id": "P2-B04-V3",
+      "base_id": "P2-B04",
+      "variant_label": "Creative Storytelling",
+      "context": "Sports league seeking to reignite momentum through compelling brand narrative",
+      "method": "Brand storytelling strategy bringing athlete stories and league identity to life",
+      "outcome": "100%+ digital engagement growth",
+      "content": "Led creative storytelling strategy for professional sports league, developing compelling brand narrative and content platform that brought athlete stories to life, reigniting fan momentum and driving 100%+ digital engagement growth.",
+      "theme_tags": ["creative-storytelling", "content-strategy", "brand-narrative", "sports-marketing"]
+    },
+    {
+      "id": "P2-B04-V4",
+      "base_id": "P2-B04",
+      "variant_label": "Customer Growth",
+      "context": "Sports league seeking to expand audience reach and fan acquisition",
+      "method": "Brand and communications strategy targeting new fan segments and brand partners",
+      "outcome": "100%+ digital engagement growth",
+      "content": "Drove 100%+ digital engagement growth for professional sports league through brand and communications strategy, expanding audience reach to new fan segments and reigniting momentum with brand partners.",
+      "theme_tags": ["customer-growth", "fan-acquisition", "audience-expansion", "partnerships"]
+    },
+    {
+      "id": "P2-B05-V1",
+      "base_id": "P2-B05",
+      "variant_label": "Portfolio Strategy",
+      "context": "CPG company with fragmented auto care portfolio losing share to private label competitors",
+      "method": "Portfolio brand strategy connecting equity across Armor All, STP, and A/C Pro",
+      "outcome": "13% YoY sales, $182.3M revenue",
+      "content": "Developed portfolio brand strategy for CPG company's auto care brands (Armor All, STP, A/C Pro), connecting equity across products and strengthening market position against private label competitors, driving 13% YoY sales growth to $182.3M.",
+      "theme_tags": ["portfolio-strategy", "brand-architecture", "CPG", "consumer", "market-positioning"]
+    },
+    {
+      "id": "P2-B05-V2",
+      "base_id": "P2-B05",
+      "variant_label": "Rebranding",
+      "context": "Heritage auto care brands needing refreshed identity to reestablish relevance",
+      "method": "Unified messaging system and refreshed brand identity across portfolio",
+      "outcome": "13% YoY sales, $182.3M revenue",
+      "content": "Led rebranding of auto care portfolio (Armor All, STP, A/C Pro), developing unified messaging and refreshed brand identity that reestablished relevance in contracting category, returning segment to growth with 13% YoY sales increase.",
+      "theme_tags": ["rebranding", "brand-refresh", "visual-identity", "CPG", "consumer"]
+    },
+    {
+      "id": "P2-B05-V3",
+      "base_id": "P2-B05",
+      "variant_label": "Integrated Campaign",
+      "context": "Consumer goods company activating rebrand across retail and media touchpoints",
+      "method": "Integrated campaign strengthening presence across retail channels and paid media",
+      "outcome": "13% YoY sales, $182.3M revenue",
+      "content": "Launched integrated campaign for auto care portfolio rebrand, activating refreshed brand identity across retail and media touchpoints, driving 13% YoY retail sales increase and $182.3M revenue in Q2.",
+      "theme_tags": ["integrated-campaign", "retail-marketing", "media-activation", "CPG", "omnichannel"]
+    },
+    {
+      "id": "P2-B06-V1",
+      "base_id": "P2-B06",
+      "variant_label": "Brand Platform",
+      "context": "National dental services provider seeking to modernize image and reestablish relevance",
+      "method": "Brand strategy and creative platform ('Yes' campaign) built on real patient stories",
+      "outcome": "16% demand increase, 14% revenue growth",
+      "content": "Developed brand platform for national dental services provider, creating 'Yes' campaign built on real patient stories that highlighted culture of care and access, driving 16% demand increase and 14% revenue growth.",
+      "theme_tags": ["brand-platform", "brand-strategy", "healthcare-marketing", "patient-experience"]
+    },
+    {
+      "id": "P2-B06-V2",
+      "base_id": "P2-B06",
+      "variant_label": "Growth Strategy",
+      "context": "Healthcare services company seeking patient acquisition growth in competitive category",
+      "method": "Segmentation model identifying high-potential patient segments with targeted brand activation",
+      "outcome": "16% demand increase, 14% revenue growth",
+      "content": "Built growth strategy for healthcare services company, developing segmentation model to identify high-potential patient segments and targeted brand activation that drove 16% demand increase and 14% revenue growth.",
+      "theme_tags": ["growth-strategy", "segmentation", "patient-acquisition", "healthcare", "performance"]
+    },
+    {
+      "id": "P2-B06-V3",
+      "base_id": "P2-B06",
+      "variant_label": "Integrated Campaign",
+      "context": "Dental services brand launching national campaign across TV, radio, digital, and social",
+      "method": "Omnichannel campaign activation bringing brand platform to life across national and local media",
+      "outcome": "16% demand increase, 14% revenue growth",
+      "content": "Launched integrated campaign for dental services brand across national and local TV, radio, paid search, and social, bringing 'Yes' platform to life through patient stories and driving 16% demand increase and 14% revenue growth.",
+      "theme_tags": ["integrated-campaign", "omnichannel", "media-activation", "healthcare-marketing", "advertising"]
+    },
+    {
+      "id": "P2-B07-V1",
+      "base_id": "P2-B07",
+      "variant_label": "Product Launch",
+      "context": "Major CPG company launching new beverage product formulated for gaming audience",
+      "method": "Go-to-market strategy positioning product at intersection of performance and gaming culture",
+      "outcome": "131% above forecast, $25.7M in 11 weeks",
+      "content": "Led product launch for gaming beverage, developing go-to-market strategy positioning product at intersection of performance and culture, activating through eSports partnerships and DTC platform to exceed forecasts by 131% with $25.7M revenue in 11 weeks.",
+      "theme_tags": ["product-launch", "go-to-market", "CPG", "gaming", "DTC"]
+    },
+    {
+      "id": "P2-B07-V2",
+      "base_id": "P2-B07",
+      "variant_label": "Creative Campaign",
+      "context": "Beverage brand entering gaming category through culturally resonant creative",
+      "method": "National marketing campaign with eSports partnerships, digital content, and community activation",
+      "outcome": "131% above forecast, $25.7M in 11 weeks",
+      "content": "Launched national creative campaign for gaming beverage, developing culturally resonant creative with eSports partnerships and digital content that connected with gaming community, generating $25.7M revenue in 11 weeks—131% above forecast.",
+      "theme_tags": ["creative-campaign", "esports", "digital-content", "gaming-culture", "advertising"]
     }
   ]
 }

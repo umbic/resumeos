@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
 import OpenAI from 'openai';
 import contentDatabase from '../src/data/content-database.json';
-import variantsDatabase from '../src/data/career-highlight-variants.json';
+import variantsDatabase from '../src/data/variants.json';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

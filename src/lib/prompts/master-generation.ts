@@ -13,6 +13,20 @@ export interface PromptContentItem {
   category_tags: string[];
   function_tags: string[];
   outcome_tags: string[];
+  industry_tags?: string[];
+  exclusive_metrics?: string[];
+}
+
+// Variant shape for three-level matching
+export interface PromptVariant {
+  id: string;
+  base_id: string;
+  variant_label: string;
+  context: string;
+  method: string;
+  outcome: string;
+  content: string;
+  theme_tags: string[];
 }
 
 export interface PositionContent {
@@ -29,7 +43,9 @@ export interface MasterPromptInput {
   jdAnalysis: EnhancedJDAnalysis;
   summaries: PromptContentItem[];
   careerHighlights: PromptContentItem[];
+  careerHighlightVariants: PromptVariant[];
   positionContent: PositionContent[];
+  positionVariants: PromptVariant[];
   format: 'long' | 'short';
   brandingMode: 'branded' | 'generic';
   targetCompany: string;
@@ -49,6 +65,24 @@ export function mapContentItemToPrompt(item: ContentItem): PromptContentItem {
     category_tags: item.categoryTags || [],
     function_tags: item.functionTags || [],
     outcome_tags: item.outcomeTags || [],
+    industry_tags: item.industryTags || [],
+    exclusive_metrics: item.exclusiveMetrics || [],
+  };
+}
+
+/**
+ * Maps database ContentItem (variant) to PromptVariant format
+ */
+export function mapContentItemToVariant(item: ContentItem): PromptVariant {
+  return {
+    id: item.id,
+    base_id: item.baseId || '',
+    variant_label: item.variantLabel || '',
+    context: item.context || '',
+    method: item.method || '',
+    outcome: '', // Extracted from content if needed
+    content: item.contentLong || '',
+    theme_tags: item.themeTags || [],
   };
 }
 
@@ -94,6 +128,74 @@ function formatContentForPrompt(item: PromptContentItem): string {
 }
 
 /**
+ * Group variants by their base_id
+ */
+function groupVariantsByBase(variants: PromptVariant[]): Record<string, PromptVariant[]> {
+  const grouped: Record<string, PromptVariant[]> = {};
+  for (const v of variants) {
+    if (!grouped[v.base_id]) {
+      grouped[v.base_id] = [];
+    }
+    grouped[v.base_id].push(v);
+  }
+  return grouped;
+}
+
+/**
+ * Format career highlights with their variants for three-level matching
+ */
+function formatCareerHighlightsWithVariants(
+  baseItems: PromptContentItem[],
+  variants: PromptVariant[]
+): string {
+  const variantsByBase = groupVariantsByBase(variants);
+
+  return baseItems.map(item => {
+    const itemVariants = variantsByBase[item.id] || [];
+    return `
+#### ${item.id}
+**Industry Tags**: ${item.industry_tags?.join(', ') || 'General'}
+**Function Tags**: ${item.function_tags?.join(', ') || 'General'}
+**Metrics**: ${item.exclusive_metrics?.join(', ') || 'N/A'}
+
+**Available Variants**:
+${itemVariants.length > 0 ? itemVariants.map(v => `
+- **${v.id} (${v.variant_label})**
+  Theme Tags: ${v.theme_tags.join(', ')}
+  Content: ${v.content}
+`).join('\n') : 'No variants - use base content'}
+
+**Base Content** (if no variant fits):
+${item.content_long || item.content_medium || item.content_short}
+`;
+  }).join('\n---\n');
+}
+
+/**
+ * Format position bullets with their variants for three-level matching
+ */
+function formatPositionBulletsWithVariants(
+  position: PositionContent,
+  variants: PromptVariant[]
+): string {
+  const variantsByBase = groupVariantsByBase(variants);
+
+  return position.bullets.map(bullet => {
+    const bulletVariants = variantsByBase[bullet.id] || [];
+    return `
+#### ${bullet.id}
+**Industry Tags**: ${bullet.industry_tags?.join(', ') || 'General'}
+**Function Tags**: ${bullet.function_tags?.join(', ') || 'General'}
+
+${bulletVariants.length > 0 ? `**Variants**:
+${bulletVariants.map(v => `- **${v.variant_label}**: ${v.content} [Tags: ${v.theme_tags.join(', ')}]`).join('\n')}` : ''}
+
+**Base Content**: ${bullet.content_long || bullet.content_medium || bullet.content_short}
+`;
+  }).join('\n');
+}
+
+/**
  * Build the master generation prompt for one-shot resume generation
  */
 export function buildMasterGenerationPrompt(input: MasterPromptInput): string {
@@ -101,7 +203,9 @@ export function buildMasterGenerationPrompt(input: MasterPromptInput): string {
     jdAnalysis,
     summaries,
     careerHighlights,
+    careerHighlightVariants,
     positionContent,
+    positionVariants,
     format,
     brandingMode,
     targetCompany,
@@ -110,6 +214,10 @@ export function buildMasterGenerationPrompt(input: MasterPromptInput): string {
   const competitorCompanies = getCompetitors(targetCompany);
   const p1BulletCount = format === 'long' ? 4 : 0;
   const p2BulletCount = format === 'long' ? 3 : 0;
+
+  // Filter P1 and P2 variants
+  const p1Variants = positionVariants.filter(v => v.id.startsWith('P1-'));
+  const p2Variants = positionVariants.filter(v => v.id.startsWith('P2-'));
 
   return `You are generating a complete executive resume tailored to a specific job description.
 
@@ -141,6 +249,37 @@ Generate a COMPLETE resume with these sections:
 
 ---
 
+## CONTENT SELECTION: THREE-LEVEL MATCHING
+
+You must select content using this priority system:
+
+### LEVEL 1: INDUSTRY RELEVANCE
+First, identify which base achievements are relevant to the target industry.
+
+**Target Industry**: Infer from ${jdAnalysis.target_company} and role context
+**Target Company**: ${jdAnalysis.target_company}
+
+For each base item, check if its industry_tags include or relate to the target industry.
+Prioritize items that directly match the industry.
+
+### LEVEL 2: FUNCTION RELEVANCE
+Next, prioritize items whose function_tags match the role type.
+
+**Target Role**: ${jdAnalysis.target_title}
+**Role Functions**: Infer from priority themes: ${jdAnalysis.priority_themes.map(t => t.theme).slice(0, 3).join(', ')}
+
+Prioritize items with matching function_tags (e.g., brand-strategy, product-marketing, demand-generation).
+
+### LEVEL 3: VARIANT SELECTION
+For each base item you select, choose the variant that best matches priority themes.
+
+**Priority Themes**:
+${jdAnalysis.priority_themes.map(t => `- ${t.theme}`).join('\n')}
+
+Match variant theme_tags to priority themes. Select the variant whose emphasis best aligns with what the JD values.
+
+---
+
 ## CONTENT DATABASE
 
 You must SELECT from and RESHAPE the content below.
@@ -149,11 +288,13 @@ You must SELECT from and RESHAPE the content below.
 ### AVAILABLE SUMMARIES
 ${summaries.map(s => formatContentForPrompt(s)).join('\n\n')}
 
-### AVAILABLE CAREER HIGHLIGHTS
-${careerHighlights.map(ch => formatContentForPrompt(ch)).join('\n\n')}
+### AVAILABLE CAREER HIGHLIGHTS WITH VARIANTS (Select 5)
 
-### POSITION CONTENT
-${positionContent.map(p => `
+${formatCareerHighlightsWithVariants(careerHighlights, careerHighlightVariants)}
+
+### POSITION CONTENT WITH VARIANTS
+
+${positionContent.map((p, i) => `
 #### POSITION ${p.position}: ${p.title} at ${p.company}
 **Dates**: ${p.dates}
 **Location**: ${p.location}
@@ -161,8 +302,10 @@ ${positionContent.map(p => `
 **Overview Options**:
 ${p.overview ? formatContentForPrompt(p.overview) : 'No overview available'}
 
-**Bullet Options**:
-${p.bullets.length > 0 ? p.bullets.map(b => formatContentForPrompt(b)).join('\n\n') : 'No bullets available'}
+**Bullet Options${i === 0 ? ` (Select ${p1BulletCount})` : i === 1 ? ` (Select ${p2BulletCount})` : ''}**:
+${i === 0 && p.bullets.length > 0 ? formatPositionBulletsWithVariants(p, p1Variants) :
+  i === 1 && p.bullets.length > 0 ? formatPositionBulletsWithVariants(p, p2Variants) :
+  p.bullets.length > 0 ? p.bullets.map(b => formatContentForPrompt(b)).join('\n\n') : 'No bullets available'}
 `).join('\n')}
 
 ---
@@ -280,14 +423,23 @@ Use these content versions based on format:
 
 Return valid JSON only. No markdown, no explanation, just JSON:
 
+**IMPORTANT**: For career highlights and position bullets, include the variant ID you selected (or base ID if no variant was used).
+
 {
   "summary": "Complete summary text here...",
   "career_highlights": [
-    "First highlight with bold hook phrase...",
-    "Second highlight...",
-    "Third highlight...",
-    "Fourth highlight...",
-    "Fifth highlight..."
+    {
+      "id": "CH-01-V2",
+      "base_id": "CH-01",
+      "variant_label": "Team Leadership",
+      "content": "**Bold hook phrase**: First highlight with narrative..."
+    },
+    {
+      "id": "CH-02-V1",
+      "base_id": "CH-02",
+      "variant_label": "Brand Strategy",
+      "content": "**Second highlight hook**: Content..."
+    }
   ],
   "positions": [
     {
@@ -297,7 +449,12 @@ Return valid JSON only. No markdown, no explanation, just JSON:
       "dates": "${POSITIONS[0].dates}",
       "location": "${POSITIONS[0].location}",
       "overview": "Overview text here...",
-      "bullets": ${p1BulletCount > 0 ? '["First bullet (≤40 words)...", "Second bullet...", "Third bullet...", "Fourth bullet..."]' : '[]'}
+      "bullets": ${p1BulletCount > 0 ? `[
+        {"id": "P1-B01-V1", "base_id": "P1-B01", "variant_label": "Brand Repositioning", "content": "First bullet (≤40 words)..."},
+        {"id": "P1-B06-V2", "base_id": "P1-B06", "variant_label": "Corporate Communications", "content": "Second bullet..."},
+        {"id": "P1-B10-V1", "base_id": "P1-B10", "variant_label": "Brand Launch", "content": "Third bullet..."},
+        {"id": "P1-B02", "base_id": "P1-B02", "variant_label": null, "content": "Fourth bullet (no variant used)..."}
+      ]` : '[]'}
     },
     {
       "number": 2,
@@ -306,7 +463,11 @@ Return valid JSON only. No markdown, no explanation, just JSON:
       "dates": "${POSITIONS[1].dates}",
       "location": "${POSITIONS[1].location}",
       "overview": "Overview text here...",
-      "bullets": ${p2BulletCount > 0 ? '["First bullet...", "Second bullet...", "Third bullet..."]' : '[]'}
+      "bullets": ${p2BulletCount > 0 ? `[
+        {"id": "P2-B01-V1", "base_id": "P2-B01", "variant_label": "Brand Strategy", "content": "First bullet..."},
+        {"id": "P2-B02-V2", "base_id": "P2-B02", "variant_label": "Creative Campaign", "content": "Second bullet..."},
+        {"id": "P2-B03", "base_id": "P2-B03", "variant_label": null, "content": "Third bullet (no variant used)..."}
+      ]` : '[]'}
     },
     {
       "number": 3,

@@ -8,9 +8,12 @@ import {
   buildMasterGenerationPrompt,
   parseGenerationResponse,
   mapContentItemToPrompt,
+  mapContentItemToVariant,
   type PositionContent,
   type PromptContentItem,
+  type PromptVariant,
 } from './prompts/master-generation';
+import { isNotNull, isNull, and } from 'drizzle-orm';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -842,19 +845,53 @@ async function fetchAllSummaries(): Promise<PromptContentItem[]> {
 }
 
 /**
- * Fetch all career highlight content items from the database
+ * Fetch all career highlight base items from the database (excludes variants)
  */
 async function fetchAllCareerHighlights(): Promise<PromptContentItem[]> {
   const results = await db
     .select()
     .from(contentItems)
-    .where(eq(contentItems.type, 'career_highlight'));
+    .where(and(
+      eq(contentItems.type, 'career_highlight'),
+      isNull(contentItems.baseId) // Exclude variants
+    ));
 
   return results.map(mapContentItemToPrompt);
 }
 
 /**
- * Fetch all position content (overviews and bullets) from the database
+ * Fetch all career highlight variants from the database
+ */
+async function fetchCareerHighlightVariants(): Promise<PromptVariant[]> {
+  const results = await db
+    .select()
+    .from(contentItems)
+    .where(and(
+      eq(contentItems.type, 'career_highlight'),
+      isNotNull(contentItems.baseId) // Only variants
+    ));
+
+  return results.map(mapContentItemToVariant);
+}
+
+/**
+ * Fetch position bullet variants from the database
+ */
+async function fetchPositionVariants(position?: number): Promise<PromptVariant[]> {
+  const results = await db
+    .select()
+    .from(contentItems)
+    .where(and(
+      eq(contentItems.type, 'bullet'),
+      isNotNull(contentItems.baseId), // Only variants
+      position !== undefined ? eq(contentItems.position, position) : undefined
+    ));
+
+  return results.map(mapContentItemToVariant);
+}
+
+/**
+ * Fetch all position content (overviews and base bullets) from the database
  */
 async function fetchAllPositionContent(): Promise<PositionContent[]> {
   // Fetch overviews
@@ -863,11 +900,14 @@ async function fetchAllPositionContent(): Promise<PositionContent[]> {
     .from(contentItems)
     .where(eq(contentItems.type, 'overview'));
 
-  // Fetch bullets
+  // Fetch bullets (base items only, exclude variants)
   const bullets = await db
     .select()
     .from(contentItems)
-    .where(eq(contentItems.type, 'bullet'));
+    .where(and(
+      eq(contentItems.type, 'bullet'),
+      isNull(contentItems.baseId) // Exclude variants
+    ));
 
   // Map overviews and bullets by position
   const overviewsByPosition: Record<number, PromptContentItem> = {};
@@ -901,7 +941,7 @@ async function fetchAllPositionContent(): Promise<PositionContent[]> {
 
 /**
  * Generate a complete resume in one shot using the master generation prompt.
- * This is the core V1.5 generation function.
+ * This is the core V1.5 generation function with three-level variant matching.
  */
 export async function generateFullResume(input: {
   jdAnalysis: EnhancedJDAnalysis;
@@ -912,13 +952,21 @@ export async function generateFullResume(input: {
   // Fetch all content from database
   const summaries = await fetchAllSummaries();
   const careerHighlights = await fetchAllCareerHighlights();
+  const careerHighlightVariants = await fetchCareerHighlightVariants();
   const positionContent = await fetchAllPositionContent();
+
+  // Fetch P1 and P2 variants
+  const p1Variants = await fetchPositionVariants(1);
+  const p2Variants = await fetchPositionVariants(2);
+  const positionVariants = [...p1Variants, ...p2Variants];
 
   const prompt = buildMasterGenerationPrompt({
     ...input,
     summaries,
     careerHighlights,
+    careerHighlightVariants,
     positionContent,
+    positionVariants,
   });
 
   const response = await anthropic.messages.create({
