@@ -10,6 +10,7 @@ import {
   AlertCircle,
   CheckCircle,
   RefreshCw,
+  Download,
 } from 'lucide-react';
 
 interface DiagnosticDecision {
@@ -104,6 +105,75 @@ export function DiagnosticsPanel({ sessionId }: { sessionId: string }) {
     }
   };
 
+  const handleExportJSON = () => {
+    if (!data) return;
+
+    // Format the export with clear labels
+    const exportData = {
+      _exportInfo: {
+        exportedAt: new Date().toISOString(),
+        sessionId: data.sessionId,
+        description: 'ResumeOS Generation Diagnostics Export',
+      },
+      summary: {
+        totalEvents: data.summary.totalEvents,
+        totalDurationMs: data.summary.totalDurationMs,
+        totalDurationSeconds: (data.summary.totalDurationMs / 1000).toFixed(2),
+        tokens: {
+          sent: data.summary.totalTokensSent,
+          received: data.summary.totalTokensReceived,
+          total: data.summary.totalTokensSent + data.summary.totalTokensReceived,
+        },
+        estimatedCostUSD: data.summary.estimatedTotalCost.toFixed(6),
+        hasErrors: data.summary.hasErrors,
+      },
+      steps: Object.entries(data.byStep).map(([stepName, events]) => ({
+        stepName,
+        stepLabel: STEP_LABELS[stepName] || stepName,
+        eventCount: (events as DiagnosticEvent[]).length,
+        totalDurationMs: (events as DiagnosticEvent[]).reduce((sum, e) => sum + (e.durationMs || 0), 0),
+        events: (events as DiagnosticEvent[]).map((event) => ({
+          eventId: event.id,
+          step: event.step,
+          substep: event.substep || 'main',
+          status: event.status,
+          timing: {
+            startedAt: event.startedAt,
+            completedAt: event.completedAt,
+            durationMs: event.durationMs,
+          },
+          tokens: event.tokensSent || event.tokensReceived ? {
+            sent: event.tokensSent,
+            received: event.tokensReceived,
+            estimatedCostUSD: event.estimatedCost ? (event.estimatedCost / 1_000_000).toFixed(6) : null,
+          } : null,
+          decisions: event.decisions && event.decisions.length > 0 ? event.decisions : null,
+          llmCall: event.promptSent ? {
+            promptSent: event.promptSent,
+            promptTokens: event.tokensSent,
+            responseReceived: event.responseReceived,
+            responseTokens: event.tokensReceived,
+          } : null,
+          inputData: event.inputData || null,
+          outputData: event.outputData || null,
+          error: event.errorMessage || null,
+        })),
+      })),
+      rawEvents: data.events,
+    };
+
+    // Create and download the file
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `diagnostics_${sessionId}_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const toggleEvent = (id: string) => {
     const newExpanded = new Set(expandedEvents);
     if (newExpanded.has(id)) {
@@ -172,13 +242,23 @@ export function DiagnosticsPanel({ sessionId }: { sessionId: string }) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-gray-900">Generation Diagnostics</h2>
-          <button
-            onClick={handleRefresh}
-            className="text-gray-400 hover:text-gray-600"
-            title="Refresh"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportJSON}
+              className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50"
+              title="Export as JSON"
+            >
+              <Download className="w-3 h-3" />
+              Export
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="text-gray-400 hover:text-gray-600"
+              title="Refresh"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
