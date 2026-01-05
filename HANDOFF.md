@@ -94,7 +94,7 @@ Test with a JD to verify:
 - Keyword coverage should improve with deterministic selection
 
 ### Commits
-- `[pending]` - feat: implement V2 deterministic scoring engine
+- `33e79ad` - feat: implement V2 deterministic scoring engine
 
 ---
 
