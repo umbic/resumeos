@@ -1,6 +1,6 @@
 import type { EnhancedJDAnalysis, GeneratedResume } from '@/types';
 import type { ContentItem } from '@/drizzle/schema';
-import { POSITIONS } from '@/lib/rules';
+import { POSITIONS, CONFLICT_MAP } from '@/lib/rules';
 
 // Content item shape for prompt building
 export interface PromptContentItem {
@@ -84,6 +84,20 @@ export function mapContentItemToVariant(item: ContentItem): PromptVariant {
     content: item.contentLong || '',
     theme_tags: item.themeTags || [],
   };
+}
+
+/**
+ * Format conflict rules for the prompt
+ * These are CH ↔ P-B pairs that share the same achievement/metric
+ */
+function formatConflictRules(): string {
+  const rules: string[] = [];
+  for (const [chId, bullets] of Object.entries(CONFLICT_MAP)) {
+    for (const bulletId of bullets) {
+      rules.push(`- ${chId} ↔ ${bulletId} (same achievement - CANNOT use both)`);
+    }
+  }
+  return rules.join('\n');
 }
 
 /**
@@ -310,6 +324,23 @@ ${i === 0 && p.bullets.length > 0 ? formatPositionBulletsWithVariants(p, p1Varia
 
 ---
 
+## CONFLICT RULES (CRITICAL - MUST ENFORCE)
+
+Some Career Highlights and Position Bullets describe the SAME achievement with the same metrics.
+**You CANNOT use both items from a conflict pair.** If you select a Career Highlight, its conflicting Position Bullet is BLOCKED (and vice versa).
+
+### CONFLICT PAIRS:
+${formatConflictRules()}
+
+**Enforcement**:
+1. When selecting Career Highlights, note which P-B IDs become blocked
+2. When selecting Position Bullets, check that none are blocked by your Career Highlight selections
+3. If you need to use a blocked bullet's achievement, use the Career Highlight version instead (or vice versa)
+
+Example: If you select CH-01 for Career Highlights, you CANNOT use P1-B02 for Position 1 bullets - they both describe the $40M brand strategy practice achievement.
+
+---
+
 ## RESHAPING RULES
 
 ### 1. NARRATIVE ALIGNMENT
@@ -523,6 +554,7 @@ Self-check:
 8. Are all priority themes addressed somewhere?
 9. Did you preserve all metrics exactly?
 10. Did you avoid jargon soup?
+11. **CONFLICT CHECK**: Did you use any Career Highlight AND its conflicting Position Bullet? If yes, REMOVE ONE.
 
 Now generate the resume.`;
 }
