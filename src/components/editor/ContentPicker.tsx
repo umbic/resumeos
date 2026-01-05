@@ -123,13 +123,13 @@ export function ContentPicker({
       }
     }
 
-    // Filter out groups where ALL items (base + variants) are already used
+    // Filter out groups where ANY item (base or variant) is already used
+    // This hides entire categories once any content from that category is selected
     const availableGroups: BaseItemGroup[] = [];
     for (const group of Array.from(baseMap.values())) {
-      const hasAvailable = group.variants.some((v: ContentItem) => !usedIds.includes(v.id));
-      if (hasAvailable) {
-        // Filter out used variants from the group
-        group.variants = group.variants.filter((v: ContentItem) => !usedIds.includes(v.id));
+      const anyUsed = group.variants.some((v: ContentItem) => usedIds.includes(v.id));
+      if (!anyUsed) {
+        // No items from this category are used - show the full group
         availableGroups.push(group);
       }
     }
