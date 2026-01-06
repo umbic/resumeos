@@ -1,7 +1,96 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-05
-> **Last Session**: Session 13 - Position Bullet Variants for Overlapping Categories
+> **Last Session**: V2 Session 1 - Foundation (Types, Config, Base Agent, DB Schema)
+
+---
+
+## V2 Session 1 Completed: Foundation
+
+### What Was Done
+
+Implemented the foundation for the V2 multi-agent pipeline architecture. This is the first of 9 planned sessions to build the new 4-agent resume generation system.
+
+### Architecture Overview
+
+V2 replaces the current one-shot generation with a **4-agent pipeline**:
+1. **JD Strategist** - Analyzes JD, creates positioning strategy
+2. **Gap Analyzer** - Reviews source material coverage
+3. **Resume Writer** - Writes fresh content from sources
+4. **Validator** - Ensures honesty and quality
+
+### Files Created
+
+| File | Description |
+|------|-------------|
+| `src/types/v2.ts` | All V2 TypeScript interfaces (10.8 KB) |
+| `src/lib/agents/config.ts` | Agent configuration (model, tokens, timeouts, pricing) |
+| `src/lib/agents/base-agent.ts` | Abstract base class for all agents |
+| `src/drizzle/migrations/0006_add_v2_columns.sql` | Migration for V2 columns |
+| `docs/RESUMEOS_V2_IMPLEMENTATION_PLAN.md` | Full implementation plan |
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/drizzle/schema.ts` | Added v2Session, v2Diagnostics, v2Status columns |
+| `src/types/index.ts` | Export all V2 types |
+
+### Key Types Defined
+
+- **JDStrategy** - Positioning strategy with requirements, angles, language guidance
+- **ContentSelectionResult** - Multiple sources per slot with scoring
+- **GapAnalysis** - Coverage report with emphasis recommendations
+- **UserAdjustments** - User intervention context
+- **WriterOutput** - Fresh content with source tracking
+- **ValidationResult** - Honesty, coverage, and quality validation
+- **PipelineSession** - State machine for pipeline progress
+- **AgentDiagnostics** / **PipelineDiagnostics** - Full observability
+
+### Agent Configuration
+
+```typescript
+AGENT_CONFIG = {
+  model: 'claude-opus-4-20250514',
+  maxTokens: { jdStrategist: 4000, gapAnalyzer: 4000, resumeWriter: 8000, validator: 4000 },
+  timeouts: { jdStrategist: 60000, gapAnalyzer: 60000, resumeWriter: 120000, validator: 60000 },
+  pricing: { inputPerMillion: 15, outputPerMillion: 75 }
+}
+```
+
+### Database Migration
+
+```sql
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS v2_session JSONB;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS v2_diagnostics JSONB;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS v2_status TEXT;
+CREATE INDEX IF NOT EXISTS idx_sessions_v2_status ON sessions(v2_status);
+```
+
+**Note**: Migration file created but NOT yet applied. Run after deployment:
+```bash
+npx drizzle-kit push
+```
+
+### Verification
+
+- ✓ `npm run build` passes with no type errors
+- ✓ All files created in correct locations
+- ✓ Pushed to origin/main
+
+### Commit
+
+`e3bdf2a` - feat(v2): foundation - types, config, base agent class, db schema
+
+### Next Session: V2 Session 2 - JD Strategist
+
+Create Agent 1 (JD Strategist):
+- `src/lib/agents/jd-strategist.ts`
+- `src/lib/prompts/jd-strategist-prompt.ts`
+- `src/app/api/v2/analyze-jd/route.ts`
+- Test with FanDuel JD
+
+See `docs/RESUMEOS_V2_IMPLEMENTATION_PLAN.md` for full details.
 
 ---
 
