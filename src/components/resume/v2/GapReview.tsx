@@ -38,6 +38,8 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
   const [acknowledgedGaps, setAcknowledgedGaps] = useState<string[]>([]);
   const [acknowledgedBlockers, setAcknowledgedBlockers] = useState<string[]>([]);
   const [approving, setApproving] = useState(false);
+  const [approveError, setApproveError] = useState<string | null>(null);
+  const [swapError, setSwapError] = useState<string | null>(null);
 
   const fetchReviewData = useCallback(async () => {
     try {
@@ -67,6 +69,7 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
   }, [fetchReviewData]);
 
   async function handleSwap(slot: string, fromId: string, toId: string) {
+    setSwapError(null);
     try {
       const res = await fetch('/api/v2/swap-source', {
         method: 'POST',
@@ -82,14 +85,18 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
       if (json.success) {
         // Refresh data to show updated state
         fetchReviewData();
+      } else {
+        setSwapError(json.error || 'Failed to swap content');
       }
     } catch (err) {
       console.error('Swap failed:', err);
+      setSwapError(err instanceof Error ? err.message : 'Swap failed');
     }
   }
 
   async function handleApprove() {
     setApproving(true);
+    setApproveError(null);
     try {
       const res = await fetch('/api/v2/approve', {
         method: 'POST',
@@ -103,12 +110,16 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
       const json = await res.json();
       if (json.success) {
         onApprove();
+      } else {
+        setApproveError(json.error || 'Failed to approve');
+        setApproving(false);
       }
     } catch (err) {
       console.error('Approve failed:', err);
-    } finally {
+      setApproveError(err instanceof Error ? err.message : 'Approval failed');
       setApproving(false);
     }
+    // Note: don't setApproving(false) on success - parent will navigate away
   }
 
   function toggleGapAcknowledged(gap: string) {
@@ -405,6 +416,22 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
           onChange={(e) => setGlobalInstructions(e.target.value)}
         />
       </div>
+
+      {/* Error Messages */}
+      {(swapError || approveError) && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          {swapError && (
+            <p className="text-red-800 text-sm">
+              <strong>Swap error:</strong> {swapError}
+            </p>
+          )}
+          {approveError && (
+            <p className="text-red-800 text-sm">
+              <strong>Approval error:</strong> {approveError}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Approve Button */}
       <div className="flex justify-between items-center">

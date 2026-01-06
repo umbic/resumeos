@@ -1,10 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GapReview } from '@/components/resume/v2/GapReview';
 import type { WriterOutput, ValidationResult } from '@/types/v2';
 
-type FlowState = 'input' | 'analyzing' | 'gap-review' | 'generating' | 'complete' | 'failed';
+// ─────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────
+
+type FlowState = 'list' | 'input' | 'analyzing' | 'gap-review' | 'generating' | 'complete' | 'failed';
+
+interface SessionSummary {
+  id: string;
+  companyName: string;
+  roleTitle: string;
+  state: string;
+  createdAt: string;
+  updatedAt: string;
+  validationPassed: boolean | null;
+  validationScore: number | null;
+  totalCost: number | null;
+  jdPreview: string;
+}
 
 interface GenerationResult {
   writerOutput: WriterOutput;
@@ -12,12 +29,80 @@ interface GenerationResult {
   status: string;
 }
 
+// ─────────────────────────────────────────────────────────────
+// Main Component
+// ─────────────────────────────────────────────────────────────
+
 export default function Home() {
-  const [state, setState] = useState<FlowState>('input');
+  const [state, setState] = useState<FlowState>('list');
+  const [sessions, setSessions] = useState<SessionSummary[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
+
   const [jobDescription, setJobDescription] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch sessions on mount
+  const fetchSessions = useCallback(async () => {
+    try {
+      setLoadingSessions(true);
+      const res = await fetch('/api/v2/sessions');
+      const data = await res.json();
+      if (data.success) {
+        setSessions(data.sessions);
+      }
+    } catch (err) {
+      console.error('Failed to fetch sessions:', err);
+    } finally {
+      setLoadingSessions(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
+
+  // Resume an existing session
+  async function handleResumeSession(session: SessionSummary) {
+    setSessionId(session.id);
+    setError(null);
+
+    if (session.state === 'gap-review') {
+      setState('gap-review');
+    } else if (session.state === 'approved') {
+      // Session was approved but not generated - go to generate
+      setState('generating');
+      await handleGenerate(session.id);
+    } else if (session.state === 'complete') {
+      // Fetch and show results
+      await handleViewComplete(session.id);
+    } else if (session.state === 'failed') {
+      setState('failed');
+      setError('This session failed. View diagnostics for details.');
+    } else {
+      // For other states, just view the session
+      setState('gap-review');
+    }
+  }
+
+  async function handleViewComplete(sid: string) {
+    try {
+      const res = await fetch(`/api/v2/diagnostics/${sid}`);
+      const data = await res.json();
+      if (data.success && data.diagnostics.finalOutput) {
+        setResult({
+          writerOutput: data.diagnostics.rawSession.writerOutput,
+          validation: data.diagnostics.rawSession.validationResult,
+          status: 'complete',
+        });
+        setSessionId(sid);
+        setState('complete');
+      }
+    } catch (err) {
+      console.error('Failed to load session:', err);
+    }
+  }
 
   async function handleStartAnalysis() {
     if (!jobDescription.trim() || jobDescription.length < 100) {
@@ -51,15 +136,16 @@ export default function Home() {
 
   async function handleApproveAndGenerate() {
     if (!sessionId) return;
-
     setState('generating');
+    await handleGenerate(sessionId);
+  }
 
+  async function handleGenerate(sid: string) {
     try {
-      // Generate (approve is handled by GapReview component)
       const generateRes = await fetch('/api/v2/pipeline/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
+        body: JSON.stringify({ sessionId: sid }),
       });
 
       const generateData = await generateRes.json();
@@ -70,9 +156,12 @@ export default function Home() {
       setResult({
         writerOutput: generateData.writerOutput,
         validation: generateData.validation,
-        status: generateData.status,
+        status: generateData.state,
       });
-      setState(generateData.status === 'complete' ? 'complete' : 'failed');
+      setState(generateData.state === 'complete' ? 'complete' : 'failed');
+
+      // Refresh sessions list
+      fetchSessions();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generation failed');
       setState('failed');
@@ -80,90 +169,134 @@ export default function Home() {
   }
 
   function handleReset() {
-    setState('input');
+    setState('list');
     setJobDescription('');
     setSessionId(null);
     setResult(null);
     setError(null);
+    fetchSessions();
   }
+
+  function handleNewSession() {
+    setJobDescription('');
+    setSessionId(null);
+    setResult(null);
+    setError(null);
+    setState('input');
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Render
+  // ─────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto py-8 px-4">
+      <div className="max-w-5xl mx-auto py-8 px-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">ResumeOS</h1>
-          <p className="text-gray-600 mt-2">
-            4-agent pipeline with gap analysis and validation
-          </p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">ResumeOS</h1>
+            <p className="text-gray-600 mt-1">
+              AI-powered resume customization pipeline
+            </p>
+          </div>
+          {state !== 'list' && state !== 'input' && (
+            <button
+              onClick={handleReset}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              ← Back to Dashboard
+            </button>
+          )}
         </div>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-between mb-8 px-4">
-          <Step
-            number={1}
-            label="Input JD"
-            active={state === 'input'}
-            complete={state !== 'input'}
-          />
-          <StepConnector
-            complete={['gap-review', 'generating', 'complete', 'failed'].includes(state)}
-          />
-          <Step
-            number={2}
-            label="Analyze"
-            active={state === 'analyzing'}
-            complete={['gap-review', 'generating', 'complete'].includes(state)}
-          />
-          <StepConnector
-            complete={['generating', 'complete', 'failed'].includes(state)}
-          />
-          <Step
-            number={3}
-            label="Review Gaps"
-            active={state === 'gap-review'}
-            complete={['generating', 'complete'].includes(state)}
-          />
-          <StepConnector complete={state === 'complete'} />
-          <Step
-            number={4}
-            label="Generate"
-            active={state === 'generating'}
-            complete={state === 'complete'}
-          />
-        </div>
+        {/* State: Sessions List */}
+        {state === 'list' && (
+          <div className="space-y-6">
+            {/* New Session Button */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Past Sessions</h2>
+              <button
+                onClick={handleNewSession}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <span className="text-xl">+</span> Generate New Resume
+              </button>
+            </div>
 
-        {/* Error Display */}
-        {error && state !== 'failed' && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800">{error}</p>
+            {/* Sessions List */}
+            {loadingSessions ? (
+              <div className="text-center py-12">
+                <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" />
+                <p className="mt-4 text-gray-600">Loading sessions...</p>
+              </div>
+            ) : sessions.length === 0 ? (
+              <div className="bg-white rounded-lg shadow p-12 text-center">
+                <div className="text-6xl mb-4">📄</div>
+                <h3 className="text-xl font-bold mb-2">No sessions yet</h3>
+                <p className="text-gray-600 mb-6">
+                  Start by generating your first tailored resume
+                </p>
+                <button
+                  onClick={handleNewSession}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg"
+                >
+                  Generate New Resume
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sessions.map((session) => (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    onResume={() => handleResumeSession(session)}
+                    onView={() => handleViewComplete(session.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* State: Input */}
         {state === 'input' && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold mb-4">Paste Job Description</h2>
-            <textarea
-              className="w-full h-64 border rounded-lg p-4 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Paste the full job description here..."
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-            />
-            <div className="flex justify-between items-center mt-4">
-              <span
-                className={`text-sm ${jobDescription.length < 100 ? 'text-red-500' : 'text-gray-500'}`}
-              >
-                {jobDescription.length} characters
-                {jobDescription.length < 100 && ' (minimum 100)'}
-              </span>
-              <button
-                onClick={handleStartAnalysis}
-                disabled={jobDescription.length < 100}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Analyze Job Description
-              </button>
+          <div className="space-y-6">
+            <button
+              onClick={() => setState('list')}
+              className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
+            >
+              ← Back to sessions
+            </button>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold mb-4">Paste Job Description</h2>
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded p-3 mb-4 text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
+              <textarea
+                className="w-full h-64 border rounded-lg p-4 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Paste the full job description here..."
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+              />
+              <div className="flex justify-between items-center mt-4">
+                <span
+                  className={`text-sm ${jobDescription.length < 100 ? 'text-red-500' : 'text-gray-500'}`}
+                >
+                  {jobDescription.length} characters
+                  {jobDescription.length < 100 && ' (minimum 100)'}
+                </span>
+                <button
+                  onClick={handleStartAnalysis}
+                  disabled={jobDescription.length < 100}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Analyze Job Description
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -207,7 +340,7 @@ export default function Home() {
                   Validation: {result.validation.passed ? 'Passed' : 'Needs Review'}
                 </span>
                 <span>|</span>
-                <span>Score: {result.validation.overallScore}/10</span>
+                <span>Score: {result.validation.overallScore}/100</span>
               </div>
             </div>
 
@@ -248,7 +381,10 @@ export default function Home() {
                 {result.writerOutput.careerHighlights.map((ch, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <span className="text-blue-600 font-bold">{i + 1}.</span>
-                    <span className="text-gray-700">{ch.content}</span>
+                    <span
+                      className="text-gray-700"
+                      dangerouslySetInnerHTML={{ __html: ch.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
+                    />
                   </li>
                 ))}
               </ul>
@@ -290,7 +426,7 @@ export default function Home() {
                 onClick={handleReset}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
               >
-                Generate Another
+                Back to Dashboard
               </button>
             </div>
           </div>
@@ -315,7 +451,7 @@ export default function Home() {
                 </a>
               )}
               <button onClick={handleReset} className="text-blue-600 hover:underline">
-                Try Again
+                Back to Dashboard
               </button>
             </div>
           </div>
@@ -329,44 +465,99 @@ export default function Home() {
 // Helper Components
 // ─────────────────────────────────────────────────────────────
 
-function Step({
-  number,
-  label,
-  active,
-  complete,
+function SessionCard({
+  session,
+  onResume,
+  onView,
 }: {
-  number: number;
-  label: string;
-  active: boolean;
-  complete: boolean;
+  session: SessionSummary;
+  onResume: () => void;
+  onView: () => void;
 }) {
-  return (
-    <div className="flex flex-col items-center">
-      <div
-        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
-          complete
-            ? 'bg-green-600 text-white'
-            : active
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-500'
-        }`}
-      >
-        {complete ? '✓' : number}
-      </div>
-      <span
-        className={`text-sm mt-2 ${active ? 'text-blue-600 font-medium' : 'text-gray-500'}`}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
+  const stateColors: Record<string, string> = {
+    complete: 'bg-green-100 text-green-800',
+    failed: 'bg-red-100 text-red-800',
+    'gap-review': 'bg-yellow-100 text-yellow-800',
+    approved: 'bg-blue-100 text-blue-800',
+    generating: 'bg-purple-100 text-purple-800',
+    analyzing: 'bg-gray-100 text-gray-800',
+  };
 
-function StepConnector({ complete }: { complete: boolean }) {
+  const stateColor = stateColors[session.state] || 'bg-gray-100 text-gray-800';
+
+  const formattedDate = new Date(session.createdAt).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   return (
-    <div
-      className={`flex-1 h-1 mx-2 transition-colors ${complete ? 'bg-green-600' : 'bg-gray-200'}`}
-    />
+    <div className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-start">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-1">
+            <h3 className="font-bold text-lg truncate">{session.companyName}</h3>
+            <span className={`text-xs px-2 py-1 rounded-full font-medium ${stateColor}`}>
+              {session.state}
+            </span>
+          </div>
+          <p className="text-gray-600 text-sm mb-2">{session.roleTitle}</p>
+          <p className="text-gray-400 text-xs">{formattedDate}</p>
+        </div>
+
+        <div className="flex items-center gap-4 ml-4">
+          {session.validationScore !== null && (
+            <div className="text-center">
+              <div
+                className={`text-2xl font-bold ${
+                  session.validationPassed ? 'text-green-600' : 'text-yellow-600'
+                }`}
+              >
+                {session.validationScore}
+              </div>
+              <div className="text-xs text-gray-500">score</div>
+            </div>
+          )}
+
+          {session.totalCost !== null && (
+            <div className="text-center">
+              <div className="text-lg font-medium text-gray-700">
+                ${session.totalCost.toFixed(2)}
+              </div>
+              <div className="text-xs text-gray-500">cost</div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            {session.state === 'complete' ? (
+              <button
+                onClick={onView}
+                className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors"
+              >
+                View Resume
+              </button>
+            ) : session.state === 'gap-review' || session.state === 'approved' ? (
+              <button
+                onClick={onResume}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors"
+              >
+                Resume
+              </button>
+            ) : null}
+            <a
+              href={`/v2/diagnostics/${session.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-gray-700 text-xs text-center"
+            >
+              Diagnostics
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -385,7 +576,7 @@ function ScoreCard({
     >
       <div className="text-sm text-gray-600">{label}</div>
       <div className={`text-2xl font-bold ${passed ? 'text-green-600' : 'text-yellow-600'}`}>
-        {score}/10
+        {score}/100
       </div>
     </div>
   );

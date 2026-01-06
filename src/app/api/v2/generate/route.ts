@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sessions } from '@/drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { ResumeWriterAgent } from '@/lib/agents/resume-writer';
 import type { PipelineSession, PipelineDiagnostics } from '@/types/v2';
 
@@ -77,21 +77,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update status to generating
+    // CRITICAL: Atomic state transition to prevent double-generate race condition
+    // Only update if state is still 'approved' (optimistic locking)
     const generatingSession: PipelineSession = {
       ...v2Session,
       state: 'generating',
       updatedAt: new Date().toISOString(),
     };
 
-    await db
+    const updateResult = await db
       .update(sessions)
       .set({
         v2Session: generatingSession,
         v2Status: 'generating',
         updatedAt: new Date(),
       })
-      .where(eq(sessions.id, sessionId));
+      .where(and(eq(sessions.id, sessionId), eq(sessions.v2Status, 'approved')));
+
+    // Check if the atomic update succeeded (another request may have beaten us)
+    if (updateResult.rowCount === 0) {
+      // Re-fetch to see current state
+      const [currentSession] = await db
+        .select()
+        .from(sessions)
+        .where(eq(sessions.id, sessionId));
+
+      const currentState = (currentSession?.v2Session as PipelineSession | null)?.state;
+      return NextResponse.json(
+        {
+          error: `Generation already in progress or completed`,
+          currentState: currentState || 'unknown',
+        },
+        { status: 409 } // Conflict
+      );
+    }
 
     // Run the Resume Writer agent
     const agent = new ResumeWriterAgent();
