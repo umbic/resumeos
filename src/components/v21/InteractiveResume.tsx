@@ -44,7 +44,6 @@ export function InteractiveResume({
       <SummarySection
         content={assembledResume.summary}
         sources={narrativeOutput.summary.sourcesUsed}
-        wordCount={narrativeOutput.summary.wordCount}
         onClick={() => onEditSection({ type: 'summary' })}
       />
 
@@ -102,16 +101,16 @@ function HeaderSection({ header }: { header: AssembledResume['header'] }) {
 interface SummarySectionProps {
   content: string;
   sources: string[];
-  wordCount: number;
   onClick: () => void;
 }
 
 function SummarySection({
   content,
   sources,
-  wordCount,
   onClick,
 }: SummarySectionProps) {
+  // Calculate word count from actual content to ensure accuracy
+  const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const isValidWordCount = wordCount >= 140 && wordCount <= 160;
 
   return (
