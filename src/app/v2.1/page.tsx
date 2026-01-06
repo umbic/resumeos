@@ -154,6 +154,38 @@ export default function V21GeneratePage() {
     setAdditionalContext('');
   }
 
+  // ─────────────────────────────────────────────────────────────
+  // Download DOCX
+  // ─────────────────────────────────────────────────────────────
+  async function handleDownload() {
+    if (!sessionId) return;
+
+    try {
+      const response = await fetch('/api/v2.1/export-docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      // Get the blob and trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Umberto_Castaldo_Resume_${new Date().toISOString().split('T')[0]}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Download failed');
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto py-8 px-4">
@@ -435,8 +467,16 @@ export default function V21GeneratePage() {
             {/* Actions */}
             <div className="flex gap-4 flex-wrap">
               {sessionId && (
+                <button
+                  onClick={() => handleDownload()}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                >
+                  Download DOCX
+                </button>
+              )}
+              {sessionId && (
                 <a
-                  href={`/v2/diagnostics/${sessionId}`}
+                  href={`/v2.1/diagnostics/${sessionId}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors"
