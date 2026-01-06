@@ -147,11 +147,23 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       {/* Header */}
       <div className="border-b pb-4">
-        <h1 className="text-2xl font-bold">Gap Review</h1>
-        <p className="text-gray-600 mt-1">
-          Review content coverage before generating your resume for{' '}
-          <span className="font-medium">{strategy.company.name}</span>
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold">Gap Review</h1>
+            <p className="text-gray-600 mt-1">
+              Review content coverage before generating your resume for{' '}
+              <span className="font-medium">{strategy.company.name}</span>
+            </p>
+          </div>
+          <a
+            href={`/v2/diagnostics/${sessionId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-gray-500 hover:text-blue-600 hover:underline"
+          >
+            View Full Diagnostics
+          </a>
+        </div>
       </div>
 
       {/* Coverage Score */}
