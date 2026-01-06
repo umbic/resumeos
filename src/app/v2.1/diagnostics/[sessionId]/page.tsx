@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
 interface DiagnosticsData {
@@ -14,12 +15,9 @@ interface DiagnosticsData {
   diagnostics: any;
 }
 
-export default function V21DiagnosticsPage({
-  params,
-}: {
-  params: Promise<{ sessionId: string }>;
-}) {
-  const { sessionId } = use(params);
+export default function V21DiagnosticsPage() {
+  const params = useParams();
+  const sessionId = params.sessionId as string;
   const [data, setData] = useState<DiagnosticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
