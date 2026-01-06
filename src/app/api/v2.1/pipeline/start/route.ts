@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
       },
       gapAnalysis: {
         overallCoverage: result.gapAnalysis.overallCoverage,
-        gapsCount: result.gapAnalysis.honestGaps?.length || 0,
-        warnings: result.gapAnalysis.warnings?.length || 0,
+        honestGaps: result.gapAnalysis.honestGaps || [],
+        warnings: result.gapAnalysis.warnings || [],
       },
       message: 'Analysis complete. Review gaps and approve to continue.',
       nextSteps: [

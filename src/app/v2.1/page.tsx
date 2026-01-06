@@ -12,9 +12,8 @@ type FlowState =
 
 interface GapAnalysis {
   overallCoverage: number | { score: number; assessment: string; summary: string };
-  gapsCount?: number;
-  gaps?: { requirement?: string; description?: string }[];
-  warnings?: { message?: string }[] | number;
+  honestGaps?: { requirement: string; gap: string; impact: string }[];
+  warnings?: { type: string; message: string }[];
 }
 
 interface AllocationSummary {
@@ -53,6 +52,7 @@ export default function V21GeneratePage() {
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [costs, setCosts] = useState<CostBreakdown | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [additionalContext, setAdditionalContext] = useState('');
 
   // ─────────────────────────────────────────────────────────────
   // Step 1: Start Analysis
@@ -104,7 +104,10 @@ export default function V21GeneratePage() {
       const approveRes = await fetch('/api/v2/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId })
+        body: JSON.stringify({
+          sessionId,
+          additionalContext: additionalContext.trim() || undefined
+        })
       });
 
       const approveData = await approveRes.json();
@@ -148,6 +151,7 @@ export default function V21GeneratePage() {
     setValidation(null);
     setCosts(null);
     setError(null);
+    setAdditionalContext('');
   }
 
   return (
@@ -298,57 +302,58 @@ export default function V21GeneratePage() {
             )}
 
             {/* Gaps */}
-            {(gapAnalysis.gapsCount && gapAnalysis.gapsCount > 0) ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                <h3 className="font-bold text-yellow-800">
-                  {gapAnalysis.gapsCount} Gap{gapAnalysis.gapsCount !== 1 ? 's' : ''} Identified
-                </h3>
-                <p className="text-yellow-700 text-sm mt-2">
-                  Some JD requirements may not have strong matches in your content library.
-                </p>
-              </div>
-            ) : gapAnalysis.gaps && gapAnalysis.gaps.length > 0 && (
+            {gapAnalysis.honestGaps && gapAnalysis.honestGaps.length > 0 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                 <h3 className="font-bold text-yellow-800 mb-3">
-                  Gaps Identified ({gapAnalysis.gaps.length})
+                  {gapAnalysis.honestGaps.length} Gap{gapAnalysis.honestGaps.length !== 1 ? 's' : ''} Identified
                 </h3>
-                <ul className="space-y-2">
-                  {gapAnalysis.gaps.slice(0, 5).map((gap, i) => (
-                    <li key={i} className="text-yellow-700 text-sm">
-                      - {gap.requirement || gap.description || JSON.stringify(gap)}
-                    </li>
+                <div className="space-y-3">
+                  {gapAnalysis.honestGaps.map((gap, i) => (
+                    <div key={i} className="bg-white rounded p-3 border border-yellow-100">
+                      <p className="font-medium text-yellow-900">{gap.requirement}</p>
+                      <p className="text-yellow-700 text-sm mt-1">{gap.gap}</p>
+                      {gap.impact && (
+                        <p className="text-yellow-600 text-xs mt-1 italic">Impact: {gap.impact}</p>
+                      )}
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
 
             {/* Warnings */}
-            {gapAnalysis.warnings && (
-              typeof gapAnalysis.warnings === 'number' ? (
-                gapAnalysis.warnings > 0 && (
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                    <h3 className="font-bold text-orange-800">
-                      {gapAnalysis.warnings} Warning{gapAnalysis.warnings !== 1 ? 's' : ''}
-                    </h3>
-                  </div>
-                )
-              ) : (
-                gapAnalysis.warnings.length > 0 && (
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                    <h3 className="font-bold text-orange-800 mb-3">
-                      Warnings ({gapAnalysis.warnings.length})
-                    </h3>
-                    <ul className="space-y-2">
-                      {gapAnalysis.warnings.slice(0, 3).map((warning, i) => (
-                        <li key={i} className="text-orange-700 text-sm">
-                          - {warning.message || JSON.stringify(warning)}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )
-              )
+            {gapAnalysis.warnings && gapAnalysis.warnings.length > 0 && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                <h3 className="font-bold text-orange-800 mb-3">
+                  {gapAnalysis.warnings.length} Warning{gapAnalysis.warnings.length !== 1 ? 's' : ''}
+                </h3>
+                <div className="space-y-2">
+                  {gapAnalysis.warnings.map((warning, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">⚠</span>
+                      <div>
+                        <span className="font-medium text-orange-800">{warning.type}: </span>
+                        <span className="text-orange-700">{warning.message}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
+
+            {/* Additional Context Input */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="font-bold mb-2">Additional Context (Optional)</h3>
+              <p className="text-gray-600 text-sm mb-3">
+                Add any specific instructions or context for the resume writer.
+              </p>
+              <textarea
+                className="w-full h-24 border rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="e.g., Emphasize my B2B SaaS experience, downplay the consulting work, focus on GTM achievements..."
+                value={additionalContext}
+                onChange={(e) => setAdditionalContext(e.target.value)}
+              />
+            </div>
 
             {/* Approve Button */}
             <div className="flex justify-end">
