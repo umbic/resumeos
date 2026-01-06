@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download, FileText, Library, Loader2 } from 'lucide-react';
 import { InteractiveResume, type EditTarget } from '@/components/v21/InteractiveResume';
@@ -22,13 +23,9 @@ interface V21Session {
   assembledResume: AssembledResume;
 }
 
-interface PageProps {
-  params: Promise<{ sessionId: string }>;
-}
-
-export default function V21ViewPage({ params }: PageProps) {
-  const resolvedParams = use(params);
-  const sessionId = resolvedParams.sessionId;
+export default function V21ViewPage() {
+  const params = useParams();
+  const sessionId = params.sessionId as string;
 
   const [session, setSession] = useState<V21Session | null>(null);
   const [loading, setLoading] = useState(true);
