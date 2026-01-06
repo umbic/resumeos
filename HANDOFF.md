@@ -1,7 +1,83 @@
 # ResumeOS - Session Handoff
 
-> **Last Updated**: 2026-01-05
-> **Last Session**: V2 Session 1 - Foundation (Types, Config, Base Agent, DB Schema)
+> **Last Updated**: 2026-01-06
+> **Last Session**: V2 Sessions Dashboard + Bug Fixes
+
+---
+
+## V2 Dashboard + Bug Fixes Completed
+
+### What Was Done
+
+1. **Sessions Dashboard** - Homepage now shows all past sessions with ability to resume or view completed resumes
+2. **Bug Fixes** - Fixed critical race conditions and error handling issues discovered in code review
+3. **E2E Test** - Ran full pipeline test with Headway JD, validated all 4 agents work correctly
+
+### Files Created
+
+| File | Description |
+|------|-------------|
+| `src/app/api/v2/sessions/route.ts` | GET endpoint returning all V2 sessions for dashboard |
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/app/page.tsx` | Complete rewrite - sessions list as landing, "Generate New" button, resume/view actions |
+| `src/app/api/v2/generate/route.ts` | Added atomic state transition to prevent double-generate race condition |
+| `src/app/api/v2/pipeline/start/route.ts` | Added error recovery to mark session as failed on pipeline errors |
+| `src/components/resume/v2/GapReview.tsx` | Added error feedback UI for swap and approve failures |
+
+### New Homepage Flow
+
+```
+Dashboard (sessions list) → "Generate New Resume" → JD Input → Analysis → Gap Review → Generate → Complete
+       ↑                                                                                            |
+       └────────────────────────── "Back to Dashboard" ←────────────────────────────────────────────┘
+```
+
+### Session Card Features
+
+- Company name (extracted from JD strategy)
+- Role title
+- State badge (color-coded: complete/gap-review/failed/etc)
+- Validation score (if complete)
+- Total cost
+- "View Resume" button (complete sessions)
+- "Resume" button (gap-review/approved sessions)
+- Diagnostics link
+
+### Bug Fixes Applied
+
+| Bug | Fix | File |
+|-----|-----|------|
+| Double-generate race condition | Atomic state transition with `WHERE v2Status='approved'` | `generate/route.ts` |
+| Pipeline errors leave session orphaned | Mark session as `failed` state on error | `pipeline/start/route.ts` |
+| GapReview swallows errors silently | Added `approveError` and `swapError` state with UI | `GapReview.tsx` |
+
+### E2E Test Results (Headway JD)
+
+| Metric | Value |
+|--------|-------|
+| Session ID | `a1f2b64f-0c30-4c60-bc79-2ed1facf826f` |
+| Final State | `complete` ✅ |
+| Total Cost | **$0.89** |
+| Total Duration | **203.3 seconds** |
+| Agents Run | **4/4** ✅ |
+| Validation Score | **93/100** (Honesty: 100, Coverage: 85, Quality: 95) |
+
+### Commit
+
+`f03593c` - feat: add sessions dashboard and bug fixes
+
+### Known Issues (Not Fixed)
+
+From code review, these issues remain:
+- No session resume via URL param (browser refresh loses UI state)
+- No transaction wrapping for read-modify-write operations
+- No runtime type validation for agent outputs
+- No auth/rate limiting
+- No session cleanup/expiry
 
 ---
 
