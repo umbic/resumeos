@@ -9,12 +9,18 @@ export const AGENT_CONFIG = {
     gapAnalyzer: 4000,
     resumeWriter: 8000,
     validator: 4000,
+    // V2.1 Two-Phase Writers
+    narrativeWriter: 3000,  // Phase 1: Summary + Career Highlights
+    detailWriter: 3000,     // Phase 2: P1/P2 Overviews + Bullets
   },
   timeouts: {
     jdStrategist: 60000,
     gapAnalyzer: 60000,
     resumeWriter: 120000,
     validator: 60000,
+    // V2.1 Two-Phase Writers
+    narrativeWriter: 90000,
+    detailWriter: 90000,
   },
   // Claude Opus pricing as of January 2025
   pricing: {
@@ -23,7 +29,7 @@ export const AGENT_CONFIG = {
   },
 } as const;
 
-export type AgentName = 'jdStrategist' | 'gapAnalyzer' | 'resumeWriter' | 'validator';
+export type AgentName = 'jdStrategist' | 'gapAnalyzer' | 'resumeWriter' | 'validator' | 'narrativeWriter' | 'detailWriter';
 
 /**
  * Calculate the cost for an API call based on token usage
