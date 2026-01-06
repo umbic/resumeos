@@ -182,11 +182,13 @@ Return ONLY valid JSON (no markdown, no explanation):
   }
 }
 
-## CRITICAL CONSTRAINTS
+## CRITICAL CONSTRAINTS (STRICT - WILL BE VALIDATED)
 
-1. Bullets MUST be 25-40 words. Count carefully.
-2. Overviews MUST be 40-60 words.
-3. NO emdashes (-) anywhere. Rewrite sentences instead.
+⚠️ WORD COUNTS ARE ENFORCED BY AUTOMATED VALIDATION:
+
+1. **Each Bullet MUST be EXACTLY 25-40 words.** Count every word carefully. Not 24, not 41. EXACTLY 25-40.
+2. **Each Overview MUST be EXACTLY 40-60 words.** Count every word carefully. Not 39, not 61. EXACTLY 40-60.
+3. NO emdashes (—) anywhere. Rewrite sentences that need them.
 4. DO NOT use banned verbs: ${bannedVerbs.join(', ')}
 5. NO repeated verbs within Position 1.
 6. NO repeated verbs within Position 2.
@@ -194,6 +196,8 @@ Return ONLY valid JSON (no markdown, no explanation):
 8. Every metric must match source material EXACTLY.
 9. Name clients/companies when the source names them.
 10. DO NOT repeat metrics already used in Career Highlights.
+
+COUNT YOUR WORDS. The validator will reject output outside these ranges.
 
 Return ONLY the JSON object, no other text.`;
 }

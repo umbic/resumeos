@@ -96,16 +96,20 @@ Return ONLY valid JSON (no markdown, no explanation):
   }
 }
 
-## CRITICAL CONSTRAINTS
+## CRITICAL CONSTRAINTS (STRICT - WILL BE VALIDATED)
 
-1. Summary MUST be 140-160 words. Count them carefully.
-2. Each Career Highlight MUST be 35-50 words (including headline).
-3. NO emdashes (-) anywhere. Rewrite sentences that need them.
-4. NO repeated verbs across the 5 highlights. Each must start differently.
+⚠️ WORD COUNTS ARE ENFORCED BY AUTOMATED VALIDATION:
+
+1. **Summary MUST be EXACTLY 140-160 words.** Count carefully. Not 117, not 165. EXACTLY 140-160.
+2. **Each Career Highlight MUST be 25-40 words** (the full "**Headline**: Description" text). Not 24, not 41. EXACTLY 25-40.
+3. NO emdashes (—) anywhere. Rewrite sentences that need them.
+4. NO repeated verbs across the 5 highlights. Each must start with a DIFFERENT verb.
 5. Every metric must come EXACTLY from source material. Do not round or modify.
 6. Headlines must be specific to the achievement (not generic like "Brand Leadership").
 7. Do NOT mention practice-building ($15M to $40M) unless this is a consulting role.
-8. The summary should NOT repeat achievements that are in Career Highlights.
+8. The summary should NOT repeat achievements that appear in Career Highlights.
+
+COUNT YOUR WORDS. The validator will reject output outside these ranges.
 
 Return ONLY the JSON object, no other text.`;
 }
