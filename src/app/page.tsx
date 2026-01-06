@@ -200,14 +200,22 @@ export default function Home() {
               AI-powered resume customization pipeline
             </p>
           </div>
-          {state !== 'list' && state !== 'input' && (
-            <button
-              onClick={handleReset}
-              className="text-gray-600 hover:text-gray-900"
+          <div className="flex items-center gap-4">
+            <a
+              href="/v2.1"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
             >
-              ← Back to Dashboard
-            </button>
-          )}
+              Try V2.1 (New)
+            </a>
+            {state !== 'list' && state !== 'input' && (
+              <button
+                onClick={handleReset}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Back to Dashboard
+              </button>
+            )}
+          </div>
         </div>
 
         {/* State: Sessions List */}
