@@ -11,9 +11,10 @@ type FlowState =
   | 'failed';
 
 interface GapAnalysis {
-  overallCoverage: number;
-  gaps: { requirement?: string; description?: string }[];
-  warnings: { message?: string }[];
+  overallCoverage: number | { score: number; assessment: string; summary: string };
+  gapsCount?: number;
+  gaps?: { requirement?: string; description?: string }[];
+  warnings?: { message?: string }[] | number;
 }
 
 interface AllocationSummary {
@@ -266,7 +267,9 @@ export default function V21GeneratePage() {
                 </div>
                 <div className="text-right">
                   <div className="text-4xl font-bold text-blue-600">
-                    {gapAnalysis.overallCoverage}/10
+                    {typeof gapAnalysis.overallCoverage === 'object'
+                      ? gapAnalysis.overallCoverage.score
+                      : gapAnalysis.overallCoverage}/10
                   </div>
                   <div className="text-sm text-gray-500">Coverage Score</div>
                 </div>
@@ -295,7 +298,16 @@ export default function V21GeneratePage() {
             )}
 
             {/* Gaps */}
-            {gapAnalysis.gaps && gapAnalysis.gaps.length > 0 && (
+            {(gapAnalysis.gapsCount && gapAnalysis.gapsCount > 0) ? (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                <h3 className="font-bold text-yellow-800">
+                  {gapAnalysis.gapsCount} Gap{gapAnalysis.gapsCount !== 1 ? 's' : ''} Identified
+                </h3>
+                <p className="text-yellow-700 text-sm mt-2">
+                  Some JD requirements may not have strong matches in your content library.
+                </p>
+              </div>
+            ) : gapAnalysis.gaps && gapAnalysis.gaps.length > 0 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                 <h3 className="font-bold text-yellow-800 mb-3">
                   Gaps Identified ({gapAnalysis.gaps.length})
@@ -311,19 +323,31 @@ export default function V21GeneratePage() {
             )}
 
             {/* Warnings */}
-            {gapAnalysis.warnings && gapAnalysis.warnings.length > 0 && (
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                <h3 className="font-bold text-orange-800 mb-3">
-                  Warnings ({gapAnalysis.warnings.length})
-                </h3>
-                <ul className="space-y-2">
-                  {gapAnalysis.warnings.slice(0, 3).map((warning, i) => (
-                    <li key={i} className="text-orange-700 text-sm">
-                      - {warning.message || JSON.stringify(warning)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {gapAnalysis.warnings && (
+              typeof gapAnalysis.warnings === 'number' ? (
+                gapAnalysis.warnings > 0 && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                    <h3 className="font-bold text-orange-800">
+                      {gapAnalysis.warnings} Warning{gapAnalysis.warnings !== 1 ? 's' : ''}
+                    </h3>
+                  </div>
+                )
+              ) : (
+                gapAnalysis.warnings.length > 0 && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                    <h3 className="font-bold text-orange-800 mb-3">
+                      Warnings ({gapAnalysis.warnings.length})
+                    </h3>
+                    <ul className="space-y-2">
+                      {gapAnalysis.warnings.slice(0, 3).map((warning, i) => (
+                        <li key={i} className="text-orange-700 text-sm">
+                          - {warning.message || JSON.stringify(warning)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              )
             )}
 
             {/* Approve Button */}
