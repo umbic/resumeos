@@ -33,6 +33,10 @@ export async function GET() {
       const v2Session = row.v2Session as PipelineSession | null;
       const diagnostics = row.v2Diagnostics as PipelineDiagnostics | null;
 
+      // Detect if this is a V2.1 session (has assembledResume in session)
+      const v2SessionAny = v2Session as unknown as { assembledResume?: unknown };
+      const isV21 = Boolean(v2SessionAny?.assembledResume);
+
       // Extract company name from JD strategy if available
       const companyName = v2Session?.jdStrategy?.company?.name ||
                           row.targetCompany ||
@@ -43,6 +47,31 @@ export async function GET() {
                         row.targetTitle ||
                         'Marketing Role';
 
+      // For V2.1, check validation from the new structure
+      const v21Session = v2Session as unknown as {
+        validation?: {
+          overallVerdict?: string;
+          honestyScore?: number;
+          coverageScore?: number;
+          qualityScore?: number;
+          formatScore?: number;
+        };
+      };
+      const v21ValidationPassed = isV21
+        ? v21Session?.validation?.overallVerdict === 'pass' ||
+          v21Session?.validation?.overallVerdict === 'pass-with-warnings'
+        : null;
+      const v21ValidationScore = isV21 && v21Session?.validation
+        ? Math.round(
+            ((v21Session.validation.honestyScore || 0) +
+              (v21Session.validation.coverageScore || 0) +
+              (v21Session.validation.qualityScore || 0) +
+              (v21Session.validation.formatScore || 0)) /
+              4 *
+              10
+          )
+        : null;
+
       return {
         id: row.id,
         companyName,
@@ -51,9 +80,12 @@ export async function GET() {
         createdAt: row.createdAt?.toISOString() || v2Session?.createdAt,
         updatedAt: row.updatedAt?.toISOString() || v2Session?.updatedAt,
 
+        // Version indicator
+        version: isV21 ? 'v2.1' : 'v2',
+
         // Quick stats
-        validationPassed: v2Session?.validationResult?.passed ?? null,
-        validationScore: v2Session?.validationResult?.overallScore ?? null,
+        validationPassed: isV21 ? v21ValidationPassed : (v2Session?.validationResult?.passed ?? null),
+        validationScore: isV21 ? v21ValidationScore : (v2Session?.validationResult?.overallScore ?? null),
         totalCost: diagnostics?.costs?.totalUSD ?? null,
 
         // Preview of JD (first 150 chars)

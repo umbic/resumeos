@@ -21,6 +21,7 @@ interface SessionSummary {
   validationScore: number | null;
   totalCost: number | null;
   jdPreview: string;
+  version?: 'v2' | 'v2.1';
 }
 
 interface GenerationResult {
@@ -492,6 +493,7 @@ function SessionCard({
   };
 
   const stateColor = stateColors[session.state] || 'bg-gray-100 text-gray-800';
+  const isV21 = session.version === 'v2.1';
 
   const formattedDate = new Date(session.createdAt).toLocaleDateString('en-US', {
     month: 'short',
@@ -501,12 +503,22 @@ function SessionCard({
     minute: '2-digit',
   });
 
+  // Determine the correct diagnostics URL based on version
+  const diagnosticsUrl = isV21
+    ? `/v2.1/diagnostics/${session.id}`
+    : `/v2/diagnostics/${session.id}`;
+
   return (
     <div className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-1">
             <h3 className="font-bold text-lg truncate">{session.companyName}</h3>
+            {isV21 && (
+              <span className="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-700 font-medium">
+                V2.1
+              </span>
+            )}
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${stateColor}`}>
               {session.state}
             </span>
@@ -540,12 +552,21 @@ function SessionCard({
 
           <div className="flex flex-col gap-2">
             {session.state === 'complete' ? (
-              <button
-                onClick={onView}
-                className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors"
-              >
-                View Resume
-              </button>
+              isV21 ? (
+                <a
+                  href={`/v2.1/view/${session.id}`}
+                  className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors text-center"
+                >
+                  View & Edit
+                </a>
+              ) : (
+                <button
+                  onClick={onView}
+                  className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors"
+                >
+                  View Resume
+                </button>
+              )
             ) : session.state === 'gap-review' || session.state === 'approved' ? (
               <button
                 onClick={onResume}
@@ -555,7 +576,7 @@ function SessionCard({
               </button>
             ) : null}
             <a
-              href={`/v2/diagnostics/${session.id}`}
+              href={diagnosticsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-500 hover:text-gray-700 text-xs text-center"

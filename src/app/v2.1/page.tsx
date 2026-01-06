@@ -467,6 +467,14 @@ export default function V21GeneratePage() {
             {/* Actions */}
             <div className="flex gap-4 flex-wrap">
               {sessionId && (
+                <a
+                  href={`/v2.1/view/${sessionId}`}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                >
+                  View & Edit Resume
+                </a>
+              )}
+              {sessionId && (
                 <button
                   onClick={() => handleDownload()}
                   className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
@@ -486,7 +494,7 @@ export default function V21GeneratePage() {
               )}
               <button
                 onClick={handleReset}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors"
               >
                 Generate Another
               </button>
