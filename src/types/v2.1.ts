@@ -196,6 +196,7 @@ export interface FormatChecks {
   summaryLength: {
     wordCount: number;
     passed: boolean;
+    expected: string;
   };
   bulletLengths: {
     passed: boolean;
@@ -203,19 +204,42 @@ export interface FormatChecks {
   };
   verbRepetition: {
     passed: boolean;
-    issues: { verb: string; positions: string[] }[];
+    withinPositionIssues: { position: string; verb: string; count: number }[];
+    acrossResumeIssues: { verb: string; count: number }[];
   };
+  overviewLengths: {
+    passed: boolean;
+    issues: { location: string; wordCount: number; expected: string }[];
+  };
+}
+
+export interface ValidatorInputV21 {
+  strategy: JDStrategy;
+  allocation: ContentAllocation;
+  narrativeOutput: NarrativeWriterOutput;
+  detailOutput: DetailWriterOutput;
+  assembledResume?: AssembledResume;
 }
 
 export interface ValidationResultV21 {
   overallVerdict: 'pass' | 'pass-with-warnings' | 'fail';
-  honestyScore: number;
-  coverageScore: number;
-  qualityScore: number;
+  honestyScore: number;      // 0-10: metrics match sources
+  coverageScore: number;     // 0-10: requirements addressed
+  qualityScore: number;      // 0-10: writing quality
+  formatScore: number;       // 0-10: formatting rules followed
+
   formatChecks: FormatChecks;
+
   issues: ValidationIssueV21[];
   metricsVerification: MetricVerificationV21[];
   requirementsCoverage: RequirementCoverageV21[];
+
+  summary: {
+    totalIssues: number;
+    blockers: number;
+    warnings: number;
+    suggestions: number;
+  };
 }
 
 export interface ValidationIssueV21 {
