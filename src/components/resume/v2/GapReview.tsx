@@ -36,6 +36,7 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
   const [data, setData] = useState<ReviewData | null>(null);
   const [globalInstructions, setGlobalInstructions] = useState('');
   const [acknowledgedGaps, setAcknowledgedGaps] = useState<string[]>([]);
+  const [acknowledgedBlockers, setAcknowledgedBlockers] = useState<string[]>([]);
   const [approving, setApproving] = useState(false);
 
   const fetchReviewData = useCallback(async () => {
@@ -113,6 +114,12 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
   function toggleGapAcknowledged(gap: string) {
     setAcknowledgedGaps((prev) =>
       prev.includes(gap) ? prev.filter((g) => g !== gap) : [...prev, gap]
+    );
+  }
+
+  function toggleBlockerAcknowledged(blocker: string) {
+    setAcknowledgedBlockers((prev) =>
+      prev.includes(blocker) ? prev.filter((b) => b !== blocker) : [...prev, blocker]
     );
   }
 
@@ -198,10 +205,24 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
           <h3 className="text-lg font-bold text-red-800 mb-4">
             Blockers ({blockerWarnings.length})
           </h3>
+          <p className="text-sm text-red-700 mb-4">
+            These are significant gaps. Acknowledge them to proceed anyway.
+          </p>
           <ul className="space-y-3">
             {blockerWarnings.map((warning, i) => (
               <li key={i} className="bg-white rounded p-4 border border-red-200">
-                <div className="font-medium text-red-800">{warning.message}</div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="font-medium text-red-800">{warning.message}</div>
+                  <label className="flex items-center gap-2 cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={acknowledgedBlockers.includes(warning.message)}
+                      onChange={() => toggleBlockerAcknowledged(warning.message)}
+                      className="rounded"
+                    />
+                    <span className="text-sm text-gray-600">Acknowledge</span>
+                  </label>
+                </div>
               </li>
             ))}
           </ul>
@@ -387,7 +408,12 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
 
       {/* Approve Button */}
       <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 space-x-4">
+          {blockerWarnings.length > 0 && (
+            <span>
+              {acknowledgedBlockers.length}/{blockerWarnings.length} blockers acknowledged
+            </span>
+          )}
           {gapAnalysis.honestGaps.length > 0 && (
             <span>
               {acknowledgedGaps.length}/{gapAnalysis.honestGaps.length} gaps acknowledged
@@ -398,7 +424,8 @@ export function GapReview({ sessionId, onApprove }: GapReviewProps) {
           onClick={handleApprove}
           disabled={
             approving ||
-            blockerWarnings.length > 0 ||
+            (blockerWarnings.length > 0 &&
+              acknowledgedBlockers.length < blockerWarnings.length) ||
             (gapAnalysis.honestGaps.length > 0 &&
               acknowledgedGaps.length < gapAnalysis.honestGaps.length)
           }
