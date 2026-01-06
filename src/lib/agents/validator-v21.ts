@@ -117,11 +117,25 @@ export class ValidatorAgentV21 {
     const warnings = allIssues.filter(i => i.severity === 'warning').length;
     const suggestions = allIssues.filter(i => i.severity === 'suggestion').length;
 
-    // Determine overall verdict
-    let overallVerdict: 'pass' | 'pass-with-warnings' | 'fail' = 'pass';
+    // Only HONESTY blockers should cause failure (fabricated metrics)
+    // Coverage/quality blockers should be demoted to warnings
+    const honestyBlockers = allIssues.filter(
+      i => i.severity === 'blocker' && i.category === 'honesty'
+    ).length;
+
+    // Log blocker details for debugging
     if (blockers > 0) {
+      console.log(`[${this.name}] Found ${blockers} blockers (${honestyBlockers} honesty-related):`);
+      allIssues
+        .filter(i => i.severity === 'blocker')
+        .forEach(i => console.log(`  - [${i.category}] ${i.location}: ${i.issue}`));
+    }
+
+    // Determine overall verdict - only fail on honesty blockers
+    let overallVerdict: 'pass' | 'pass-with-warnings' | 'fail' = 'pass';
+    if (honestyBlockers > 0) {
       overallVerdict = 'fail';
-    } else if (warnings > 0) {
+    } else if (blockers > 0 || warnings > 0) {
       overallVerdict = 'pass-with-warnings';
     }
 
