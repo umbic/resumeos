@@ -1,6 +1,7 @@
 import { pgTable, text, integer, timestamp, jsonb, uuid, serial } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import type { JDAnalysis, VerbTracker, GeneratedResume, Gap, QualityScore, RefinementMessage, KeywordGap } from '../types';
+import type { PipelineSession, PipelineDiagnostics, PipelineState } from '../types/v2';
 
 // Custom vector type for pgvector
 // Note: Vercel Postgres supports pgvector - we'll handle vectors as text and cast in queries
@@ -119,6 +120,11 @@ export const sessions = pgTable('sessions', {
 
   // Chat refinement history
   refinementHistory: jsonb('refinement_history').$type<RefinementMessage[]>().default([]),
+
+  // V2 Pipeline columns
+  v2Session: jsonb('v2_session').$type<PipelineSession | null>(),
+  v2Diagnostics: jsonb('v2_diagnostics').$type<PipelineDiagnostics | null>(),
+  v2Status: text('v2_status').$type<PipelineState | null>(),
 
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

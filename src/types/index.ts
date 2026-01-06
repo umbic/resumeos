@@ -166,3 +166,9 @@ export interface RefinementMessage {
   content: string;
   timestamp: string;     // ISO date string
 }
+
+// ============================================
+// V2 Multi-Agent Pipeline Types
+// ============================================
+
+export * from './v2';
