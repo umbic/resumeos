@@ -202,12 +202,6 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <a
-              href="/v2.1"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              Try V2.1 (New)
-            </a>
             {state !== 'list' && state !== 'input' && (
               <button
                 onClick={handleReset}
@@ -225,12 +219,12 @@ export default function Home() {
             {/* New Session Button */}
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Past Sessions</h2>
-              <button
-                onClick={handleNewSession}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center gap-2"
+              <a
+                href="/v3"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center gap-2"
               >
-                <span className="text-xl">+</span> Generate New Resume
-              </button>
+                <span className="text-xl">+</span> Generate New Resume (V3)
+              </a>
             </div>
 
             {/* Sessions List */}
@@ -244,14 +238,14 @@ export default function Home() {
                 <div className="text-6xl mb-4">📄</div>
                 <h3 className="text-xl font-bold mb-2">No sessions yet</h3>
                 <p className="text-gray-600 mb-6">
-                  Start by generating your first tailored resume
+                  Start by generating your first tailored resume with V3
                 </p>
-                <button
-                  onClick={handleNewSession}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg"
+                <a
+                  href="/v3"
+                  className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg"
                 >
-                  Generate New Resume
-                </button>
+                  Generate New Resume (V3)
+                </a>
               </div>
             ) : (
               <div className="space-y-3">
