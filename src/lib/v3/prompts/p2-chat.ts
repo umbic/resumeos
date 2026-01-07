@@ -225,7 +225,7 @@ Return ONLY valid JSON:
 
 1. **1 overview + 3 bullets** - Exactly this structure
 2. **Overview: 40-60 words** - Count carefully
-3. **Bullets: 25-40 words each** - Count carefully
+⚠️ 3. **Bullets: EXACTLY 25-40 words each** - Count EVERY word. Bullets under 25 words WILL BE REJECTED! Target 30-35 words per bullet.
 4. **patternProof REQUIRED** - Each bullet must explain how it proves a pattern
 5. **NO BANNED BASE IDs** - Never use: ${bannedBaseIds.join(', ')}
 6. **NO BANNED VERBS** - Never start with: ${bannedVerbs.join(', ')}
@@ -234,6 +234,8 @@ Return ONLY valid JSON:
 9. **Final coverage report** - Show complete JD coverage analysis
 10. **No forbidden words** - Never use: leveraged, utilized, spearheaded, synergy
 11. **No emdashes** - Use commas or periods instead of —
+
+⚠️ WORD COUNT CHECK: Each P2 bullet MUST have at least 25 words. Count carefully before returning!
 
 Return ONLY the JSON object. No markdown, no explanations.`;
 }

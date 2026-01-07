@@ -155,7 +155,7 @@ Return ONLY valid JSON:
 ## CRITICAL REQUIREMENTS
 
 1. **Exactly 4 overviews** - One for each position (3, 4, 5, 6)
-2. **Word count: 20-40 words each** - Count carefully
+⚠️ 2. **Word count: EXACTLY 20-40 words each** - Count EVERY word. Overviews under 20 words WILL BE REJECTED! Target 25-30 words.
 3. **NO BANNED VERBS** - Never start with: ${allUsedVerbs.join(', ')}
 4. **Unique verbs within P3-P6** - Each overview starts with DIFFERENT verb
 5. **Position numbers must be 3, 4, 5, 6** - In that order
@@ -163,6 +163,8 @@ Return ONLY valid JSON:
 7. **Show progression** - Earlier roles should feel like building blocks
 8. **No forbidden words** - Never use: leveraged, utilized, spearheaded, synergy
 9. **No emdashes** - Use commas or periods instead of —
+
+⚠️ WORD COUNT CHECK: Each overview MUST have at least 20 words. Count carefully before returning!
 
 ## SUGGESTED CAREER VERBS (not yet used)
 

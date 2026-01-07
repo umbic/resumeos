@@ -40,7 +40,7 @@ import {
 import { getPosition, getPositions3to6 } from './content-loader';
 
 // Configuration
-const MAX_RETRIES = 2;
+const MAX_RETRIES = 3;
 const DEFAULT_MAX_TOKENS = 4096;
 
 // Step names for diagnostics
@@ -147,18 +147,18 @@ export async function runV3Pipeline(
       return createFailedResult(sessionId, diagnostics, 'Position 1 not found in profile');
     }
 
-    // Build state for P1 validation
+    // Build state for P1 validation (deduplicate to avoid double-counting)
     const stateForP1: AccumulatedState = {
       ...createEmptyState(),
-      allUsedBaseIds: chOutput.stateForDownstream.usedBaseIds,
-      allUsedVerbs: [
+      allUsedBaseIds: [...new Set(chOutput.stateForDownstream.usedBaseIds)],
+      allUsedVerbs: [...new Set([
         ...summaryOutput.stateForDownstream.usedVerbs,
         ...chOutput.stateForDownstream.usedVerbs,
-      ],
-      allUsedMetrics: [
+      ])],
+      allUsedMetrics: [...new Set([
         ...summaryOutput.stateForDownstream.usedMetrics,
         ...chOutput.stateForDownstream.usedMetrics,
-      ],
+      ])],
     };
 
     const p1Result = await runStep<P1ChatOutput>(
@@ -189,23 +189,23 @@ export async function runV3Pipeline(
       return createFailedResult(sessionId, diagnostics, 'Position 2 not found in profile');
     }
 
-    // Build state for P2 validation
+    // Build state for P2 validation (deduplicate)
     const stateForP2: AccumulatedState = {
       ...createEmptyState(),
-      allUsedBaseIds: [
+      allUsedBaseIds: [...new Set([
         ...chOutput.stateForDownstream.usedBaseIds,
         ...p1Output.stateForDownstream.usedBaseIds,
-      ],
-      allUsedVerbs: [
+      ])],
+      allUsedVerbs: [...new Set([
         ...summaryOutput.stateForDownstream.usedVerbs,
         ...chOutput.stateForDownstream.usedVerbs,
         ...p1Output.stateForDownstream.usedVerbs,
-      ],
-      allUsedMetrics: [
+      ])],
+      allUsedMetrics: [...new Set([
         ...summaryOutput.stateForDownstream.usedMetrics,
         ...chOutput.stateForDownstream.usedMetrics,
         ...p1Output.stateForDownstream.usedMetrics,
-      ],
+      ])],
     };
 
     const p2Result = await runStep<P2ChatOutput>(
@@ -237,13 +237,13 @@ export async function runV3Pipeline(
       diagnostics.warnings.push(`Only ${positions3to6.length} positions available for P3-P6 (expected 4)`);
     }
 
-    // Collect all verbs used so far
-    const allUsedVerbs = [
+    // Collect all verbs used so far (deduplicated)
+    const allUsedVerbs = [...new Set([
       ...summaryOutput.stateForDownstream.usedVerbs,
       ...chOutput.stateForDownstream.usedVerbs,
       ...p1Output.stateForDownstream.usedVerbs,
       ...p2Output.stateForDownstream.usedVerbs,
-    ];
+    ])];
 
     // Build state for P3-P6 validation
     const stateForP3P6: AccumulatedState = {

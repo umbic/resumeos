@@ -30,9 +30,13 @@ export function validateJDOutput(output: unknown): ValidationResult {
   if (!data.sections || data.sections.length === 0) {
     issues.push('No sections extracted');
   } else {
+    // Sections that are inherently short (e.g., Education) may have fewer phrases
+    const shortSectionNames = ['education', 'location', 'salary', 'benefits', 'compensation'];
     for (const section of data.sections) {
-      if (!section.keyPhrases || section.keyPhrases.length < 3) {
-        issues.push(`Section "${section.name}" has fewer than 3 key phrases`);
+      const isShortSection = shortSectionNames.some(s => section.name.toLowerCase().includes(s));
+      const minPhrases = isShortSection ? 1 : 3;
+      if (!section.keyPhrases || section.keyPhrases.length < minPhrases) {
+        issues.push(`Section "${section.name}" has fewer than ${minPhrases} key phrases`);
       }
     }
   }
@@ -273,7 +277,7 @@ export function validateP1Output(
   return {
     valid: issues.length === 0,
     issues,
-    canRetry: !issues.some((i) => i.includes('banned')),
+    canRetry: true, // Always allow retry for P1
   };
 }
 
@@ -363,7 +367,7 @@ export function validateP2Output(
   return {
     valid: issues.length === 0,
     issues,
-    canRetry: !issues.some((i) => i.includes('banned')),
+    canRetry: true, // Always allow retry for P2
   };
 }
 

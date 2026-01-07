@@ -6,7 +6,7 @@ import Anthropic from '@anthropic-ai/sdk';
 const client = new Anthropic();
 
 // Default model for V3 pipeline
-export const V3_MODEL = 'claude-opus-4-5-20250514';
+export const V3_MODEL = 'claude-sonnet-4-20250514';
 
 export interface ClaudeRequest {
   model?: string;

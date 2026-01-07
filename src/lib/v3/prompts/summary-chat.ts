@@ -131,13 +131,15 @@ Return ONLY valid JSON matching this structure:
 
 ## CRITICAL REQUIREMENTS
 
-1. **Word count**: MUST be 140-160 words. Count carefully.
+⚠️ **1. Word count**: MUST be EXACTLY 140-160 words. Count every single word. Summaries under 140 words or over 160 words WILL BE REJECTED. This is the most important requirement!
 2. **JD language**: Use at least 3 HIGH-weight phrases from the JD naturally
 3. **No forbidden words**: Never use: leveraged, utilized, spearheaded, synergy, passionate
 4. **No emdashes**: Use commas or periods instead of —
 5. **Specific metrics**: Use exact numbers from sources, don't round or generalize
 6. **Active voice**: Start sentences with strong verbs, not "I" or passive constructions
 7. **Sources only**: Every fact must come from the provided summaries
+
+⚠️ WORD COUNT CHECK: Before returning, count every word in your summary. If it's not between 140-160, rewrite it!
 
 Return ONLY the JSON object. No markdown formatting, no explanations.`;
 }

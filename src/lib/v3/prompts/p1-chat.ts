@@ -107,16 +107,18 @@ ${gaps || 'No significant gaps identified'}
 These HIGH-weight phrases haven't been used yet. Incorporate where natural:
 ${unusedHighPhrases || 'All high-priority phrases have been used'}
 
-## BANNED ITEMS (Already Used)
+## ⛔ BANNED ITEMS - CRITICAL: DO NOT USE
 
-**DO NOT USE these base IDs** (already in Career Highlights):
-${bannedBaseIds.join(', ')}
+### Banned Base IDs (already in Career Highlights):
+${bannedBaseIds.length > 0 ? bannedBaseIds.map(id => `- ❌ ${id}`).join('\n') : '(none)'}
 
-**DO NOT START bullets with these verbs** (already used):
-${bannedVerbs.join(', ')}
+### Banned Starting Verbs (already used in Summary/CH):
+${bannedVerbs.length > 0 ? bannedVerbs.map(v => `- ❌ ${v}`).join('\n') : '(none)'}
 
-**DO NOT REPEAT these metrics** (already used):
-${bannedMetrics.join(', ') || 'None'}
+### ⚠️ BANNED METRICS - NEVER REPEAT THESE NUMBERS:
+${bannedMetrics.length > 0 ? bannedMetrics.map(m => `- ❌ "${m}" - DO NOT USE THIS METRIC`).join('\n') : '(none)'}
+
+**If a source bullet contains a banned metric, you MUST rewrite it with a DIFFERENT metric or remove the metric entirely.**
 
 ## AVAILABLE CONTENT
 

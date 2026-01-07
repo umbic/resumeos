@@ -98,9 +98,15 @@ ${issuesBlock}
 ## YOUR TASK
 
 1. **Select 5 Career Highlights** - Choose the best 5 base items and their optimal variants
-2. **Write each highlight** - 35-50 words, format: **Bold Headline**: Achievement narrative
+2. **Write each highlight** - Format: **Bold Headline**: [35-50 word achievement narrative]
+   - The headline is SHORT (2-4 words)
+   - The content AFTER the colon must be 35-50 words
+   - DO NOT count the headline in the word count
+   - Example: "**Digital Transformation**: [35-50 words of content here...]"
 3. **Map to JD** - Show exactly which JD phrases each highlight addresses
 4. **Track coverage** - Which JD sections are now addressed vs still have gaps
+
+⚠️ WORD COUNT CRITICAL: Each highlight's content (AFTER the colon) must be 35-50 words. Count carefully!
 
 ## OUTPUT FORMAT
 
@@ -157,9 +163,9 @@ Return ONLY valid JSON:
 
 1. **Exactly 5 highlights** - No more, no less
 2. **Unique base IDs** - Each baseId can only appear once
-3. **Unique verbs** - Each highlight must start with a DIFFERENT action verb
-4. **Word count 35-50** - Count carefully for each highlight
-5. **Bold headline format** - **Headline**: Description
+3. **Unique verbs** - Each highlight content must start with a DIFFERENT action verb (after the headline colon)
+4. ⚠️ **Word count 35-50** - Content AFTER the headline colon must be 35-50 words. Count ONLY the words after ":". This is CRITICAL - highlights under 35 words will be rejected!
+5. **Bold headline format** - **Short Headline**: Description (headline is 2-4 words max)
 6. **At least 2 JD mappings per highlight** - Show how each addresses the JD
 7. **No forbidden words** - Never use: leveraged, utilized, spearheaded, synergy
 8. **No emdashes** - Use commas or periods instead of —
