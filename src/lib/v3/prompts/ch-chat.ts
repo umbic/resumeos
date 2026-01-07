@@ -6,7 +6,6 @@ import type {
   CHSource,
   SummaryChatOutput,
   CHChatOutput,
-  ThematicAnchors,
 } from '../types';
 import { UMBERTO_VOICE_GUIDE_CONDENSED } from '../voice-guide';
 

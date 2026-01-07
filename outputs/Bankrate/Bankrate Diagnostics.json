@@ -1,0 +1,4578 @@
+{
+  "success": true,
+  "sessionId": "aa27555a-0ad3-42fa-b0b0-10092fb2ef2f",
+  "status": "complete",
+  "createdAt": "2026-01-06T18:10:57.379Z",
+  "updatedAt": "2026-01-06T18:15:26.187Z",
+  "session": {
+    "id": "aa27555a-0ad3-42fa-b0b0-10092fb2ef2f",
+    "status": "complete",
+    "createdAt": "2026-01-06T18:10:57.379Z",
+    "profileId": "default",
+    "updatedAt": "2026-01-06T18:15:26.187Z",
+    "allocation": {
+      "summaries": [
+        {
+          "slot": "summary-source-1",
+          "score": 12,
+          "content": "Umberto builds brands for financial services companies navigating a fundamental shift: from product-led positioning to customer-centric differentiation. Over 15 years, he's partnered with institutions like American Express, Capital One, New York Life, Synovus, and UBS to develop brand strategies that resonate in categories where trust is everything and switching costs are high. His work spans retail banking, wealth management, insurance, and corporate payments - always focused on translating complex value propositions into clear, compelling stories. At Deloitte Digital, he led engagements that connected brand strategy to business outcomes: CRM transformation, customer acquisition, and loyalty architecture. He understands the regulatory realities and competitive dynamics of financial services - and how to build brands that earn attention in a category defined by sameness.",
+          "contentId": "SUM-FS"
+        },
+        {
+          "slot": "summary-source-2",
+          "score": 4,
+          "content": "Umberto defines what brands stand for - and builds the systems that make it stick. Over 15 years, he's led brand strategy engagements for Fortune 500 companies including Deloitte, GE, American Express, and Pfizer - developing positioning, architecture, and messaging platforms that align organizations and differentiate in market. His work spans corporate repositioning, M&A brand integration, and portfolio architecture - always focused on turning strategic intent into executional clarity. At Deloitte Digital, he built the Brand Strategy practice from the ground up, creating methodologies that connect brand to business outcomes. He believes brand strategy isn't about taglines - it's about making choices that compound over time.",
+          "contentId": "SUM-BS"
+        }
+      ],
+      "allocationLog": [
+        {
+          "slot": "summary-source-1",
+          "action": "assigned",
+          "reason": "Summary source 1 (score: 12)",
+          "contentId": "SUM-FS"
+        },
+        {
+          "slot": "summary-source-2",
+          "action": "assigned",
+          "reason": "Summary source 2 (score: 4)",
+          "contentId": "SUM-BS"
+        },
+        {
+          "slot": "ch-1",
+          "action": "assigned",
+          "reason": "Best available (score: 9)",
+          "contentId": "CH-04-V5",
+          "blockedVariants": [
+            "CH-04-V1",
+            "CH-04-V2"
+          ]
+        },
+        {
+          "slot": "ch-2",
+          "action": "assigned",
+          "reason": "Best available (score: 6)",
+          "contentId": "CH-02-V5",
+          "blockedVariants": [
+            "CH-02",
+            "CH-02-V1"
+          ]
+        },
+        {
+          "slot": "ch-3",
+          "action": "assigned",
+          "reason": "Best available (score: 3)",
+          "contentId": "CH-08",
+          "blockedVariants": [
+            "CH-08-V1",
+            "CH-08-V2"
+          ]
+        },
+        {
+          "slot": "ch-4",
+          "action": "assigned",
+          "reason": "Best available (score: 3)",
+          "contentId": "CH-09",
+          "blockedVariants": [
+            "CH-09-V1",
+            "CH-09-V2"
+          ]
+        },
+        {
+          "slot": "ch-5",
+          "action": "assigned",
+          "reason": "Best available (score: 1)",
+          "contentId": "CH-01-V5",
+          "blockedVariants": [
+            "CH-01",
+            "CH-01-V1"
+          ]
+        },
+        {
+          "slot": "p1-bullet-1",
+          "action": "assigned",
+          "reason": "Best available after CH allocation (score: 6)",
+          "contentId": "P1-B01"
+        },
+        {
+          "slot": "p1-bullet-2",
+          "action": "assigned",
+          "reason": "Best available after CH allocation (score: 6)",
+          "contentId": "P1-B10"
+        },
+        {
+          "slot": "p1-bullet-3",
+          "action": "assigned",
+          "reason": "Best available after CH allocation (score: 3)",
+          "contentId": "P1-B04-V1"
+        },
+        {
+          "slot": "p1-bullet-4",
+          "action": "assigned",
+          "reason": "Best available after CH allocation (score: 3)",
+          "contentId": "P1-B05-V1"
+        },
+        {
+          "slot": "p2-bullet-1",
+          "action": "assigned",
+          "reason": "Best available after CH+P1 allocation (score: 3)",
+          "contentId": "P2-B03-V2"
+        },
+        {
+          "slot": "p2-bullet-2",
+          "action": "assigned",
+          "reason": "Best available after CH+P1 allocation (score: 3)",
+          "contentId": "P2-B04"
+        },
+        {
+          "slot": "p2-bullet-3",
+          "action": "assigned",
+          "reason": "Best available after CH+P1 allocation (score: 3)",
+          "contentId": "P2-B06"
+        },
+        {
+          "slot": "p1-overview",
+          "action": "assigned",
+          "reason": "Position 1 overview",
+          "contentId": "OV-P1"
+        },
+        {
+          "slot": "p2-overview",
+          "action": "assigned",
+          "reason": "Position 2 overview",
+          "contentId": "OV-P2"
+        }
+      ],
+      "careerHighlights": [
+        {
+          "slot": "ch-1",
+          "score": 9,
+          "content": "Elevated Deloitte's perception among C-suite executives through comprehensive brand architecture transformation. Generated 43% increase in qualified opportunities and 33% improvement in brand relevance.",
+          "contentId": "CH-04-V5"
+        },
+        {
+          "slot": "ch-2",
+          "score": 6,
+          "content": "Elevated sports league from regional interest to national phenomenon through content-driven fan engagement. Achieved 50% YoY attendance growth and $60M media rights deal representing 40x value increase.",
+          "contentId": "CH-02-V5"
+        },
+        {
+          "slot": "ch-3",
+          "score": 3,
+          "content": "Following health system's acquisition of regional Medicaid provider, led complete rebrand establishing human-centered positioning. Developed 'Wholecare' platform and campaign that drove 30,000 member increase and scaled total membership to 410,000 within 18 months.",
+          "contentId": "CH-08"
+        },
+        {
+          "slot": "ch-4",
+          "score": 3,
+          "content": "Led CRM strategy transformation for global payment company's corporate cards, advancing from promotions-based approach to AI-powered personalization. Developed framework and tools that delivered 5% retention lift, 12% cross-sell increase, and 32% reduction in production costs.",
+          "contentId": "CH-09"
+        },
+        {
+          "slot": "ch-5",
+          "score": 1,
+          "content": "Transformed brand consulting into $40M growth engine through strategic engagements that repositioned legacy brands. Developed AI accelerators improving client speed-to-market by 23%.",
+          "contentId": "CH-01-V5"
+        }
+      ],
+      "position1Bullets": [
+        {
+          "slot": "p1-bullet-1",
+          "score": 6,
+          "content": "Developed a differentiated and category-distinct brand strategy and creative platform for a regional bank looking to compete against national players. Work contributed to 9% increase in customer acquisition, 12% improvement in brand favorability, and 64.3% revenue growth over three years.",
+          "contentId": "P1-B01"
+        },
+        {
+          "slot": "p1-bullet-2",
+          "score": 6,
+          "content": "Launched bold brand platform for Fortune 500 insurer's wealth management division, establishing distinctive positioning in a category defined by sameness. Work drove 23% increase in brand awareness and 37% improvement in favorability among target segments.",
+          "contentId": "P1-B10"
+        },
+        {
+          "slot": "p1-bullet-3",
+          "score": 3,
+          "content": "Repositioned recovery footwear brand from niche player to category leader through strategic brand platform development. Drove 191% sales increase, 54% new customer acquisition, and sustained double-digit YoY growth.",
+          "contentId": "P1-B04-V1"
+        },
+        {
+          "slot": "p1-bullet-4",
+          "score": 3,
+          "content": "Built unified brand platform for major health system aligning narrative, patient experience, and communications. Drove 10% awareness lift, 300% social engagement increase, and 1.6M new patient appointments.",
+          "contentId": "P1-B05-V1"
+        }
+      ],
+      "position2Bullets": [
+        {
+          "slot": "p2-bullet-1",
+          "score": 3,
+          "content": "Built a data-driven brand architecture system to unify Deloitte Consulting's positioning across service lines. Framework drove 3x increase in marketing-attributed pipeline.",
+          "contentId": "P2-B03-V2"
+        },
+        {
+          "slot": "p2-bullet-2",
+          "score": 3,
+          "content": "At a time when the league was experiencing stagnation in reach and relevance, led the development of comprehensive brand communications strategy that repositioned the league for national growth. Work drove 100%+ increase in digital engagement.",
+          "contentId": "P2-B04"
+        },
+        {
+          "slot": "p2-bullet-3",
+          "score": 3,
+          "content": "Developed and launched a new brand strategy and creative platform for a national dental services organization. Work drove 16% increase in patient demand and 14% revenue growth.",
+          "contentId": "P2-B06"
+        }
+      ],
+      "position1Overview": {
+        "slot": "p1-overview",
+        "score": 0,
+        "content": "Promoted to lead Deloitte's Brand Strategy & Activation practice during a time when the firm was aggressively expanding into creative and marketing services. Built the practice from $15M to $40M in revenue by assembling a team of 35+ strategists and establishing credibility with Fortune 500 CMOs seeking an alternative to traditional agencies.",
+        "contentId": "OV-P1"
+      },
+      "position2Overview": {
+        "slot": "p2-overview",
+        "score": 0,
+        "content": "Recruited to establish a new brand consulting model that bridges creative excellence with strategic rigor. Built methodology and team that could compete with both agencies and consultancies, delivering integrated brand strategy engagements for Fortune 500 clients.",
+        "contentId": "OV-P2"
+      }
+    },
+    "jdStrategy": {
+      "role": {
+        "level": "senior",
+        "scope": "Unknown",
+        "title": "Unknown - Brand/Content Strategy Role",
+        "function": "brand-strategy",
+        "reportsTo": null,
+        "keyStakeholders": [
+          "Unknown"
+        ],
+        "functionKeywords": [
+          "brand-strategy",
+          "content-strategy",
+          "brand-stewardship",
+          "strategic-guidance"
+        ]
+      },
+      "company": {
+        "name": "Unknown",
+        "industry": "Financial Services",
+        "competitors": [
+          "AMEX",
+          "Synovus Bank",
+          "New York Life Investments",
+          "Capital One",
+          "PNC"
+        ],
+        "subIndustry": null,
+        "cultureSignals": [
+          "brand-focused",
+          "stewardship-oriented",
+          "guidance-driven"
+        ],
+        "industryKeywords": [
+          "financial-services",
+          "banking",
+          "investment-management",
+          "insurance"
+        ],
+        "companySpecificLanguage": [
+          "brand expertise",
+          "stewardship",
+          "guidance"
+        ]
+      },
+      "language": {
+        "termsToAvoid": [
+          "revenue-focused",
+          "sales-driven",
+          "ROI-centric"
+        ],
+        "toneGuidance": "Strategic, thoughtful, and consultative - emphasizing wisdom and guidance over tactical execution",
+        "termsToMirror": [
+          {
+            "jdTerm": "brand expertise",
+            "context": "In describing strategic initiatives",
+            "naturalUsage": "brand expertise in developing..."
+          },
+          {
+            "jdTerm": "stewardship",
+            "context": "When discussing brand management approach",
+            "naturalUsage": "brand stewardship across..."
+          },
+          {
+            "jdTerm": "guidance",
+            "context": "In leadership and advisory contexts",
+            "naturalUsage": "strategic guidance to..."
+          }
+        ]
+      },
+      "positioning": {
+        "primaryAngle": {
+          "angle": "Brand steward and strategic guide with deep financial services expertise",
+          "jdEvidence": "I think this is more about brand, expertise and stewardship and guidance",
+          "contentImplication": "Lead with brand leadership and strategic guidance capabilities, emphasize thought leadership and advisory roles"
+        },
+        "supportingAngles": [
+          {
+            "angle": "Content strategist who understands financial services customer journey",
+            "jdEvidence": "I also do have content strategy experience... AMEXCRM we can also talk about content strategy",
+            "contentImplication": "Highlight content strategy work within financial services context, emphasize customer-centric approaches"
+          },
+          {
+            "angle": "Cross-functional leader bridging brand, content, and customer experience",
+            "jdEvidence": "AMEXCRM we can also talk about content strategy there",
+            "contentImplication": "Show integration of CRM, content, and brand initiatives"
+          }
+        ],
+        "narrativeDirection": "Position as a strategic brand leader who brings deep financial services expertise to guide organizations through brand transformation and evolution. Emphasize stewardship mindset over revenue metrics, focusing on long-term brand value creation and strategic guidance. Frame content strategy work as integral to brand building and customer experience excellence."
+      },
+      "requirements": {
+        "mustHave": [
+          {
+            "category": "industry",
+            "priority": "critical",
+            "jdEvidence": "I have a lot of financial services experience, especially with AMEX Synovus Bank, New York life investments, capital one PNC",
+            "requirement": "Financial services experience"
+          },
+          {
+            "category": "skill",
+            "priority": "critical",
+            "jdEvidence": "I also do have content strategy experience",
+            "requirement": "Content strategy expertise"
+          },
+          {
+            "category": "experience",
+            "priority": "critical",
+            "jdEvidence": "I think this is more about brand, expertise and stewardship and guidance",
+            "requirement": "Brand expertise and stewardship capabilities"
+          }
+        ],
+        "niceToHave": [
+          {
+            "category": "experience",
+            "priority": "important",
+            "jdEvidence": "when we speak about the AMEXCRM we can also talk about content strategy there",
+            "requirement": "CRM experience with content strategy integration"
+          }
+        ]
+      },
+      "scoringSignals": {
+        "themes": [
+          "brand-stewardship",
+          "strategic-guidance",
+          "brand-transformation",
+          "customer-centricity",
+          "thought-leadership"
+        ],
+        "functions": [
+          "brand-strategy",
+          "content-strategy",
+          "brand-management",
+          "customer-experience",
+          "strategic-communications"
+        ],
+        "industries": [
+          "financial-services",
+          "banking",
+          "investment-management",
+          "insurance",
+          "fintech"
+        ]
+      }
+    },
+    "validation": {
+      "issues": [
+        {
+          "issue": "Word \"brand\" used 20 times",
+          "category": "format",
+          "evidence": "Found in: summary, career-highlight-1, career-highlight-5, p1-overview, p1-bullet-1, p1-bullet-2, p1-bullet-3, p1-bullet-4, p2-overview, p2-bullet-1, p2-bullet-2, p2-bullet-3",
+          "location": "summary, career-highlight-1, career-highlight-5, p1-overview, p1-bullet-1, p1-bullet-2, p1-bullet-3, p1-bullet-4, p2-overview, p2-bullet-1, p2-bullet-2, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"brand\""
+        },
+        {
+          "issue": "Word \"increase\" used 10 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-1, career-highlight-3, career-highlight-4, p1-bullet-1, p1-bullet-2, p1-bullet-3, p1-bullet-4, p2-bullet-1, p2-bullet-2, p2-bullet-3",
+          "location": "career-highlight-1, career-highlight-3, career-highlight-4, p1-bullet-1, p1-bullet-2, p1-bullet-3, p1-bullet-4, p2-bullet-1, p2-bullet-2, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"increase\""
+        },
+        {
+          "issue": "Word \"growth\" used 8 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-2, career-highlight-5, p1-bullet-1, p1-bullet-3, p2-bullet-2, p2-bullet-3",
+          "location": "career-highlight-2, career-highlight-5, p1-bullet-1, p1-bullet-3, p2-bullet-2, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"growth\""
+        },
+        {
+          "issue": "Word \"strategy\" used 6 times",
+          "category": "format",
+          "evidence": "Found in: summary, p1-overview, p1-bullet-1, p2-overview, p2-bullet-2, p2-bullet-3",
+          "location": "summary, p1-overview, p1-bullet-1, p2-overview, p2-bullet-2, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"strategy\""
+        },
+        {
+          "issue": "Word \"platform\" used 6 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-3, p1-bullet-1, p1-bullet-2, p1-bullet-3, p1-bullet-4, p2-bullet-3",
+          "location": "career-highlight-3, p1-bullet-1, p1-bullet-2, p1-bullet-3, p1-bullet-4, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"platform\""
+        },
+        {
+          "issue": "Word \"drove\" used 6 times",
+          "category": "format",
+          "evidence": "Found in: p1-bullet-2, p1-bullet-3, p1-bullet-4, p2-bullet-1, p2-bullet-2, p2-bullet-3",
+          "location": "p1-bullet-2, p1-bullet-3, p1-bullet-4, p2-bullet-1, p2-bullet-2, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"drove\""
+        },
+        {
+          "issue": "Word \"services\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: summary, p1-overview, p2-bullet-3",
+          "location": "summary, p1-overview, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"services\""
+        },
+        {
+          "issue": "Word \"work\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: summary, p1-bullet-1, p2-bullet-2, p2-bullet-3",
+          "location": "summary, p1-bullet-1, p2-bullet-2, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"work\""
+        },
+        {
+          "issue": "Word \"deloitte\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: summary, career-highlight-1, p2-bullet-1",
+          "location": "summary, career-highlight-1, p2-bullet-1",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"deloitte\""
+        },
+        {
+          "issue": "Word \"acquisition\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: summary, career-highlight-3, p1-bullet-1, p1-bullet-3",
+          "location": "summary, career-highlight-3, p1-bullet-1, p1-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"acquisition\""
+        },
+        {
+          "issue": "Word \"architecture\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: summary, career-highlight-1, p2-bullet-1",
+          "location": "summary, career-highlight-1, p2-bullet-1",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"architecture\""
+        },
+        {
+          "issue": "Word \"strategic\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: summary, career-highlight-5, p1-bullet-3, p2-overview",
+          "location": "summary, career-highlight-5, p1-bullet-3, p2-overview",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"strategic\""
+        },
+        {
+          "issue": "Word \"national\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-2, p1-bullet-1, p2-bullet-2, p2-bullet-3",
+          "location": "career-highlight-2, p1-bullet-1, p2-bullet-2, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"national\""
+        },
+        {
+          "issue": "Word \"system\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-3, p1-bullet-4, p2-bullet-1",
+          "location": "career-highlight-3, p1-bullet-4, p2-bullet-1",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"system\""
+        },
+        {
+          "issue": "Word \"creative\" used 4 times",
+          "category": "format",
+          "evidence": "Found in: p1-overview, p1-bullet-1, p2-overview, p2-bullet-3",
+          "location": "p1-overview, p1-bullet-1, p2-overview, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"creative\""
+        },
+        {
+          "issue": "Word \"transformation\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: summary, career-highlight-1",
+          "location": "summary, career-highlight-1",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"transformation\""
+        },
+        {
+          "issue": "Word \"customer\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: summary, p1-bullet-1, p1-bullet-3",
+          "location": "summary, p1-bullet-1, p1-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"customer\""
+        },
+        {
+          "issue": "Word \"category\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: summary, p1-bullet-2, p1-bullet-3",
+          "location": "summary, p1-bullet-2, p1-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"category\""
+        },
+        {
+          "issue": "Word \"improvement\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-1, p1-bullet-1, p1-bullet-2",
+          "location": "career-highlight-1, p1-bullet-1, p1-bullet-2",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"improvement\""
+        },
+        {
+          "issue": "Word \"league\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-2, p2-bullet-2",
+          "location": "career-highlight-2, p2-bullet-2",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"league\""
+        },
+        {
+          "issue": "Word \"engagement\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-2, p1-bullet-4, p2-bullet-2",
+          "location": "career-highlight-2, p1-bullet-4, p2-bullet-2",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"engagement\""
+        },
+        {
+          "issue": "Word \"health\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-3, p1-bullet-4",
+          "location": "career-highlight-3, p1-bullet-4",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"health\""
+        },
+        {
+          "issue": "Word \"positioning\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-3, p1-bullet-2, p2-bullet-1",
+          "location": "career-highlight-3, p1-bullet-2, p2-bullet-1",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"positioning\""
+        },
+        {
+          "issue": "Word \"developed\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-3, career-highlight-5, p1-bullet-1",
+          "location": "career-highlight-3, career-highlight-5, p1-bullet-1",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"developed\""
+        },
+        {
+          "issue": "Word \"consulting\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: career-highlight-5, p2-overview",
+          "location": "career-highlight-5, p2-overview",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"consulting\""
+        },
+        {
+          "issue": "Word \"revenue\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: p1-overview, p1-bullet-1, p2-bullet-3",
+          "location": "p1-overview, p1-bullet-1, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"revenue\""
+        },
+        {
+          "issue": "Word \"fortune\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: p1-overview, p1-bullet-2, p2-overview",
+          "location": "p1-overview, p1-bullet-2, p2-overview",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"fortune\""
+        },
+        {
+          "issue": "Word \"patient\" used 3 times",
+          "category": "format",
+          "evidence": "Found in: p1-bullet-4, p2-bullet-3",
+          "location": "p1-bullet-4, p2-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Use synonyms or restructure sentences to reduce repetition of \"patient\""
+        },
+        {
+          "issue": "Bullet has 23 words (expected 25-40 words)",
+          "category": "format",
+          "evidence": "Word count: 23",
+          "location": "career-highlight-1",
+          "severity": "warning",
+          "suggestedFix": "Expand bullet with more context or metrics"
+        },
+        {
+          "issue": "Bullet has 22 words (expected 25-40 words)",
+          "category": "format",
+          "evidence": "Word count: 22",
+          "location": "career-highlight-2",
+          "severity": "warning",
+          "suggestedFix": "Expand bullet with more context or metrics"
+        },
+        {
+          "issue": "Bullet has 21 words (expected 25-40 words)",
+          "category": "format",
+          "evidence": "Word count: 21",
+          "location": "career-highlight-3",
+          "severity": "warning",
+          "suggestedFix": "Expand bullet with more context or metrics"
+        },
+        {
+          "issue": "Bullet has 23 words (expected 25-40 words)",
+          "category": "format",
+          "evidence": "Word count: 23",
+          "location": "career-highlight-4",
+          "severity": "warning",
+          "suggestedFix": "Expand bullet with more context or metrics"
+        },
+        {
+          "issue": "Bullet has 21 words (expected 25-40 words)",
+          "category": "format",
+          "evidence": "Word count: 21",
+          "location": "career-highlight-5",
+          "severity": "warning",
+          "suggestedFix": "Expand bullet with more context or metrics"
+        },
+        {
+          "issue": "Bullet has 21 words (expected 25-40 words)",
+          "category": "format",
+          "evidence": "Word count: 21",
+          "location": "p2-bullet-1",
+          "severity": "warning",
+          "suggestedFix": "Expand bullet with more context or metrics"
+        },
+        {
+          "issue": "Overview has 34 words (expected 40-60 words)",
+          "category": "format",
+          "evidence": "Word count: 34",
+          "location": "p2-overview",
+          "severity": "warning",
+          "suggestedFix": "Expand overview to provide more context"
+        },
+        {
+          "issue": "Content strategy could be more prominently featured",
+          "category": "coverage",
+          "evidence": "Only 2 direct mentions of content strategy despite it being high priority",
+          "location": "overall resume",
+          "severity": "suggestion",
+          "suggestedFix": "Consider adding more content strategy language to summary or additional bullets"
+        },
+        {
+          "issue": "Recovery footwear example seems less relevant to financial services focus",
+          "category": "quality",
+          "evidence": "Footwear brand in context of financial services expertise",
+          "location": "p1-bullet-3",
+          "severity": "suggestion",
+          "suggestedFix": "Consider replacing with another financial services example if available"
+        }
+      ],
+      "summary": {
+        "blockers": 0,
+        "warnings": 7,
+        "suggestions": 30,
+        "totalIssues": 37
+      },
+      "formatScore": 5.5,
+      "formatChecks": {
+        "wordVariety": {
+          "passed": false,
+          "overusedWords": [
+            {
+              "word": "brand",
+              "count": 20,
+              "locations": [
+                "summary",
+                "career-highlight-1",
+                "career-highlight-5",
+                "p1-overview",
+                "p1-bullet-1",
+                "p1-bullet-2",
+                "p1-bullet-3",
+                "p1-bullet-4",
+                "p2-overview",
+                "p2-bullet-1",
+                "p2-bullet-2",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "increase",
+              "count": 10,
+              "locations": [
+                "career-highlight-1",
+                "career-highlight-3",
+                "career-highlight-4",
+                "p1-bullet-1",
+                "p1-bullet-2",
+                "p1-bullet-3",
+                "p1-bullet-4",
+                "p2-bullet-1",
+                "p2-bullet-2",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "growth",
+              "count": 8,
+              "locations": [
+                "career-highlight-2",
+                "career-highlight-5",
+                "p1-bullet-1",
+                "p1-bullet-3",
+                "p2-bullet-2",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "strategy",
+              "count": 6,
+              "locations": [
+                "summary",
+                "p1-overview",
+                "p1-bullet-1",
+                "p2-overview",
+                "p2-bullet-2",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "platform",
+              "count": 6,
+              "locations": [
+                "career-highlight-3",
+                "p1-bullet-1",
+                "p1-bullet-2",
+                "p1-bullet-3",
+                "p1-bullet-4",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "drove",
+              "count": 6,
+              "locations": [
+                "p1-bullet-2",
+                "p1-bullet-3",
+                "p1-bullet-4",
+                "p2-bullet-1",
+                "p2-bullet-2",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "services",
+              "count": 4,
+              "locations": [
+                "summary",
+                "p1-overview",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "work",
+              "count": 4,
+              "locations": [
+                "summary",
+                "p1-bullet-1",
+                "p2-bullet-2",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "deloitte",
+              "count": 4,
+              "locations": [
+                "summary",
+                "career-highlight-1",
+                "p2-bullet-1"
+              ]
+            },
+            {
+              "word": "acquisition",
+              "count": 4,
+              "locations": [
+                "summary",
+                "career-highlight-3",
+                "p1-bullet-1",
+                "p1-bullet-3"
+              ]
+            },
+            {
+              "word": "architecture",
+              "count": 4,
+              "locations": [
+                "summary",
+                "career-highlight-1",
+                "p2-bullet-1"
+              ]
+            },
+            {
+              "word": "strategic",
+              "count": 4,
+              "locations": [
+                "summary",
+                "career-highlight-5",
+                "p1-bullet-3",
+                "p2-overview"
+              ]
+            },
+            {
+              "word": "national",
+              "count": 4,
+              "locations": [
+                "career-highlight-2",
+                "p1-bullet-1",
+                "p2-bullet-2",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "system",
+              "count": 4,
+              "locations": [
+                "career-highlight-3",
+                "p1-bullet-4",
+                "p2-bullet-1"
+              ]
+            },
+            {
+              "word": "creative",
+              "count": 4,
+              "locations": [
+                "p1-overview",
+                "p1-bullet-1",
+                "p2-overview",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "transformation",
+              "count": 3,
+              "locations": [
+                "summary",
+                "career-highlight-1"
+              ]
+            },
+            {
+              "word": "customer",
+              "count": 3,
+              "locations": [
+                "summary",
+                "p1-bullet-1",
+                "p1-bullet-3"
+              ]
+            },
+            {
+              "word": "category",
+              "count": 3,
+              "locations": [
+                "summary",
+                "p1-bullet-2",
+                "p1-bullet-3"
+              ]
+            },
+            {
+              "word": "improvement",
+              "count": 3,
+              "locations": [
+                "career-highlight-1",
+                "p1-bullet-1",
+                "p1-bullet-2"
+              ]
+            },
+            {
+              "word": "league",
+              "count": 3,
+              "locations": [
+                "career-highlight-2",
+                "p2-bullet-2"
+              ]
+            },
+            {
+              "word": "engagement",
+              "count": 3,
+              "locations": [
+                "career-highlight-2",
+                "p1-bullet-4",
+                "p2-bullet-2"
+              ]
+            },
+            {
+              "word": "health",
+              "count": 3,
+              "locations": [
+                "career-highlight-3",
+                "p1-bullet-4"
+              ]
+            },
+            {
+              "word": "positioning",
+              "count": 3,
+              "locations": [
+                "career-highlight-3",
+                "p1-bullet-2",
+                "p2-bullet-1"
+              ]
+            },
+            {
+              "word": "developed",
+              "count": 3,
+              "locations": [
+                "career-highlight-3",
+                "career-highlight-5",
+                "p1-bullet-1"
+              ]
+            },
+            {
+              "word": "consulting",
+              "count": 3,
+              "locations": [
+                "career-highlight-5",
+                "p2-overview"
+              ]
+            },
+            {
+              "word": "revenue",
+              "count": 3,
+              "locations": [
+                "p1-overview",
+                "p1-bullet-1",
+                "p2-bullet-3"
+              ]
+            },
+            {
+              "word": "fortune",
+              "count": 3,
+              "locations": [
+                "p1-overview",
+                "p1-bullet-2",
+                "p2-overview"
+              ]
+            },
+            {
+              "word": "patient",
+              "count": 3,
+              "locations": [
+                "p1-bullet-4",
+                "p2-bullet-3"
+              ]
+            }
+          ]
+        },
+        "bulletLengths": {
+          "issues": [
+            {
+              "expected": "25-40 words",
+              "location": "career-highlight-1",
+              "wordCount": 23
+            },
+            {
+              "expected": "25-40 words",
+              "location": "career-highlight-2",
+              "wordCount": 22
+            },
+            {
+              "expected": "25-40 words",
+              "location": "career-highlight-3",
+              "wordCount": 21
+            },
+            {
+              "expected": "25-40 words",
+              "location": "career-highlight-4",
+              "wordCount": 23
+            },
+            {
+              "expected": "25-40 words",
+              "location": "career-highlight-5",
+              "wordCount": 21
+            },
+            {
+              "expected": "25-40 words",
+              "location": "p2-bullet-1",
+              "wordCount": 21
+            }
+          ],
+          "passed": false
+        },
+        "summaryLength": {
+          "passed": true,
+          "expected": "140-160 words",
+          "wordCount": 147
+        },
+        "emdashDetected": {
+          "passed": true,
+          "locations": []
+        },
+        "verbRepetition": {
+          "passed": true,
+          "acrossResumeIssues": [],
+          "withinPositionIssues": []
+        },
+        "overviewLengths": {
+          "issues": [
+            {
+              "expected": "40-60 words",
+              "location": "p2-overview",
+              "wordCount": 34
+            }
+          ],
+          "passed": false
+        }
+      },
+      "honestyScore": 10,
+      "qualityScore": 9,
+      "coverageScore": 9,
+      "overallVerdict": "pass-with-warnings",
+      "metricsVerification": [
+        {
+          "match": true,
+          "metric": "43% increase in qualified opportunities",
+          "location": "career-highlight-1",
+          "sourceId": "CH-04-V5",
+          "sourceValue": "43% increase in qualified opportunities"
+        },
+        {
+          "match": true,
+          "metric": "33% improvement in brand relevance",
+          "location": "career-highlight-1",
+          "sourceId": "CH-04-V5",
+          "sourceValue": "33% improvement in brand relevance"
+        },
+        {
+          "match": true,
+          "metric": "50% YoY attendance growth",
+          "location": "career-highlight-2",
+          "sourceId": "CH-02-V5",
+          "sourceValue": "50% YoY attendance growth"
+        },
+        {
+          "match": true,
+          "metric": "$60M media rights deal",
+          "location": "career-highlight-2",
+          "sourceId": "CH-02-V5",
+          "sourceValue": "$60M media rights deal"
+        },
+        {
+          "match": true,
+          "metric": "30,000 member increase",
+          "location": "career-highlight-3",
+          "sourceId": "CH-08",
+          "sourceValue": "30,000 member increase"
+        },
+        {
+          "match": true,
+          "metric": "410,000 total membership",
+          "location": "career-highlight-3",
+          "sourceId": "CH-08",
+          "sourceValue": "scaled total membership to 410,000"
+        },
+        {
+          "match": true,
+          "metric": "5% retention lift",
+          "location": "career-highlight-4",
+          "sourceId": "CH-09",
+          "sourceValue": "5% retention lift"
+        },
+        {
+          "match": true,
+          "metric": "12% cross-sell increase",
+          "location": "career-highlight-4",
+          "sourceId": "CH-09",
+          "sourceValue": "12% cross-sell increase"
+        },
+        {
+          "match": true,
+          "metric": "32% production cost reduction",
+          "location": "career-highlight-4",
+          "sourceId": "CH-09",
+          "sourceValue": "32% reduction in production costs"
+        },
+        {
+          "match": true,
+          "metric": "$40M growth engine",
+          "location": "career-highlight-5",
+          "sourceId": "CH-01-V5",
+          "sourceValue": "$40M growth engine"
+        },
+        {
+          "match": true,
+          "metric": "23% speed-to-market improvement",
+          "location": "career-highlight-5",
+          "sourceId": "CH-01-V5",
+          "sourceValue": "improving client speed-to-market by 23%"
+        },
+        {
+          "match": true,
+          "metric": "$15M to $40M revenue growth",
+          "location": "p1-overview",
+          "sourceId": "OV-P1",
+          "sourceValue": "Built the practice from $15M to $40M in revenue"
+        },
+        {
+          "match": true,
+          "metric": "35+ strategists",
+          "location": "p1-overview",
+          "sourceId": "OV-P1",
+          "sourceValue": "assembling a team of 35+ strategists"
+        },
+        {
+          "match": true,
+          "metric": "9% increase in customer acquisition",
+          "location": "p1-bullet-1",
+          "sourceId": "P1-B01",
+          "sourceValue": "9% increase in customer acquisition"
+        },
+        {
+          "match": true,
+          "metric": "12% improvement in brand favorability",
+          "location": "p1-bullet-1",
+          "sourceId": "P1-B01",
+          "sourceValue": "12% improvement in brand favorability"
+        },
+        {
+          "match": true,
+          "metric": "64.3% revenue growth",
+          "location": "p1-bullet-1",
+          "sourceId": "P1-B01",
+          "sourceValue": "64.3% revenue growth over three years"
+        },
+        {
+          "match": true,
+          "metric": "23% increase in brand awareness",
+          "location": "p1-bullet-2",
+          "sourceId": "P1-B10",
+          "sourceValue": "23% increase in brand awareness"
+        },
+        {
+          "match": true,
+          "metric": "37% improvement in favorability",
+          "location": "p1-bullet-2",
+          "sourceId": "P1-B10",
+          "sourceValue": "37% improvement in favorability among target segments"
+        },
+        {
+          "match": true,
+          "metric": "191% sales increase",
+          "location": "p1-bullet-3",
+          "sourceId": "P1-B04-V1",
+          "sourceValue": "191% sales increase"
+        },
+        {
+          "match": true,
+          "metric": "54% new customer acquisition",
+          "location": "p1-bullet-3",
+          "sourceId": "P1-B04-V1",
+          "sourceValue": "54% new customer acquisition"
+        },
+        {
+          "match": true,
+          "metric": "10% awareness lift",
+          "location": "p1-bullet-4",
+          "sourceId": "P1-B05-V1",
+          "sourceValue": "10% awareness lift"
+        },
+        {
+          "match": true,
+          "metric": "300% social engagement increase",
+          "location": "p1-bullet-4",
+          "sourceId": "P1-B05-V1",
+          "sourceValue": "300% social engagement increase"
+        },
+        {
+          "match": true,
+          "metric": "1.6M new patient appointments",
+          "location": "p1-bullet-4",
+          "sourceId": "P1-B05-V1",
+          "sourceValue": "1.6M new patient appointments"
+        },
+        {
+          "match": true,
+          "metric": "3x increase in marketing-attributed pipeline",
+          "location": "p2-bullet-1",
+          "sourceId": "P2-B03-V2",
+          "sourceValue": "3x increase in marketing-attributed pipeline"
+        },
+        {
+          "match": true,
+          "metric": "100% increase in digital engagement",
+          "location": "p2-bullet-2",
+          "sourceId": "P2-B04",
+          "sourceValue": "100%+ increase in digital engagement"
+        },
+        {
+          "match": true,
+          "metric": "16% increase in patient demand",
+          "location": "p2-bullet-3",
+          "sourceId": "P2-B06",
+          "sourceValue": "16% increase in patient demand"
+        },
+        {
+          "match": true,
+          "metric": "14% revenue growth",
+          "location": "p2-bullet-3",
+          "sourceId": "P2-B06",
+          "sourceValue": "14% revenue growth"
+        }
+      ],
+      "requirementsCoverage": [
+        {
+          "covered": true,
+          "location": "summary, career-highlight-1, career-highlight-4, p1-bullet-1, p1-bullet-2",
+          "priority": "high",
+          "strength": "strong",
+          "requirement": "Financial services experience"
+        },
+        {
+          "covered": true,
+          "location": "career-highlight-2, p2-bullet-2",
+          "priority": "high",
+          "strength": "strong",
+          "requirement": "Content strategy expertise"
+        },
+        {
+          "covered": true,
+          "location": "summary, career-highlight-1, career-highlight-5, p1-overview, p2-overview, multiple bullets",
+          "priority": "high",
+          "strength": "strong",
+          "requirement": "Brand expertise and stewardship capabilities"
+        },
+        {
+          "covered": true,
+          "location": "career-highlight-4",
+          "priority": "low",
+          "strength": "strong",
+          "requirement": "CRM experience with content strategy integration"
+        },
+        {
+          "covered": true,
+          "location": "summary uses 'brand expertise'",
+          "priority": "high",
+          "strength": "strong",
+          "requirement": "Mirror: 'brand expertise'"
+        },
+        {
+          "covered": true,
+          "location": "summary uses 'brand stewardship'",
+          "priority": "high",
+          "strength": "strong",
+          "requirement": "Mirror: 'stewardship'"
+        },
+        {
+          "covered": true,
+          "location": "summary uses 'guided'",
+          "priority": "high",
+          "strength": "strong",
+          "requirement": "Mirror: 'guidance'"
+        }
+      ]
+    },
+    "gapAnalysis": {
+      "warnings": [
+        {
+          "type": "weak_coverage",
+          "message": "Content strategy expertise is implicit rather than explicit in most materials",
+          "severity": "warning"
+        }
+      ],
+      "honestGaps": [],
+      "overallCoverage": {
+        "score": 8,
+        "summary": "Strong coverage of financial services experience and brand expertise requirements. Content strategy experience could be more explicitly highlighted, but stewardship and guidance themes are well-represented throughout.",
+        "assessment": "strong"
+      },
+      "requirementCoverage": [
+        {
+          "gap": null,
+          "coverage": "fully_covered",
+          "suggestion": null,
+          "requirement": {
+            "category": "industry",
+            "priority": "critical",
+            "jdEvidence": "I have a lot of financial services experience, especially with AMEX Synovus Bank, New York life investments, capital one PNC",
+            "requirement": "Financial services experience"
+          },
+          "coveringSource": "SUM-FS"
+        },
+        {
+          "gap": "Content strategy experience exists but is not explicitly labeled as such in most materials",
+          "coverage": "partially_covered",
+          "suggestion": "Reframe brand platform development work to emphasize content strategy components and methodologies",
+          "requirement": {
+            "category": "skill",
+            "priority": "critical",
+            "jdEvidence": "I also do have content strategy experience",
+            "requirement": "Content strategy expertise"
+          },
+          "coveringSource": "CH-02-V5"
+        },
+        {
+          "gap": null,
+          "coverage": "fully_covered",
+          "suggestion": null,
+          "requirement": {
+            "category": "experience",
+            "priority": "critical",
+            "jdEvidence": "I think this is more about brand, expertise and stewardship and guidance",
+            "requirement": "Brand expertise and stewardship capabilities"
+          },
+          "coveringSource": "Multiple sources including CH-04-V5, SUM-BS"
+        },
+        {
+          "gap": null,
+          "coverage": "fully_covered",
+          "suggestion": null,
+          "requirement": {
+            "category": "experience",
+            "priority": "important",
+            "jdEvidence": "when we speak about the AMEXCRM we can also talk about content strategy there",
+            "requirement": "CRM experience with content strategy integration"
+          },
+          "coveringSource": "CH-09"
+        }
+      ],
+      "positioningAlignment": {
+        "missingAngles": [
+          "Content strategist angle needs explicit framing"
+        ],
+        "narrativeViability": "Highly achievable - strong foundation for brand stewardship narrative with ample financial services proof points",
+        "primaryAngleSupported": true,
+        "supportingAnglesCovered": [
+          "Brand steward with financial services expertise",
+          "Strategic guide and thought leader"
+        ]
+      },
+      "emphasisRecommendations": [
+        {
+          "reason": "Aligns with positioning strategy emphasizing stewardship over revenue metrics",
+          "slotId": "summary",
+          "sourceId": "SUM-FS",
+          "recommendation": "Add explicit mention of brand stewardship and strategic guidance capabilities"
+        },
+        {
+          "reason": "Supports primary angle of brand steward and strategic guide",
+          "slotId": "ch_1",
+          "sourceId": "CH-04-V5",
+          "recommendation": "Emphasize thought leadership and C-suite advisory aspects"
+        },
+        {
+          "reason": "Directly addresses CRM + content strategy requirement with AMEX context",
+          "slotId": "ch_4",
+          "sourceId": "CH-09",
+          "recommendation": "Frame CRM work as content strategy transformation, emphasize personalization at scale"
+        },
+        {
+          "reason": "Shows financial services expertise with stewardship mindset",
+          "slotId": "p1_bullet_1",
+          "sourceId": "P1-B01",
+          "recommendation": "Emphasize brand stewardship approach for regional bank transformation"
+        },
+        {
+          "reason": "Combines financial services depth with brand expertise positioning",
+          "slotId": "p1_bullet_2",
+          "sourceId": "P1-B10",
+          "recommendation": "Frame as strategic guidance for wealth management brand transformation"
+        }
+      ]
+    },
+    "detailOutput": {
+      "metadata": {
+        "usedVerbs": [
+          "Developed",
+          "Launched",
+          "Repositioned",
+          "Unified",
+          "Architected",
+          "Led",
+          "Designed"
+        ],
+        "metricsUsed": [
+          {
+            "metric": "9% customer acquisition",
+            "sourceId": "P1-B01"
+          },
+          {
+            "metric": "12% brand favorability",
+            "sourceId": "P1-B01"
+          },
+          {
+            "metric": "64.3% revenue growth",
+            "sourceId": "P1-B01"
+          },
+          {
+            "metric": "23% brand awareness",
+            "sourceId": "P1-B10"
+          },
+          {
+            "metric": "37% favorability improvement",
+            "sourceId": "P1-B10"
+          },
+          {
+            "metric": "191% sales increase",
+            "sourceId": "P1-B04-V1"
+          },
+          {
+            "metric": "54% new customer acquisition",
+            "sourceId": "P1-B04-V1"
+          },
+          {
+            "metric": "10% awareness lift",
+            "sourceId": "P1-B05-V1"
+          },
+          {
+            "metric": "300% social engagement",
+            "sourceId": "P1-B05-V1"
+          },
+          {
+            "metric": "1.6M patient appointments",
+            "sourceId": "P1-B05-V1"
+          },
+          {
+            "metric": "3x marketing-attributed pipeline",
+            "sourceId": "P2-B03-V2"
+          },
+          {
+            "metric": "100% digital engagement",
+            "sourceId": "P2-B04"
+          },
+          {
+            "metric": "16% patient demand",
+            "sourceId": "P2-B06"
+          },
+          {
+            "metric": "14% revenue growth",
+            "sourceId": "P2-B06"
+          }
+        ]
+      },
+      "position1": {
+        "bullets": [
+          {
+            "slot": "p1-bullet-1",
+            "content": "Developed differentiated brand strategy and creative platform for regional bank competing against national players. Work contributed to 9% increase in customer acquisition, 12% improvement in brand favorability, and 64.3% revenue growth over three years.",
+            "sourceId": "P1-B01",
+            "wordCount": 34,
+            "primaryVerb": "Developed"
+          },
+          {
+            "slot": "p1-bullet-2",
+            "content": "Launched bold brand platform for Fortune 500 insurer's wealth management division, establishing distinctive positioning in category defined by sameness. Drove 23% increase in brand awareness and 37% improvement in favorability among target segments.",
+            "sourceId": "P1-B10",
+            "wordCount": 32,
+            "primaryVerb": "Launched"
+          },
+          {
+            "slot": "p1-bullet-3",
+            "content": "Repositioned recovery footwear brand from niche player to category leader through strategic brand platform development. Drove 191% sales increase, 54% new customer acquisition, and sustained double-digit year over year growth.",
+            "sourceId": "P1-B04-V1",
+            "wordCount": 30,
+            "primaryVerb": "Repositioned"
+          },
+          {
+            "slot": "p1-bullet-4",
+            "content": "Unified brand platform for major health system aligning narrative, patient experience, and communications. Drove 10% awareness lift, 300% social engagement increase, and 1.6M new patient appointments.",
+            "sourceId": "P1-B05-V1",
+            "wordCount": 27,
+            "primaryVerb": "Unified"
+          }
+        ],
+        "overview": {
+          "content": "Promoted to lead Deloitte's Brand Strategy & Activation practice during aggressive expansion into creative and marketing services. Grew practice from $15M to $40M in revenue by assembling 35+ strategists and establishing credibility with Fortune 500 CMOs seeking alternatives to traditional agencies.",
+          "sourceId": "OV-P1",
+          "wordCount": 42
+        }
+      },
+      "position2": {
+        "bullets": [
+          {
+            "slot": "p2-bullet-1",
+            "content": "Architected data-driven brand architecture system to unify Deloitte Consulting's positioning across service lines. Framework drove 3x increase in marketing-attributed pipeline.",
+            "sourceId": "P2-B03-V2",
+            "wordCount": 21,
+            "primaryVerb": "Architected"
+          },
+          {
+            "slot": "p2-bullet-2",
+            "content": "Led development of comprehensive brand communications strategy repositioning league for national growth during period of stagnation in reach and relevance. Work drove 100% increase in digital engagement.",
+            "sourceId": "P2-B04",
+            "wordCount": 28,
+            "primaryVerb": "Led"
+          },
+          {
+            "slot": "p2-bullet-3",
+            "content": "Designed and launched new brand strategy and creative platform for national dental services organization. Work drove 16% increase in patient demand and 14% revenue growth.",
+            "sourceId": "P2-B06",
+            "wordCount": 26,
+            "primaryVerb": "Designed"
+          }
+        ],
+        "overview": {
+          "content": "Recruited to establish new brand consulting model bridging creative excellence with strategic rigor. Designed methodology and team capable of competing with both agencies and consultancies, delivering integrated brand strategy engagements for Fortune 500 clients.",
+          "sourceId": "OV-P2",
+          "wordCount": 34
+        }
+      }
+    },
+    "jobDescription": "I have a lot of financial services experience, especially with AMEX Synovus Bank, New York life investments, capital one PNC I also do have content strategy experience so for a note for the résumé writer is in my career highlight when we speak about the AMEXCRM we can also talk about content strategy there and yeah. I also don't think that the positioning of revenue focus is right. I think this is more about brand, expertise and stewardship and guidance.",
+    "assembledResume": {
+      "_meta": {
+        "assembledAt": "2026-01-06T18:15:26.109Z",
+        "sourcesUsed": {
+          "summary": [
+            "SUM-FS",
+            "SUM-BS"
+          ],
+          "position1": [
+            "OV-P1",
+            "P1-B01",
+            "P1-B10",
+            "P1-B04-V1",
+            "P1-B05-V1"
+          ],
+          "position2": [
+            "OV-P2",
+            "P2-B03-V2",
+            "P2-B04",
+            "P2-B06"
+          ],
+          "careerHighlights": [
+            "CH-04-V5",
+            "CH-02-V5",
+            "CH-08",
+            "CH-09",
+            "CH-01-V5"
+          ]
+        }
+      },
+      "header": {
+        "name": "Umberto Castaldo",
+        "email": "Umberto.Castaldo@gmail.com",
+        "phone": "917 435 2003",
+        "location": "New York, NY",
+        "targetTitle": "SVP Brand Strategy / Head of Brand Strategy Practice"
+      },
+      "summary": "Great financial services brands solve a fundamental problem. They transform commoditized products into differentiated relationships. Over 15 years partnering with American Express, Capital One, New York Life, and UBS, I've guided institutions through this transformation. The work spans retail banking, wealth management, insurance, and corporate payments, always focused on translating complex value propositions into clear narratives that earn trust. At Deloitte Digital, I built methodologies that connect brand strategy to business outcomes, from CRM transformation to customer acquisition architecture. Financial services faces unique challenges. Regulatory constraints, high switching costs, and category sameness demand sophisticated brand stewardship. The best strategies don't just position products. They create systems that compound value over time, turning strategic intent into operational clarity and market differentiation.",
+      "education": {
+        "field": "Business Management & Marketing Communications",
+        "degree": "Bachelor of Business Administration",
+        "school": "Marist College"
+      },
+      "positions": [
+        {
+          "title": "SVP Brand Strategy / Head of Brand Strategy Practice",
+          "bullets": [
+            "Developed differentiated brand strategy and creative platform for regional bank competing against national players. Work contributed to 9% increase in customer acquisition, 12% improvement in brand favorability, and 64.3% revenue growth over three years.",
+            "Launched bold brand platform for Fortune 500 insurer's wealth management division, establishing distinctive positioning in category defined by sameness. Drove 23% increase in brand awareness and 37% improvement in favorability among target segments.",
+            "Repositioned recovery footwear brand from niche player to category leader through strategic brand platform development. Drove 191% sales increase, 54% new customer acquisition, and sustained double-digit year over year growth.",
+            "Unified brand platform for major health system aligning narrative, patient experience, and communications. Drove 10% awareness lift, 300% social engagement increase, and 1.6M new patient appointments."
+          ],
+          "company": "Deloitte Digital",
+          "endDate": "Present",
+          "location": "New York, NY",
+          "overview": "Promoted to lead Deloitte's Brand Strategy & Activation practice during aggressive expansion into creative and marketing services. Grew practice from $15M to $40M in revenue by assembling 35+ strategists and establishing credibility with Fortune 500 CMOs seeking alternatives to traditional agencies.",
+          "startDate": "May 2021"
+        },
+        {
+          "title": "Sr. Director of Brand Strategy",
+          "bullets": [
+            "Architected data-driven brand architecture system to unify Deloitte Consulting's positioning across service lines. Framework drove 3x increase in marketing-attributed pipeline.",
+            "Led development of comprehensive brand communications strategy repositioning league for national growth during period of stagnation in reach and relevance. Work drove 100% increase in digital engagement.",
+            "Designed and launched new brand strategy and creative platform for national dental services organization. Work drove 16% increase in patient demand and 14% revenue growth."
+          ],
+          "company": "Deloitte Digital",
+          "endDate": "May 2021",
+          "location": "New York, NY",
+          "overview": "Recruited to establish new brand consulting model bridging creative excellence with strategic rigor. Designed methodology and team capable of competing with both agencies and consultancies, delivering integrated brand strategy engagements for Fortune 500 clients.",
+          "startDate": "Apr 2018"
+        },
+        {
+          "title": "VP of Innovation",
+          "bullets": [],
+          "company": "Omnicom Media Group",
+          "endDate": "Apr 2018",
+          "location": "New York, NY",
+          "overview": "Promoted to lead innovation across brand, technology, and customer experience, helping clients navigate shift from traditional media to integrated, data-driven marketing approaches and performance measurement systems.",
+          "startDate": "May 2016"
+        },
+        {
+          "title": "Head of Media Innovation",
+          "bullets": [],
+          "company": "OMD Worldwide",
+          "endDate": "May 2016",
+          "location": "New York, NY",
+          "overview": "Recruited to lead GE's global brand storytelling and innovation strategy, with mandate to position company as leader in emerging media and branded entertainment through integrated campaign development.",
+          "startDate": "Apr 2015"
+        },
+        {
+          "title": "Senior Brand Strategist",
+          "bullets": [],
+          "company": "Straightline International",
+          "endDate": "Apr 2015",
+          "location": "New York, NY",
+          "overview": "Developed foundational brand strategy systems for B2B and industrial clients undergoing transformation, including post-merger integration and portfolio rationalization through comprehensive positioning and value proposition work.",
+          "startDate": "Jul 2014"
+        },
+        {
+          "title": "Brand Strategist",
+          "bullets": [],
+          "company": "Berlin Cameron, WPP Cultural Agency",
+          "endDate": "Jul 2014",
+          "location": "New York, NY",
+          "overview": "Supported brand positioning and integrated campaign development across consumer, tech, and financial services clients as part of cross-functional creative teams focused on strategic storytelling and performance outcomes.",
+          "startDate": "Jun 2011"
+        }
+      ],
+      "careerHighlights": [
+        "**Deloitte Brand Architecture**: Elevated perception among C-suite executives through comprehensive transformation. Generated 43% increase in qualified opportunities and 33% improvement in brand relevance.",
+        "**Sports League Revival**: Transformed regional interest into national phenomenon through content-driven engagement. Achieved 50% YoY attendance growth and $60M media rights deal.",
+        "**Health System Rebrand**: Created human-centered positioning following Medicaid acquisition. Developed 'Wholecare' platform driving 30,000 member increase, scaling total membership to 410,000.",
+        "**Payment Company CRM**: Advanced corporate cards from promotions to AI-powered personalization. Delivered 5% retention lift, 12% cross-sell increase, and 32% production cost reduction.",
+        "**Brand Consulting Growth**: Built $40M growth engine repositioning legacy brands through strategic engagements. Developed AI accelerators improving client speed-to-market by 23%."
+      ]
+    },
+    "narrativeOutput": {
+      "summary": {
+        "content": "Great financial services brands solve a fundamental problem. They transform commoditized products into differentiated relationships. Over 15 years partnering with American Express, Capital One, New York Life, and UBS, I've guided institutions through this transformation. The work spans retail banking, wealth management, insurance, and corporate payments, always focused on translating complex value propositions into clear narratives that earn trust. At Deloitte Digital, I built methodologies that connect brand strategy to business outcomes, from CRM transformation to customer acquisition architecture. Financial services faces unique challenges. Regulatory constraints, high switching costs, and category sameness demand sophisticated brand stewardship. The best strategies don't just position products. They create systems that compound value over time, turning strategic intent into operational clarity and market differentiation.",
+        "wordCount": 147,
+        "sourcesUsed": [
+          "SUM-FS",
+          "SUM-BS"
+        ]
+      },
+      "metadata": {
+        "usedVerbs": [
+          "Elevated",
+          "Transformed",
+          "Created",
+          "Advanced",
+          "Built"
+        ],
+        "thematicAnchors": {
+          "keyProofPoints": [
+            "43% opportunity increase at Deloitte",
+            "$40M practice growth",
+            "410,000 member scale"
+          ],
+          "toneEstablished": "Confident, strategic, focused on brand stewardship and long-term value creation",
+          "distinctiveValue": "Deep financial services expertise combined with proven ability to build brand systems that compound value over time",
+          "primaryNarrative": "Brand strategist who guides financial institutions through transformation from product-led to customer-centric differentiation"
+        }
+      },
+      "careerHighlights": [
+        {
+          "slot": "ch-1",
+          "content": "**Deloitte Brand Architecture**: Elevated perception among C-suite executives through comprehensive transformation. Generated 43% increase in qualified opportunities and 33% improvement in brand relevance.",
+          "headline": "Deloitte Brand Architecture",
+          "sourceId": "CH-04-V5",
+          "wordCount": 25,
+          "primaryVerb": "Elevated"
+        },
+        {
+          "slot": "ch-2",
+          "content": "**Sports League Revival**: Transformed regional interest into national phenomenon through content-driven engagement. Achieved 50% YoY attendance growth and $60M media rights deal.",
+          "headline": "Sports League Revival",
+          "sourceId": "CH-02-V5",
+          "wordCount": 25,
+          "primaryVerb": "Transformed"
+        },
+        {
+          "slot": "ch-3",
+          "content": "**Health System Rebrand**: Created human-centered positioning following Medicaid acquisition. Developed 'Wholecare' platform driving 30,000 member increase, scaling total membership to 410,000.",
+          "headline": "Health System Rebrand",
+          "sourceId": "CH-08",
+          "wordCount": 25,
+          "primaryVerb": "Created"
+        },
+        {
+          "slot": "ch-4",
+          "content": "**Payment Company CRM**: Advanced corporate cards from promotions to AI-powered personalization. Delivered 5% retention lift, 12% cross-sell increase, and 32% production cost reduction.",
+          "headline": "Payment Company CRM",
+          "sourceId": "CH-09",
+          "wordCount": 26,
+          "primaryVerb": "Advanced"
+        },
+        {
+          "slot": "ch-5",
+          "content": "**Brand Consulting Growth**: Built $40M growth engine repositioning legacy brands through strategic engagements. Developed AI accelerators improving client speed-to-market by 23%.",
+          "headline": "Brand Consulting Growth",
+          "sourceId": "CH-01-V5",
+          "wordCount": 25,
+          "primaryVerb": "Built"
+        }
+      ]
+    },
+    "userAdjustments": {
+      "approvedAt": "2026-01-06T18:13:46.290Z",
+      "additionalContext": "I have a lot of financial services experience, especially with AMEX Synovus Bank, New York life investments, capital one PNC I also do have content strategy experience so for a note for the résumé writer is in my career highlight when we speak about the AMEXCRM we can also talk about content strategy there and yeah. I also don't think that the positioning of revenue focus is right. I think this is more about brand, expertise and stewardship and guidance."
+    },
+    "contentSelection": {
+      "debug": {
+        "jdSignals": {
+          "themes": [
+            "brand-stewardship",
+            "strategic-guidance",
+            "brand-transformation",
+            "customer-centricity",
+            "thought-leadership"
+          ],
+          "functions": [
+            "brand-strategy",
+            "content-strategy",
+            "brand-management",
+            "customer-experience",
+            "strategic-communications"
+          ],
+          "industries": [
+            "financial-services",
+            "banking",
+            "investment-management",
+            "insurance",
+            "fintech"
+          ]
+        },
+        "conflictsApplied": [
+          "CH-04 blocks P1-B09",
+          "CH-04 blocks P1-B09",
+          "CH-04 blocks P1-B09",
+          "CH-02 blocks P2-B08",
+          "CH-02 blocks P2-B08",
+          "CH-02 blocks P2-B08",
+          "CH-08 blocks P1-B07",
+          "CH-08 blocks P1-B07",
+          "CH-08 blocks P1-B07",
+          "CH-09 blocks P1-B03",
+          "CH-09 blocks P1-B03",
+          "CH-09 blocks P1-B03",
+          "CH-01 blocks P1-B02",
+          "CH-01 blocks P1-B02",
+          "CH-01 blocks P1-B02"
+        ],
+        "scoringBreakdown": [
+          {
+            "itemId": "SUM-B2B",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "SUM-FS",
+            "themeScore": 0,
+            "totalScore": 12,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": [
+                "financial-services",
+                "banking",
+                "insurance"
+              ]
+            },
+            "functionScore": 3,
+            "industryScore": 9
+          },
+          {
+            "itemId": "SUM-TECH",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "SUM-CON",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "SUM-CE",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "SUM-PM",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "SUM-BS",
+            "themeScore": 1,
+            "totalScore": 4,
+            "matchedTags": {
+              "theme": [
+                "transformation"
+              ],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "SUM-PG",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "itemId": "CH-01",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-01",
+            "itemId": "CH-01-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-01",
+            "itemId": "CH-01-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-01",
+            "itemId": "CH-01-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-01",
+            "itemId": "CH-01-V4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-01",
+            "itemId": "CH-01-V5",
+            "themeScore": 1,
+            "totalScore": 1,
+            "matchedTags": {
+              "theme": [
+                "transformation"
+              ],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "CH-02",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-02",
+            "itemId": "CH-02-V1",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-02",
+            "itemId": "CH-02-V2",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-02",
+            "itemId": "CH-02-V3",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-02",
+            "itemId": "CH-02-V4",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-02",
+            "itemId": "CH-02-V5",
+            "themeScore": 3,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [
+                "brand-transformation"
+              ],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "CH-03",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-03",
+            "itemId": "CH-03-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-03",
+            "itemId": "CH-03-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-03",
+            "itemId": "CH-03-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-03",
+            "itemId": "CH-03-V4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "CH-04",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-04",
+            "itemId": "CH-04-V1",
+            "themeScore": 3,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [
+                "brand-transformation"
+              ],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-04",
+            "itemId": "CH-04-V2",
+            "themeScore": 3,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [
+                "brand-transformation"
+              ],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-04",
+            "itemId": "CH-04-V3",
+            "themeScore": 3,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [
+                "brand-transformation"
+              ],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-04",
+            "itemId": "CH-04-V4",
+            "themeScore": 3,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [
+                "brand-transformation"
+              ],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-04",
+            "itemId": "CH-04-V5",
+            "themeScore": 6,
+            "totalScore": 9,
+            "matchedTags": {
+              "theme": [
+                "brand-transformation",
+                "thought-leadership"
+              ],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "CH-05",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-05",
+            "itemId": "CH-05-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-05",
+            "itemId": "CH-05-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-05",
+            "itemId": "CH-05-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-05",
+            "itemId": "CH-05-V4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "CH-06",
+            "themeScore": 0,
+            "totalScore": 1,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "global-brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 1,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-06",
+            "itemId": "CH-06-V1",
+            "themeScore": 0,
+            "totalScore": 1,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "global-brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 1,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-06",
+            "itemId": "CH-06-V2",
+            "themeScore": 0,
+            "totalScore": 1,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "global-brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 1,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-06",
+            "itemId": "CH-06-V3",
+            "themeScore": 0,
+            "totalScore": 1,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "global-brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 1,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-06",
+            "itemId": "CH-06-V4",
+            "themeScore": 0,
+            "totalScore": 1,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "global-brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 1,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-06",
+            "itemId": "CH-06-V5",
+            "themeScore": 0,
+            "totalScore": 1,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "global-brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 1,
+            "industryScore": 0
+          },
+          {
+            "itemId": "CH-07",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-07",
+            "itemId": "CH-07-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-07",
+            "itemId": "CH-07-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-07",
+            "itemId": "CH-07-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "CH-08",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "insurance"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "baseId": "CH-08",
+            "itemId": "CH-08-V1",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "insurance"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "baseId": "CH-08",
+            "itemId": "CH-08-V2",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "insurance"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "baseId": "CH-08",
+            "itemId": "CH-08-V3",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "insurance"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "itemId": "CH-09",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "baseId": "CH-09",
+            "itemId": "CH-09-V1",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "baseId": "CH-09",
+            "itemId": "CH-09-V2",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "baseId": "CH-09",
+            "itemId": "CH-09-V3",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "baseId": "CH-09",
+            "itemId": "CH-09-V4",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          },
+          {
+            "itemId": "CH-10",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-10",
+            "itemId": "CH-10-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-10",
+            "itemId": "CH-10-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-10",
+            "itemId": "CH-10-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-10",
+            "itemId": "CH-10-V4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "CH-11",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-11",
+            "itemId": "CH-11-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-11",
+            "itemId": "CH-11-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-11",
+            "itemId": "CH-11-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "CH-11",
+            "itemId": "CH-11-V4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P1-B01",
+            "themeScore": 0,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services",
+                "banking"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 6
+          },
+          {
+            "baseId": "P1-B01",
+            "itemId": "P1-B01-V1",
+            "themeScore": 0,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services",
+                "banking"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 6
+          },
+          {
+            "baseId": "P1-B01",
+            "itemId": "P1-B01-V2",
+            "themeScore": 0,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services",
+                "banking"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 6
+          },
+          {
+            "baseId": "P1-B01",
+            "itemId": "P1-B01-V3",
+            "themeScore": 0,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services",
+                "banking"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 6
+          },
+          {
+            "itemId": "P1-B04",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B04",
+            "itemId": "P1-B04-V1",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B04",
+            "itemId": "P1-B04-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B04",
+            "itemId": "P1-B04-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B04",
+            "itemId": "P1-B04-V4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P1-B05",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B05",
+            "itemId": "P1-B05-V1",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B05",
+            "itemId": "P1-B05-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B05",
+            "itemId": "P1-B05-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P1-B06",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B06",
+            "itemId": "P1-B06-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B06",
+            "itemId": "P1-B06-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B06",
+            "itemId": "P1-B06-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P1-B08",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B08",
+            "itemId": "P1-B08-V1",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B08",
+            "itemId": "P1-B08-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B08",
+            "itemId": "P1-B08-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B08",
+            "itemId": "P1-B08-V4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P1-B08",
+            "itemId": "P1-B08-V5",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P1-B10",
+            "themeScore": 0,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services",
+                "insurance"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 6
+          },
+          {
+            "baseId": "P1-B10",
+            "itemId": "P1-B10-V1",
+            "themeScore": 0,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services",
+                "insurance"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 6
+          },
+          {
+            "baseId": "P1-B10",
+            "itemId": "P1-B10-V2",
+            "themeScore": 0,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services",
+                "insurance"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 6
+          },
+          {
+            "baseId": "P1-B10",
+            "itemId": "P1-B10-V3",
+            "themeScore": 0,
+            "totalScore": 6,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services",
+                "insurance"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 6
+          },
+          {
+            "itemId": "P2-B01",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B01",
+            "itemId": "P2-B01-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B01",
+            "itemId": "P2-B01-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B01",
+            "itemId": "P2-B01-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B01",
+            "itemId": "P2-B01-V4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P2-B02",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B02",
+            "itemId": "P2-B02-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B02",
+            "itemId": "P2-B02-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B02",
+            "itemId": "P2-B02-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P2-B03",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B03",
+            "itemId": "P2-B03-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B03",
+            "itemId": "P2-B03-V2",
+            "themeScore": 3,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [
+                "brand-transformation"
+              ],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P2-B04",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B04",
+            "itemId": "P2-B04-V1",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B04",
+            "itemId": "P2-B04-V2",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B04",
+            "itemId": "P2-B04-V3",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B04",
+            "itemId": "P2-B04-V4",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P2-B05",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B05",
+            "itemId": "P2-B05-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B05",
+            "itemId": "P2-B05-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B05",
+            "itemId": "P2-B05-V3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P2-B06",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B06",
+            "itemId": "P2-B06-V1",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B06",
+            "itemId": "P2-B06-V2",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B06",
+            "itemId": "P2-B06-V3",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P2-B07",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B07",
+            "itemId": "P2-B07-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B07",
+            "itemId": "P2-B07-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "P2-B09",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B09",
+            "itemId": "P2-B09-V1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B09",
+            "itemId": "P2-B09-V2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B09",
+            "itemId": "P2-B09-V3",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "baseId": "P2-B09",
+            "itemId": "P2-B09-V4",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "customer-experience"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "OV-P1",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P1",
+            "itemId": "OV-P1-B2B",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P1",
+            "itemId": "OV-P1-FS",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P1",
+            "itemId": "OV-P1-TECH",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P1",
+            "itemId": "OV-P1-CON",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P1",
+            "itemId": "OV-P1-CE",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P1",
+            "itemId": "OV-P1-PM",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P1",
+            "itemId": "OV-P1-BS",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P1",
+            "itemId": "OV-P1-PG",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "OV-P2",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P2",
+            "itemId": "OV-P2-B2B",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P2",
+            "itemId": "OV-P2-FS",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P2",
+            "itemId": "OV-P2-TECH",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P2",
+            "itemId": "OV-P2-CON",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P2",
+            "itemId": "OV-P2-CE",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P2",
+            "itemId": "OV-P2-PM",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P2",
+            "itemId": "OV-P2-BS",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "baseId": "OV-P2",
+            "itemId": "OV-P2-PG",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "OV-P3",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "OV-P4",
+            "themeScore": 0,
+            "totalScore": 0,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": []
+            },
+            "functionScore": 0,
+            "industryScore": 0
+          },
+          {
+            "itemId": "OV-P5",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "functionScore": 3,
+            "industryScore": 0
+          },
+          {
+            "itemId": "OV-P6",
+            "themeScore": 0,
+            "totalScore": 3,
+            "matchedTags": {
+              "theme": [],
+              "function": [],
+              "industry": [
+                "financial-services"
+              ]
+            },
+            "functionScore": 0,
+            "industryScore": 3
+          }
+        ]
+      },
+      "summary": {
+        "slot": "summary",
+        "sources": [
+          {
+            "id": "SUM-FS",
+            "tags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": [
+                "financial-services",
+                "banking",
+                "insurance"
+              ]
+            },
+            "score": 12,
+            "baseId": "SUM-FS",
+            "content": "Umberto builds brands for financial services companies navigating a fundamental shift: from product-led positioning to customer-centric differentiation. Over 15 years, he's partnered with institutions like American Express, Capital One, New York Life, Synovus, and UBS to develop brand strategies that resonate in categories where trust is everything and switching costs are high. His work spans retail banking, wealth management, insurance, and corporate payments - always focused on translating complex value propositions into clear, compelling stories. At Deloitte Digital, he led engagements that connected brand strategy to business outcomes: CRM transformation, customer acquisition, and loyalty architecture. He understands the regulatory realities and competitive dynamics of financial services - and how to build brands that earn attention in a category defined by sameness."
+          },
+          {
+            "id": "SUM-BS",
+            "tags": {
+              "theme": [
+                "transformation"
+              ],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "score": 4,
+            "baseId": "SUM-BS",
+            "content": "Umberto defines what brands stand for - and builds the systems that make it stick. Over 15 years, he's led brand strategy engagements for Fortune 500 companies including Deloitte, GE, American Express, and Pfizer - developing positioning, architecture, and messaging platforms that align organizations and differentiate in market. His work spans corporate repositioning, M&A brand integration, and portfolio architecture - always focused on turning strategic intent into executional clarity. At Deloitte Digital, he built the Brand Strategy practice from the ground up, creating methodologies that connect brand to business outcomes. He believes brand strategy isn't about taglines - it's about making choices that compound over time."
+          },
+          {
+            "id": "SUM-B2B",
+            "tags": {
+              "theme": [],
+              "function": [
+                "brand-strategy"
+              ],
+              "industry": []
+            },
+            "score": 3,
+            "baseId": "SUM-B2B",
+            "content": "Umberto helps complex organizations figure out what their brand actually means - and then make it work harder. Over 15 years, he's partnered with enterprise leaders navigating messy realities: post-merger identity crises, product portfolios that don't cohere, and growth ambitions that outpace the story. His work spans the Fortune 500 - companies like General Electric, Deloitte, American Express, and Pfizer - where he's led positioning, architecture, and activation programs that turn internal complexity into external clarity. At Deloitte Digital, he built the Brand Strategy practice from inception into a $40M business, advising C-suite clients on how to make brand a strategic asset. He brings the rigor of consulting with the craft of creative - and a bias toward work that earns its place in the market."
+          }
+        ],
+        "selectionRationale": "Selected 3 summaries based on industry/function/theme match. Top: SUM-FS (score: 12)"
+      },
+      "position1": {
+        "bullets": [
+          {
+            "slot": "p1_bullet_1",
+            "sources": [
+              {
+                "id": "P1-B01",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": [
+                    "financial-services",
+                    "banking"
+                  ]
+                },
+                "score": 6,
+                "baseId": "P1-B01",
+                "content": "Developed a differentiated and category-distinct brand strategy and creative platform for a regional bank looking to compete against national players. Work contributed to 9% increase in customer acquisition, 12% improvement in brand favorability, and 64.3% revenue growth over three years."
+              },
+              {
+                "id": "P1-B01-V1",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": [
+                    "financial-services",
+                    "banking"
+                  ]
+                },
+                "score": 6,
+                "baseId": "P1-B01",
+                "content": "Developed a differentiated and category-distinct brand strategy and creative platform for a regional bank looking to compete against national players. Work contributed to 9% increase in customer acquisition, 12% improvement in brand favorability, and 64.3% revenue growth over three years.",
+                "variantLabel": "Brand Repositioning"
+              },
+              {
+                "id": "P1-B01-V2",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": [
+                    "financial-services",
+                    "banking"
+                  ]
+                },
+                "score": 6,
+                "baseId": "P1-B01",
+                "content": "Developed a differentiated and category-distinct brand strategy and creative platform for a regional bank looking to compete against national players. Work contributed to 9% increase in customer acquisition, 12% improvement in brand favorability, and 64.3% revenue growth over three years.",
+                "variantLabel": "Revenue Growth"
+              }
+            ],
+            "selectionRationale": "P1 bullet 1: P1-B01 with 3 variants. Best: P1-B01 (score: 6)"
+          },
+          {
+            "slot": "p1_bullet_2",
+            "sources": [
+              {
+                "id": "P1-B10",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": [
+                    "financial-services",
+                    "insurance"
+                  ]
+                },
+                "score": 6,
+                "baseId": "P1-B10",
+                "content": "Launched bold brand platform for Fortune 500 insurer's wealth management division, establishing distinctive positioning in a category defined by sameness. Work drove 23% increase in brand awareness and 37% improvement in favorability among target segments."
+              },
+              {
+                "id": "P1-B10-V1",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": [
+                    "financial-services",
+                    "insurance"
+                  ]
+                },
+                "score": 6,
+                "baseId": "P1-B10",
+                "content": "Launched bold brand platform for Fortune 500 insurer's wealth management division, establishing distinctive positioning in a category defined by sameness. Work drove 23% increase in brand awareness and 37% improvement in favorability among target segments.",
+                "variantLabel": "Brand Launch"
+              },
+              {
+                "id": "P1-B10-V2",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": [
+                    "financial-services",
+                    "insurance"
+                  ]
+                },
+                "score": 6,
+                "baseId": "P1-B10",
+                "content": "Launched bold brand platform for Fortune 500 insurer's wealth management division, establishing distinctive positioning in a category defined by sameness. Work drove 23% increase in brand awareness and 37% improvement in favorability among target segments.",
+                "variantLabel": "Brand Design"
+              }
+            ],
+            "selectionRationale": "P1 bullet 2: P1-B10 with 3 variants. Best: P1-B10 (score: 6)"
+          },
+          {
+            "slot": "p1_bullet_3",
+            "sources": [
+              {
+                "id": "P1-B04-V1",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P1-B04",
+                "content": "Repositioned recovery footwear brand from niche player to category leader through strategic brand platform development. Drove 191% sales increase, 54% new customer acquisition, and sustained double-digit YoY growth.",
+                "variantLabel": "Brand Repositioning"
+              },
+              {
+                "id": "P1-B04",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 0,
+                "baseId": "P1-B04",
+                "content": "Partnered with a high-growth recovery footwear brand to define its path from niche player to category leader. Led the development of a segmentation-led growth strategy, modernized the eCommerce experience, and established a new brand platform and acquisition campaign. The work contributed to a 54% increase in new customer acquisition, a 47% lift in web traffic, and laid the foundation for sustained double-digit revenue growth year-over-year."
+              },
+              {
+                "id": "P1-B04-V2",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 0,
+                "baseId": "P1-B04",
+                "content": "Scaled DTC footwear brand through e-commerce transformation and revamped digital experience. Delivered 191% sales increase, 54% new customer acquisition, and 47% lift in web traffic.",
+                "variantLabel": "DTC & E-commerce"
+              }
+            ],
+            "selectionRationale": "P1 bullet 3: P1-B04 with 3 variants. Best: P1-B04-V1 (score: 3)"
+          },
+          {
+            "slot": "p1_bullet_4",
+            "sources": [
+              {
+                "id": "P1-B05-V1",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P1-B05",
+                "content": "Built unified brand platform for major health system aligning narrative, patient experience, and communications. Drove 10% awareness lift, 300% social engagement increase, and 1.6M new patient appointments.",
+                "variantLabel": "Brand Strategy"
+              },
+              {
+                "id": "P1-B05",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 0,
+                "baseId": "P1-B05",
+                "content": "Led the development and execution of NYU Langone's 'Best Outcomes' campaign to elevate brand perception in a highly competitive healthcare market. Built an integrated messaging system that aligned paid, owned, and in-hospital experiences around a unified brand narrative. The campaign generated 1.6M net-new patient appointments, exceeded social engagement benchmarks by 300%, and contributed to NYU's rise to the #1 hospital ranking in New York."
+              },
+              {
+                "id": "P1-B05-V2",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 0,
+                "baseId": "P1-B05",
+                "content": "Transformed patient engagement through digital experience strategy integrating Salesforce CRM. Unified patient touchpoints driving 300% social engagement increase and 1.6M new patient appointments.",
+                "variantLabel": "Digital Experience"
+              }
+            ],
+            "selectionRationale": "P1 bullet 4: P1-B05 with 3 variants. Best: P1-B05-V1 (score: 3)"
+          }
+        ],
+        "overview": {
+          "slot": "p1_overview",
+          "sources": [
+            {
+              "id": "OV-P1",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": []
+              },
+              "score": 0,
+              "baseId": "OV-P1",
+              "content": "Promoted to lead Deloitte's Brand Strategy & Activation practice during a time when the firm was aggressively expanding into creative and marketing services. Built the practice from $15M to $40M in revenue by assembling a team of 35+ strategists and establishing credibility with Fortune 500 CMOs seeking an alternative to traditional agencies."
+            },
+            {
+              "id": "OV-P1-B2B",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": []
+              },
+              "score": 0,
+              "baseId": "OV-P1",
+              "content": "Promoted to lead Deloitte's Brand Strategy & Activation practice during a time when the firm was aggressively expanding into creative and marketing services. Built the practice from $15M to $40M in revenue by assembling a team of 35+ strategists and establishing credibility with Fortune 500 CMOs seeking an alternative to traditional agencies.",
+              "variantLabel": "OV-P1-B2B"
+            }
+          ],
+          "selectionRationale": "P1 overview: 2 candidates. Best: OV-P1 (score: 0)"
+        }
+      },
+      "position2": {
+        "bullets": [
+          {
+            "slot": "p2_bullet_1",
+            "sources": [
+              {
+                "id": "P2-B03-V2",
+                "tags": {
+                  "theme": [
+                    "brand-transformation"
+                  ],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P2-B03",
+                "content": "Built a data-driven brand architecture system to unify Deloitte Consulting's positioning across service lines. Framework drove 3x increase in marketing-attributed pipeline.",
+                "variantLabel": "Demand Generation"
+              },
+              {
+                "id": "P2-B03",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 0,
+                "baseId": "P2-B03",
+                "content": "Built a data-driven brand architecture system to unify Deloitte Consulting's positioning across service lines. Framework drove 3x increase in marketing-attributed pipeline."
+              },
+              {
+                "id": "P2-B03-V1",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 0,
+                "baseId": "P2-B03",
+                "content": "Built a data-driven brand architecture system to unify Deloitte Consulting's positioning across service lines. Framework drove 3x increase in marketing-attributed pipeline.",
+                "variantLabel": "Brand Strategy"
+              }
+            ],
+            "selectionRationale": "P2 bullet 1: P2-B03 with 3 variants. Best: P2-B03-V2 (score: 3)"
+          },
+          {
+            "slot": "p2_bullet_2",
+            "sources": [
+              {
+                "id": "P2-B04",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P2-B04",
+                "content": "At a time when the league was experiencing stagnation in reach and relevance, led the development of comprehensive brand communications strategy that repositioned the league for national growth. Work drove 100%+ increase in digital engagement."
+              },
+              {
+                "id": "P2-B04-V1",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P2-B04",
+                "content": "At a time when the league was experiencing stagnation in reach and relevance, led the development of comprehensive brand communications strategy that repositioned the league for national growth. Work drove 100%+ increase in digital engagement.",
+                "variantLabel": "Brand Strategy"
+              },
+              {
+                "id": "P2-B04-V2",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P2-B04",
+                "content": "At a time when the league was experiencing stagnation in reach and relevance, led the development of comprehensive brand communications strategy that repositioned the league for national growth. Work drove 100%+ increase in digital engagement.",
+                "variantLabel": "Digital Engagement"
+              }
+            ],
+            "selectionRationale": "P2 bullet 2: P2-B04 with 3 variants. Best: P2-B04 (score: 3)"
+          },
+          {
+            "slot": "p2_bullet_3",
+            "sources": [
+              {
+                "id": "P2-B06",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P2-B06",
+                "content": "Developed and launched a new brand strategy and creative platform for a national dental services organization. Work drove 16% increase in patient demand and 14% revenue growth."
+              },
+              {
+                "id": "P2-B06-V1",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P2-B06",
+                "content": "Developed and launched a new brand strategy and creative platform for a national dental services organization. Work drove 16% increase in patient demand and 14% revenue growth.",
+                "variantLabel": "Brand Platform"
+              },
+              {
+                "id": "P2-B06-V2",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "P2-B06",
+                "content": "Developed and launched a new brand strategy and creative platform for a national dental services organization. Work drove 16% increase in patient demand and 14% revenue growth.",
+                "variantLabel": "Growth Strategy"
+              }
+            ],
+            "selectionRationale": "P2 bullet 3: P2-B06 with 3 variants. Best: P2-B06 (score: 3)"
+          }
+        ],
+        "overview": {
+          "slot": "p2_overview",
+          "sources": [
+            {
+              "id": "OV-P2",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": []
+              },
+              "score": 0,
+              "baseId": "OV-P2",
+              "content": "Recruited to establish a new brand consulting model that bridges creative excellence with strategic rigor. Built methodology and team that could compete with both agencies and consultancies, delivering integrated brand strategy engagements for Fortune 500 clients."
+            },
+            {
+              "id": "OV-P2-B2B",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": []
+              },
+              "score": 0,
+              "baseId": "OV-P2",
+              "content": "Recruited to establish a new brand consulting model that bridges creative excellence with strategic rigor. Built methodology and team that could compete with both agencies and consultancies, delivering integrated brand strategy engagements for Fortune 500 clients.",
+              "variantLabel": "OV-P2-B2B"
+            }
+          ],
+          "selectionRationale": "P2 overview: 2 candidates. Best: OV-P2 (score: 0)"
+        }
+      },
+      "positions3to6": [
+        {
+          "overview": {
+            "slot": "p3_overview",
+            "sources": [
+              {
+                "id": "OV-P3",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 0,
+                "baseId": "OV-P3",
+                "content": "Promoted to lead innovation across brand, technology, and consumer experience—helping clients navigate the shift from traditional media to integrated, data-driven marketing approaches."
+              }
+            ],
+            "selectionRationale": "P3 overview: base content (no variants)"
+          },
+          "position": 3
+        },
+        {
+          "overview": {
+            "slot": "p4_overview",
+            "sources": [
+              {
+                "id": "OV-P4",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": []
+                },
+                "score": 0,
+                "baseId": "OV-P4",
+                "content": "Recruited to lead GE's global brand storytelling and innovation strategy, with a mandate to position the company as a leader in emerging media and branded entertainment."
+              }
+            ],
+            "selectionRationale": "P4 overview: base content (no variants)"
+          },
+          "position": 4
+        },
+        {
+          "overview": {
+            "slot": "p5_overview",
+            "sources": [
+              {
+                "id": "OV-P5",
+                "tags": {
+                  "theme": [],
+                  "function": [
+                    "brand-strategy"
+                  ],
+                  "industry": []
+                },
+                "score": 3,
+                "baseId": "OV-P5",
+                "content": "Developed foundational brand strategy systems for B2B and industrial clients undergoing transformation, including post-merger integration and portfolio rationalization."
+              }
+            ],
+            "selectionRationale": "P5 overview: base content (no variants)"
+          },
+          "position": 5
+        },
+        {
+          "overview": {
+            "slot": "p6_overview",
+            "sources": [
+              {
+                "id": "OV-P6",
+                "tags": {
+                  "theme": [],
+                  "function": [],
+                  "industry": [
+                    "financial-services"
+                  ]
+                },
+                "score": 3,
+                "baseId": "OV-P6",
+                "content": "Supported brand positioning and campaign development across consumer, tech, and financial services clients as part of integrated creative team."
+              }
+            ],
+            "selectionRationale": "P6 overview: base content (no variants)"
+          },
+          "position": 6
+        }
+      ],
+      "careerHighlights": [
+        {
+          "slot": "ch_1",
+          "sources": [
+            {
+              "id": "CH-04-V5",
+              "tags": {
+                "theme": [
+                  "brand-transformation",
+                  "thought-leadership"
+                ],
+                "function": [
+                  "brand-strategy"
+                ],
+                "industry": []
+              },
+              "score": 9,
+              "baseId": "CH-04",
+              "content": "Elevated Deloitte's perception among C-suite executives through comprehensive brand architecture transformation. Generated 43% increase in qualified opportunities and 33% improvement in brand relevance.",
+              "variantLabel": "Executive Perception"
+            },
+            {
+              "id": "CH-04-V1",
+              "tags": {
+                "theme": [
+                  "brand-transformation"
+                ],
+                "function": [
+                  "brand-strategy"
+                ],
+                "industry": []
+              },
+              "score": 6,
+              "baseId": "CH-04",
+              "content": "Repositioned Deloitte beyond audit to strategic advisor through new brand architecture and narrative strategy. Drove 43% increase in lead generation and 33% lift in brand relevancy across five industries.",
+              "variantLabel": "Corporate Repositioning"
+            },
+            {
+              "id": "CH-04-V2",
+              "tags": {
+                "theme": [
+                  "brand-transformation"
+                ],
+                "function": [
+                  "brand-strategy"
+                ],
+                "industry": []
+              },
+              "score": 6,
+              "baseId": "CH-04",
+              "content": "Developed integrated corporate campaign across owned, earned, and paid ecosystem. Increased awareness of products and services by 20% while driving 43% lift in lead generation.",
+              "variantLabel": "Integrated Campaign"
+            }
+          ],
+          "selectionRationale": "CH slot 1: CH-04 with 3 variants. Best: CH-04-V5 (score: 9)"
+        },
+        {
+          "slot": "ch_2",
+          "sources": [
+            {
+              "id": "CH-02-V5",
+              "tags": {
+                "theme": [
+                  "brand-transformation"
+                ],
+                "function": [
+                  "brand-strategy"
+                ],
+                "industry": []
+              },
+              "score": 6,
+              "baseId": "CH-02",
+              "content": "Elevated sports league from regional interest to national phenomenon through content-driven fan engagement. Achieved 50% YoY attendance growth and $60M media rights deal representing 40x value increase.",
+              "variantLabel": "Cultural Impact"
+            },
+            {
+              "id": "CH-02",
+              "tags": {
+                "theme": [],
+                "function": [
+                  "brand-strategy"
+                ],
+                "industry": []
+              },
+              "score": 3,
+              "baseId": "CH-02",
+              "content": "Partnered with professional sports league at pivotal growth moment to define its first comprehensive brand strategy. Developed positioning, visual identity system, and go-to-market approach that contributed to 50% YoY attendance growth and a landmark $60M media rights deal—a 40x increase in valuation."
+            },
+            {
+              "id": "CH-02-V1",
+              "tags": {
+                "theme": [],
+                "function": [
+                  "brand-strategy"
+                ],
+                "industry": []
+              },
+              "score": 3,
+              "baseId": "CH-02",
+              "content": "Defined comprehensive brand strategy for professional sports league at inflection point. Developed market positioning and brand platform driving 50% YoY attendance and $60M media rights deal—a 40x value increase.",
+              "variantLabel": "Brand Strategy"
+            }
+          ],
+          "selectionRationale": "CH slot 2: CH-02 with 3 variants. Best: CH-02-V5 (score: 6)"
+        },
+        {
+          "slot": "ch_3",
+          "sources": [
+            {
+              "id": "CH-08",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": [
+                  "insurance"
+                ]
+              },
+              "score": 3,
+              "baseId": "CH-08",
+              "content": "Following health system's acquisition of regional Medicaid provider, led complete rebrand establishing human-centered positioning. Developed 'Wholecare' platform and campaign that drove 30,000 member increase and scaled total membership to 410,000 within 18 months."
+            },
+            {
+              "id": "CH-08-V1",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": [
+                  "insurance"
+                ]
+              },
+              "score": 3,
+              "baseId": "CH-08",
+              "content": "Integrated acquired health plan into unified brand following national health system acquisition. Led post-acquisition rebrand driving 30K member increase and scaling total membership to 410,000.",
+              "variantLabel": "M&A Integration"
+            },
+            {
+              "id": "CH-08-V2",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": [
+                  "insurance"
+                ]
+              },
+              "score": 3,
+              "baseId": "CH-08",
+              "content": "Developed human-centered brand platform rooted in insight that members want to feel genuinely cared for. Drove 30K enrollment increase and 35% web traffic growth.",
+              "variantLabel": "Human-Centered Brand"
+            }
+          ],
+          "selectionRationale": "CH slot 3: CH-08 with 3 variants. Best: CH-08 (score: 3)"
+        },
+        {
+          "slot": "ch_4",
+          "sources": [
+            {
+              "id": "CH-09",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": [
+                  "financial-services"
+                ]
+              },
+              "score": 3,
+              "baseId": "CH-09",
+              "content": "Led CRM strategy transformation for global payment company's corporate cards, advancing from promotions-based approach to AI-powered personalization. Developed framework and tools that delivered 5% retention lift, 12% cross-sell increase, and 32% reduction in production costs."
+            },
+            {
+              "id": "CH-09-V1",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": [
+                  "financial-services"
+                ]
+              },
+              "score": 3,
+              "baseId": "CH-09",
+              "content": "Transformed CRM strategy for global payments company, shifting from promotions-driven approach to customer-centric personalization. Delivered 5% retention lift and 12% cross-sell improvement.",
+              "variantLabel": "CRM Transformation"
+            },
+            {
+              "id": "CH-09-V2",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": [
+                  "financial-services"
+                ]
+              },
+              "score": 3,
+              "baseId": "CH-09",
+              "content": "Modernized financial services CRM through AI-powered personalization and predictive segmentation. Developed GenAI tools driving 5% retention lift, 12% cross-sell increase, and 32% production cost reduction.",
+              "variantLabel": "AI & Personalization"
+            }
+          ],
+          "selectionRationale": "CH slot 4: CH-09 with 3 variants. Best: CH-09 (score: 3)"
+        },
+        {
+          "slot": "ch_5",
+          "sources": [
+            {
+              "id": "CH-01-V5",
+              "tags": {
+                "theme": [
+                  "transformation"
+                ],
+                "function": [],
+                "industry": []
+              },
+              "score": 1,
+              "baseId": "CH-01",
+              "content": "Transformed brand consulting into $40M growth engine through strategic engagements that repositioned legacy brands. Developed AI accelerators improving client speed-to-market by 23%.",
+              "variantLabel": "Transformation & Scale"
+            },
+            {
+              "id": "CH-01",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": []
+              },
+              "score": 0,
+              "baseId": "CH-01",
+              "content": "Recruited to launch Deloitte's brand strategy practice from the ground up. Built a team of 35+ strategists and scaled the business from $0 to $40M in revenue, establishing Deloitte Digital as a credible competitor to traditional brand consultancies and agencies."
+            },
+            {
+              "id": "CH-01-V1",
+              "tags": {
+                "theme": [],
+                "function": [],
+                "industry": []
+              },
+              "score": 0,
+              "baseId": "CH-01",
+              "content": "Built brand strategy practice from inception to $40M, assembling 35+ strategists and developing proprietary methodologies. Created 10+ AI accelerators that improved client speed-to-market by 23%.",
+              "variantLabel": "Practice Building"
+            }
+          ],
+          "selectionRationale": "CH slot 5: CH-01 with 3 variants. Best: CH-01-V5 (score: 1)"
+        }
+      ]
+    },
+    "contentAllocation": null
+  },
+  "diagnostics": {
+    "agents": {
+      "validator": {
+        "cost": 0.237945,
+        "durationMs": 45722,
+        "inputTokens": 3598,
+        "outputTokens": 2453
+      },
+      "detailWriter": {
+        "cost": 0.132195,
+        "durationMs": 32948,
+        "inputTokens": 2233,
+        "outputTokens": 1316
+      },
+      "narrativeWriter": {
+        "cost": 0.105855,
+        "durationMs": 20794,
+        "inputTokens": 2467,
+        "outputTokens": 918
+      }
+    },
+    "startedAt": "2026-01-06T18:13:46.530Z",
+    "totalCost": 0.475995
+  }
+}

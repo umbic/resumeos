@@ -6,7 +6,6 @@ import type {
   V3Result,
   V3Diagnostics,
   StepDiagnostic,
-  ErrorEntry,
   ContentSources,
   Profile,
   JDAnalyzerOutput,

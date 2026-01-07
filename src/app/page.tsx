@@ -178,14 +178,6 @@ export default function Home() {
     fetchSessions();
   }
 
-  function handleNewSession() {
-    setJobDescription('');
-    setSessionId(null);
-    setResult(null);
-    setError(null);
-    setState('input');
-  }
-
   // ─────────────────────────────────────────────────────────────
   // Render
   // ─────────────────────────────────────────────────────────────

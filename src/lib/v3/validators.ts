@@ -126,7 +126,8 @@ export function validateSummaryOutput(output: unknown): ValidationResult {
 
 export function validateCHOutput(
   output: unknown,
-  state: AccumulatedState
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _state: AccumulatedState
 ): ValidationResult {
   const issues: string[] = [];
   const data = output as Partial<CHChatOutput>;
