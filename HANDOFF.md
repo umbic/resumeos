@@ -1,7 +1,78 @@
 # ResumeOS - Session Handoff
 
-> **Last Updated**: 2026-01-06
-> **Last Session**: V2 Sessions Dashboard + Bug Fixes
+> **Last Updated**: 2026-01-07
+> **Last Session**: V3 Sessions 1-5 Complete (Types, Validators, Prompts, Orchestrator)
+
+---
+
+## V3 Sessions 1-5 Complete: Foundation + Orchestrator
+
+### Summary
+
+Implemented the complete V3 foundation — types, validators, all 6 prompt builders, content loader, and orchestrator for the "chat per section" architecture.
+
+### V3 Architecture
+
+```
+JD Analyzer → Summary → CH → P1 → P2 → P3-P6
+     ↓           ↓       ↓    ↓     ↓
+  phrases    anchors  state state  final
+```
+
+Each chat passes state downstream (usedBaseIds, usedVerbs, usedMetrics) to prevent duplication.
+
+### Files Created (13 files, ~3,800 lines)
+
+| File | Lines | Description |
+|------|-------|-------------|
+| `src/lib/v3/types.ts` | 469 | All V3 TypeScript types |
+| `src/lib/v3/validators.ts` | 455 | 6 validation functions |
+| `src/lib/v3/voice-guide.ts` | 97 | Voice rules, forbidden words |
+| `src/lib/v3/prompts/jd-analyzer.ts` | 170 | JD analysis prompt |
+| `src/lib/v3/prompts/summary-chat.ts` | 178 | Summary generation prompt |
+| `src/lib/v3/prompts/ch-chat.ts` | 200 | Career Highlights prompt |
+| `src/lib/v3/prompts/p1-chat.ts` | 249 | Position 1 prompt |
+| `src/lib/v3/prompts/p2-chat.ts` | 275 | Position 2 prompt |
+| `src/lib/v3/prompts/p3p6-chat.ts` | 212 | Positions 3-6 prompt |
+| `src/lib/v3/prompts/index.ts` | 44 | Prompt exports |
+| `src/lib/v3/claude-client.ts` | 61 | Claude API wrapper |
+| `src/lib/v3/content-loader.ts` | 290 | Content loader from master-content.json |
+| `src/lib/v3/orchestrator.ts` | 520 | Pipeline runner with retry logic |
+| `src/lib/v3/__tests__/validators.test.ts` | 757 | 39 unit tests |
+
+### Session 5 Additions
+
+| File | Description |
+|------|-------------|
+| `claude-client.ts` | Claude API wrapper with cost calculation |
+| `content-loader.ts` | Transforms master-content.json to V3 ContentSources |
+| `orchestrator.ts` | Runs 6-step pipeline with validation and retry |
+
+### Orchestrator Features
+
+- Runs 6 sequential chats (JD → Summary → CH → P1 → P2 → P3-P6)
+- Each step validates output and can retry up to MAX_RETRIES times
+- Accumulates state across steps (banned IDs, verbs, metrics)
+- Full diagnostics with timing, token counts, and cost tracking
+- Returns V3Result with all outputs and final JD coverage analysis
+
+### Content Loader Features
+
+- Loads summaries, career highlights, bullets, and overviews
+- Transforms variants into flat list with tags
+- Provides conflict rules mapping
+- Default profile for Umberto with all 6 positions
+
+### Verification
+
+- TypeScript compilation: **Passed**
+- Unit tests: **39/39 passed**
+
+### Next Session: V3 Session 6 - API Routes
+
+Create:
+- `src/app/api/v3/generate/route.ts` — Main generation endpoint
+- `src/app/api/v3/status/[sessionId]/route.ts` — Status polling endpoint
 
 ---
 

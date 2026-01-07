@@ -179,3 +179,73 @@ The app includes a comprehensive diagnostics system for debugging resume generat
 - `src/components/diagnostics/DiagnosticsPanel.tsx` - In-app panel
 - `src/app/diagnostics/[sessionId]/page.tsx` - Dedicated diagnostics page
 - `src/app/api/diagnostics/[sessionId]/route.ts` - API endpoint
+
+## V3 Architecture (In Development)
+
+V3 replaces V2.1's abstract tag-based approach with **phrase-level JD analysis** and **explicit JD mapping**.
+
+### Key Differences from V2.1
+
+| Aspect | V2.1 | V3 |
+|--------|------|-----|
+| JD Analysis | Abstract tags (industry, function, theme) | Exact phrases with weights (HIGH/MEDIUM/LOW) |
+| Content Selection | Tag matching score | Explicit JD phrase mapping |
+| Coverage Tracking | None | Per-section with Strong/Partial/Gap |
+| State Management | Session-level | Chat-to-chat accumulation |
+
+### V3 Pipeline (6 Sequential Chats)
+
+```
+JD Analyzer → Summary → CH → P1 → P2 → P3-P6
+     ↓           ↓       ↓    ↓     ↓
+  phrases    anchors  state state  final
+```
+
+Each chat passes state downstream:
+- `usedBaseIds` — prevents duplicate content
+- `usedVerbs` — prevents verb repetition
+- `usedMetrics` — prevents metric duplication
+- `jdSectionsCovered` — tracks coverage gaps
+
+### V3 File Structure
+
+```
+src/lib/v3/
+├── types.ts              # ✅ All V3 types (469 lines)
+├── validators.ts         # ✅ Output validation - 6 validators (455 lines)
+├── voice-guide.ts        # ✅ Voice/formatting rules (97 lines)
+├── prompts/
+│   ├── index.ts          # ✅ Prompt exports
+│   ├── jd-analyzer.ts    # ✅ JD analysis prompt
+│   ├── summary-chat.ts   # ✅ Summary generation
+│   ├── ch-chat.ts        # ✅ Career highlights
+│   ├── p1-chat.ts        # ✅ Position 1
+│   ├── p2-chat.ts        # ✅ Position 2
+│   └── p3p6-chat.ts      # ✅ Positions 3-6
+├── claude-client.ts      # ✅ Claude API wrapper (61 lines)
+├── content-loader.ts     # ✅ Content source loader (290 lines)
+├── orchestrator.ts       # ✅ Pipeline runner with retry (520 lines)
+├── assembler.ts          # 🔲 Resume assembly (Session 6)
+├── docx-generator.ts     # 🔲 DOCX output (Session 6)
+├── coverage-report.ts    # 🔲 JD coverage analysis (Session 6)
+└── __tests__/
+    └── validators.test.ts # ✅ 39 unit tests
+```
+
+### V3 Implementation Progress
+
+| Session | Status | Deliverables |
+|---------|--------|--------------|
+| 1. Types + Validators | ✅ Done | types.ts, validators.ts, tests |
+| 2. JD + Summary Prompts | ✅ Done | voice-guide.ts, jd-analyzer.ts, summary-chat.ts |
+| 3. CH + P1 Prompts | ✅ Done | ch-chat.ts, p1-chat.ts |
+| 4. P2 + P3-P6 Prompts | ✅ Done | p2-chat.ts, p3p6-chat.ts |
+| 5. Orchestrator | ✅ Done | orchestrator.ts, content-loader.ts, claude-client.ts |
+| 6. API Routes | 🔲 Next | /api/v3/generate, status endpoint |
+| 7. Assembler + DOCX | 🔲 Pending | assembler.ts, docx-generator.ts, coverage-report.ts |
+| 8. UI + Testing | 🔲 Pending | UI toggle, integration tests, quality fixes |
+
+### V3 Reference Documents
+
+- `docs/RESUMEOS_V3_IMPLEMENTATION_FINAL.md` — Complete technical specification
+- `docs/V3_IMPLEMENTATION_SESSIONS.md` — 8-session implementation plan
