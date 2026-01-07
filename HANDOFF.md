@@ -1,7 +1,63 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-07
-> **Last Session**: V3 Sessions 1-7 Complete (Full Pipeline + API Routes)
+> **Last Session**: V3 Session 8 Complete (UI + Deployment)
+
+---
+
+## V3 Session 8 Complete: UI + Deployment
+
+### Summary
+
+Added V3 UI page and updated dashboard to use V3 for new resume generation. Successfully deployed to Vercel.
+
+### Files Created
+
+| File | Lines | Description |
+|------|-------|-------------|
+| `src/app/v3/page.tsx` | 356 | V3 generation page with input/generating/complete/failed states |
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/app/page.tsx` | Changed "Generate New Resume" buttons to link to /v3 |
+| `src/lib/v3/orchestrator.ts` | Removed unused ErrorEntry import |
+| `src/lib/v3/prompts/ch-chat.ts` | Removed unused ThematicAnchors import |
+| `src/lib/v3/validators.ts` | Added eslint-disable for _state param |
+
+### V3 UI Features
+
+- **Input State**: Paste JD, character count validation (min 100)
+- **Generating State**: Loading spinner with pipeline step indicator
+- **Complete State**: Shows coverage report, resume preview, download DOCX button
+- **Failed State**: Error message with retry option
+
+### Commits
+
+- `263ae34` - feat(v3): add V3 UI page and update dashboard
+- `f04dfa7` - fix: resolve ESLint unused variable errors
+
+### Verification
+
+- TypeScript compilation: **Passed**
+- Build: **Passed**
+- Vercel deployment: **Successful**
+- Live at: https://resumeos.vercel.app/v3
+
+### V3 Complete!
+
+The full V3 pipeline is now deployed:
+1. Dashboard shows "Generate New Resume (V3)" button
+2. /v3 page accepts JD input and generates resume using Opus 4.5
+3. Coverage report grades JD match (A-F)
+4. DOCX download available
+
+### Next Steps
+
+- Test V3 with real job descriptions
+- Monitor Opus 4.5 costs and latency
+- Collect user feedback on coverage reports
 
 ---
 

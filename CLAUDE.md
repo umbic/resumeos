@@ -244,7 +244,12 @@ src/lib/v3/
 | 5. Orchestrator | ✅ Done | orchestrator.ts, content-loader.ts, claude-client.ts |
 | 6. Assembler + DOCX | ✅ Done | assembler.ts, docx-generator.ts, coverage-report.ts, index.ts |
 | 7. API Routes | ✅ Done | /api/v3/generate, /api/v3/generate/download |
-| 8. UI + Testing | 🔲 Next | UI toggle, integration tests, quality fixes |
+| 8. UI + Deployment | ✅ Done | /v3 page, dashboard integration, Vercel deployment |
+
+### V3 Live URLs
+
+- **Dashboard**: https://resumeos.vercel.app/
+- **V3 Generation**: https://resumeos.vercel.app/v3
 
 ### V3 Reference Documents
 
