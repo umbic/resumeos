@@ -1,7 +1,54 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-07
-> **Last Session**: V3 Sessions 1-6 Complete (Full Pipeline + Assembler)
+> **Last Session**: V3 Sessions 1-7 Complete (Full Pipeline + API Routes)
+
+---
+
+## V3 Session 7 Complete: API Routes
+
+### Summary
+
+Added API routes for V3 generation and DOCX download.
+
+### Files Created
+
+| File | Lines | Description |
+|------|-------|-------------|
+| `src/app/api/v3/generate/route.ts` | 80 | Main generation endpoint |
+| `src/app/api/v3/generate/download/route.ts` | 75 | DOCX download endpoint |
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v3/generate` | POST | Generate resume, returns JSON with resume + coverage |
+| `/api/v3/generate/download` | POST | Generate and download DOCX file |
+
+### Usage
+
+```bash
+# Generate resume (JSON response)
+curl -X POST /api/v3/generate \
+  -H "Content-Type: application/json" \
+  -d '{"jobDescription": "..."}'
+
+# Download DOCX directly
+curl -X POST /api/v3/generate/download \
+  -H "Content-Type: application/json" \
+  -d '{"jobDescription": "..."}' \
+  -o resume.docx
+```
+
+### Verification
+
+- TypeScript compilation: **Passed**
+
+### Next Session: V3 Session 8 - UI + Testing
+
+- Add V3 toggle to UI
+- Integration tests
+- End-to-end testing with real JDs
 
 ---
 
