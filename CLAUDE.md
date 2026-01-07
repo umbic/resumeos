@@ -225,9 +225,10 @@ src/lib/v3/
 ├── claude-client.ts      # ✅ Claude API wrapper (61 lines)
 ├── content-loader.ts     # ✅ Content source loader (290 lines)
 ├── orchestrator.ts       # ✅ Pipeline runner with retry (520 lines)
-├── assembler.ts          # 🔲 Resume assembly (Session 6)
-├── docx-generator.ts     # 🔲 DOCX output (Session 6)
-├── coverage-report.ts    # 🔲 JD coverage analysis (Session 6)
+├── assembler.ts          # ✅ Resume assembly (120 lines)
+├── docx-generator.ts     # ✅ DOCX output (210 lines)
+├── coverage-report.ts    # ✅ JD coverage analysis (105 lines)
+├── index.ts              # ✅ Main entry point (100 lines)
 └── __tests__/
     └── validators.test.ts # ✅ 39 unit tests
 ```
@@ -241,8 +242,8 @@ src/lib/v3/
 | 3. CH + P1 Prompts | ✅ Done | ch-chat.ts, p1-chat.ts |
 | 4. P2 + P3-P6 Prompts | ✅ Done | p2-chat.ts, p3p6-chat.ts |
 | 5. Orchestrator | ✅ Done | orchestrator.ts, content-loader.ts, claude-client.ts |
-| 6. API Routes | 🔲 Next | /api/v3/generate, status endpoint |
-| 7. Assembler + DOCX | 🔲 Pending | assembler.ts, docx-generator.ts, coverage-report.ts |
+| 6. Assembler + DOCX | ✅ Done | assembler.ts, docx-generator.ts, coverage-report.ts, index.ts |
+| 7. API Routes | 🔲 Next | /api/v3/generate, download endpoint |
 | 8. UI + Testing | 🔲 Pending | UI toggle, integration tests, quality fixes |
 
 ### V3 Reference Documents

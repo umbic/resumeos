@@ -1,7 +1,45 @@
 # ResumeOS - Session Handoff
 
 > **Last Updated**: 2026-01-07
-> **Last Session**: V3 Sessions 1-5 Complete (Types, Validators, Prompts, Orchestrator)
+> **Last Session**: V3 Sessions 1-6 Complete (Full Pipeline + Assembler)
+
+---
+
+## V3 Session 6 Complete: Assembler + DOCX + Coverage
+
+### Summary
+
+Added the final assembly layer that takes pipeline outputs and produces the finished resume with DOCX export and coverage analysis.
+
+### Files Created
+
+| File | Lines | Description |
+|------|-------|-------------|
+| `src/lib/v3/assembler.ts` | 120 | Maps all outputs to ResumeV3 structure |
+| `src/lib/v3/docx-generator.ts` | 210 | Styled DOCX document generation |
+| `src/lib/v3/coverage-report.ts` | 105 | JD coverage scoring and grading |
+| `src/lib/v3/index.ts` | 100 | Main entry point with generateResumeV3() |
+
+### Key Functions
+
+| Function | Description |
+|----------|-------------|
+| `generateResumeV3(jd, options)` | Main entry point - runs full pipeline |
+| `assembleResume(input)` | Maps outputs to ResumeV3 structure |
+| `generateDocx(resume)` | Creates styled DOCX document |
+| `generateCoverageReport(resume, jd)` | Scores JD coverage (A-F grade) |
+| `generateResumeDocx(resume)` | Returns Buffer for download |
+
+### Verification
+
+- TypeScript compilation: **Passed**
+- Unit tests: **39/39 passed**
+
+### Next Session: V3 Session 7 - API Routes
+
+Create:
+- `src/app/api/v3/generate/route.ts` — Main generation endpoint
+- `src/app/api/v3/generate/download/route.ts` — DOCX download endpoint
 
 ---
 
